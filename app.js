@@ -985,7 +985,28 @@ function escapeHtml(str) {
 }
 
 // --- DOM Initialization & Event Handlers ---
+// --- Colour Theme ---
+const THEME_KEY = 'moon_theme';
+const THEME_BAR_COLORS = { maroon: '#0B0709', lime: '#08090C', ocean: '#070B10', violet: '#0A0810', gold: '#0B0A07' };
+
+function applyTheme(id) {
+  if (!THEME_BAR_COLORS[id]) id = 'maroon';
+  document.documentElement.setAttribute('data-theme', id);
+  try { localStorage.setItem(THEME_KEY, id); } catch (e) {}
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', THEME_BAR_COLORS[id]);
+  document.querySelectorAll('.theme-swatch').forEach(b =>
+    b.classList.toggle('active', b.dataset.themeId === id));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'maroon');
+  document.querySelectorAll('.theme-swatch').forEach(b =>
+    b.addEventListener('click', () => applyTheme(b.dataset.themeId)));
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+
   // Service Worker Registration for PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')

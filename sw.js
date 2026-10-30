@@ -1,11 +1,12 @@
-const CACHE_NAME = 'moon-v1';
+﻿const CACHE_NAME = 'moon-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
-  './app_icon.png'
+  './app_icon.png',
+  './app_icon_192.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -62,3 +63,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+

@@ -2,26 +2,37 @@
    IRONPULSE - iOS Fitness PWA Design System
    ========================================================== */
 
-:root {
-  --bg-dark: #08090C;
-  --bg-card: #12141A;
-  --bg-card-hover: #181B24;
-  --bg-input: #1A1D27;
+:root,
+:root[data-theme="maroon"] {
+  --bg-dark: #0B0709;
+  --bg-deep: #060304;
+  --bg-card: #170D11;
+  --bg-card-hover: #20121A;
+  --bg-input: #251419;
+  --bg-raised: #1B0F14;
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(204, 255, 0, 0.35);
+  --border-active: rgba(var(--accent-rgb), 0.4);
 
-  /* Signature Accents */
-  --accent-lime: #CCFF00;
-  --accent-lime-glow: rgba(204, 255, 0, 0.25);
-  --accent-cyan: #00E5FF;
-  --accent-cyan-glow: rgba(0, 229, 255, 0.25);
+  --accent-lime: #E0506A;
+  --accent-rgb: 224, 80, 106;
+  --accent-grad-a: #E8566F;
+  --accent-grad-b: #9E1B34;
+  --accent-cyan: #F0A898;
+  --accent2: #F0A898;
+  --accent2-rgb: 240, 168, 152;
+  --accent2-grad-a: #F5BBAA;
+  --accent2-grad-b: #C9776A;
+  --on-accent: #FFFFFF;
+  --accent-lime-glow: rgba(var(--accent-rgb), 0.25);
+  --accent-cyan-glow: rgba(var(--accent2-rgb), 0.25);
   --accent-crimson: #FF3B30;
   --accent-crimson-glow: rgba(255, 59, 48, 0.25);
   --accent-gold: #FFD60A;
-  
+  --meta-theme: #0B0709;
+
   --text-main: #FFFFFF;
-  --text-muted: #8F95A3;
-  --text-dim: #5A6070;
+  --text-muted: #A8979C;
+  --text-dim: #6F5F64;
 
   --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -29,6 +40,48 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --tab-bar-height: calc(64px + var(--safe-bottom));
+}
+
+/* ---------- Colour themes (Settings > Appearance) ---------- */
+:root[data-theme="lime"] {
+  --bg-dark: #08090C; --bg-deep: #060709; --bg-card: #12141A; --bg-card-hover: #181B24;
+  --bg-input: #1A1D27; --bg-raised: #14161E;
+  --accent-lime: #CCFF00; --accent-rgb: 204, 255, 0;
+  --accent-grad-a: #d4ff1a; --accent-grad-b: #a6e600;
+  --accent-cyan: #00E5FF; --accent2: #cceeff; --accent2-rgb: 0, 229, 255;
+  --accent2-grad-a: #00e5ff; --accent2-grad-b: #0099ff;
+  --on-accent: #060709; --meta-theme: #08090C;
+  --text-muted: #8F95A3; --text-dim: #5A6070;
+}
+:root[data-theme="ocean"] {
+  --bg-dark: #070B10; --bg-deep: #04070B; --bg-card: #0E151D; --bg-card-hover: #141E29;
+  --bg-input: #16212D; --bg-raised: #101A24;
+  --accent-lime: #38BDF8; --accent-rgb: 56, 189, 248;
+  --accent-grad-a: #5CCBFA; --accent-grad-b: #1478C4;
+  --accent-cyan: #7DE3D0; --accent2: #7DE3D0; --accent2-rgb: 125, 227, 208;
+  --accent2-grad-a: #8DEBDA; --accent2-grad-b: #2BB3A0;
+  --on-accent: #04101A; --meta-theme: #070B10;
+  --text-muted: #8A98A8; --text-dim: #566372;
+}
+:root[data-theme="violet"] {
+  --bg-dark: #0A0810; --bg-deep: #05040A; --bg-card: #140F1E; --bg-card-hover: #1C1529;
+  --bg-input: #21182F; --bg-raised: #181224;
+  --accent-lime: #A78BFA; --accent-rgb: 167, 139, 250;
+  --accent-grad-a: #B79EFB; --accent-grad-b: #6D3FE0;
+  --accent-cyan: #F0ABFC; --accent2: #F0ABFC; --accent2-rgb: 240, 171, 252;
+  --accent2-grad-a: #F5C2FD; --accent2-grad-b: #C25BD9;
+  --on-accent: #0E0720; --meta-theme: #0A0810;
+  --text-muted: #9A92A8; --text-dim: #655D74;
+}
+:root[data-theme="gold"] {
+  --bg-dark: #0B0A07; --bg-deep: #060503; --bg-card: #17140D; --bg-card-hover: #201C12;
+  --bg-input: #261F14; --bg-raised: #1B170F;
+  --accent-lime: #F5B83D; --accent-rgb: 245, 184, 61;
+  --accent-grad-a: #FBC85A; --accent-grad-b: #C4800F;
+  --accent-cyan: #FF8A5C; --accent2: #FF8A5C; --accent2-rgb: 255, 138, 92;
+  --accent2-grad-a: #FF9E78; --accent2-grad-b: #D4532A;
+  --on-accent: #1A1000; --meta-theme: #0B0A07;
+  --text-muted: #A89F8F; --text-dim: #70685A;
 }
 
 * {
@@ -94,7 +147,7 @@ html, body {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(204, 255, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
   object-fit: cover;
 }
 
@@ -136,7 +189,7 @@ html, body {
 
 .header-action-btn:active {
   transform: scale(0.96);
-  background: rgba(204, 255, 0, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   border-color: var(--accent-lime);
 }
 
@@ -248,8 +301,8 @@ html, body {
 
 /* Primary Glow Button */
 .primary-glow-btn {
-  background: linear-gradient(135deg, #d4ff1a 0%, #a6e600 100%);
-  color: #060709;
+  background: linear-gradient(135deg, var(--accent-grad-a) 0%, var(--accent-grad-b) 100%);
+  color: var(--on-accent);
   border: none;
   padding: 14px 20px;
   border-radius: 14px;
@@ -260,13 +313,13 @@ html, body {
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(204, 255, 0, 0.35);
+  box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.35);
   transition: all 0.2s ease;
 }
 
 .primary-glow-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 10px rgba(204, 255, 0, 0.2);
+  box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.2);
 }
 
 .full-width {
@@ -400,7 +453,7 @@ html, body {
   text-transform: uppercase;
   padding: 3px 8px;
   border-radius: 6px;
-  background: rgba(0, 229, 255, 0.12);
+  background: rgba(var(--accent2-rgb), 0.12);
   color: var(--accent-cyan);
 }
 
@@ -571,8 +624,8 @@ html, body {
 
 .finish-btn {
   flex: 1;
-  background: linear-gradient(135deg, #00e5ff 0%, #0099ff 100%);
-  color: #060709;
+  background: linear-gradient(135deg, var(--accent2-grad-a) 0%, var(--accent2-grad-b) 100%);
+  color: var(--on-accent);
   border: none;
   padding: 12px;
   border-radius: 12px;
@@ -583,7 +636,7 @@ html, body {
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 229, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(var(--accent2-rgb), 0.3);
 }
 
 .finish-btn:active {
@@ -684,7 +737,7 @@ html, body {
 }
 
 .set-row.completed {
-  background: rgba(204, 255, 0, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 
 .set-index-badge {
@@ -719,7 +772,7 @@ html, body {
 
 .set-input:focus {
   border-color: var(--accent-lime);
-  background: rgba(204, 255, 0, 0.05);
+  background: rgba(var(--accent-rgb), 0.05);
 }
 
 .set-checkbox-btn {
@@ -740,8 +793,8 @@ html, body {
 .set-checkbox-btn.checked {
   background: var(--accent-lime);
   border-color: var(--accent-lime);
-  color: #060709;
-  box-shadow: 0 0 10px rgba(204, 255, 0, 0.4);
+  color: var(--on-accent);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.4);
 }
 
 .add-set-btn {
@@ -848,7 +901,7 @@ html, body {
 
 .chip.active {
   background: var(--accent-lime);
-  color: #060709;
+  color: var(--on-accent);
   border-color: var(--accent-lime);
   font-weight: 700;
 }
@@ -973,7 +1026,7 @@ html, body {
   height: 22px;
   border-radius: 50%;
   background: var(--accent-lime);
-  color: #060709;
+  color: var(--on-accent);
   font-size: 0.75rem;
   font-weight: 800;
   display: flex;
@@ -1081,7 +1134,7 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(20px);
-  background-color: #060709;
+  background-color: var(--on-accent);
 }
 
 /* Unit Toggle */
@@ -1107,7 +1160,7 @@ input:checked + .slider:before {
 
 .unit-btn.active {
   background: var(--accent-lime);
-  color: #060709;
+  color: var(--on-accent);
 }
 
 .ios-select {
@@ -1309,7 +1362,7 @@ input:checked + .slider:before {
   width: 100%;
   max-width: 520px;
   max-height: 85vh;
-  background: #14161E;
+  background: var(--bg-raised);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
   border: 1px solid var(--border-subtle);
@@ -1411,7 +1464,7 @@ input:checked + .slider:before {
 }
 
 .ex-picker-item:active {
-  background: rgba(204, 255, 0, 0.12);
+  background: rgba(var(--accent-rgb), 0.12);
   border-color: var(--accent-lime);
 }
 
@@ -1554,12 +1607,12 @@ input:checked + .slider:before {
 }
 
 .iphone-tip-box {
-  background: rgba(0, 229, 255, 0.08);
-  border: 1px solid rgba(0, 229, 255, 0.2);
+  background: rgba(var(--accent2-rgb), 0.08);
+  border: 1px solid rgba(var(--accent2-rgb), 0.2);
   border-radius: 12px;
   padding: 10px 12px;
   font-size: 0.76rem;
-  color: #cceeff;
+  color: var(--accent2);
   line-height: 1.35;
   text-align: left;
 }
@@ -1649,4 +1702,40 @@ input:checked + .slider:before {
   0% { transform: scale(0.3); opacity: 0; }
   60% { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); }
+}
+
+
+/* ---------- Theme picker ---------- */
+.theme-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 10px;
+  padding: 4px 0 2px;
+}
+.theme-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 14px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.theme-swatch:active { transform: scale(0.95); }
+.theme-swatch .swatch-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+}
+.theme-swatch.active {
+  border-color: var(--accent-lime);
+  color: var(--text-main);
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.3);
 }

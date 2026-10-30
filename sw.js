@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'moon-v3';
+﻿const CACHE_NAME = 'moon-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -63,5 +63,6 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
 
 

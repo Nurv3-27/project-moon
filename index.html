@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Moon - Workout Tracker</title>
+  
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Moon">
+  <meta name="theme-color" content="#0a0c10">
+  <meta name="description" content="Next-generation workout logger and fitness tracker with set logging, rest timer, and PR tracking.">
+  
+  <!-- Icons & Manifest -->
+  <link rel="apple-touch-icon" href="app_icon.png">
+  <link rel="icon" type="image/png" href="app_icon.png">
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app" class="app-root">
+    
+    <!-- Top Status Bar & Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-pill">
+          <img src="app_icon.png" alt="Logo" class="brand-icon">
+          <div class="brand-text">
+            <span class="brand-name">MOON</span>
+            <span class="brand-tag">FITNESS OS</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button id="qr-btn" class="header-action-btn" title="Open on iPhone">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span class="btn-label">iPhone Link</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Active Workout Banner (Sticky mini banner if workout in progress and on another tab) -->
+    <div id="floating-active-banner" class="floating-active-banner hidden" onclick="switchTab('workout')">
+      <div class="banner-pulse-dot"></div>
+      <div class="banner-info">
+        <span class="banner-title" id="banner-workout-name">Push Day In Progress</span>
+        <span class="banner-timer" id="banner-timer">00:00</span>
+      </div>
+      <button class="banner-resume-btn">Resume &rarr;</button>
+    </div>
+
+    <!-- MAIN VIEWS -->
+    <main class="main-content">
+      
+      <!-- TAB 1: ROUTINES -->
+      <section id="view-routines" class="tab-view active">
+        <div class="section-hero">
+          <div class="hero-text">
+            <span class="greeting-subtitle">READY TO CRUSH IT?</span>
+            <h1 class="hero-title">Start a Workout</h1>
+          </div>
+          <button id="btn-quick-workout" class="primary-glow-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+            <span>Quick Blank Workout</span>
+          </button>
+        </div>
+
+        <!-- Weekly Streak & Stats Widget -->
+        <div class="stats-overview-bar">
+          <div class="stat-pill">
+            <span class="stat-num" id="stat-streak">0</span>
+            <span class="stat-label">DAY STREAK 🔥</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-num" id="stat-weekly-count">0</span>
+            <span class="stat-label">THIS WEEK 🏋️</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-num" id="stat-total-volume">0</span>
+            <span class="stat-label" id="stat-volume-unit">TOTAL KG ⚡</span>
+          </div>
+        </div>
+
+        <!-- Routines List -->
+        <div class="section-header-row">
+          <h2 class="subheading">Saved Routines</h2>
+          <button id="btn-create-routine" class="secondary-btn small-btn">+ New Routine</button>
+        </div>
+
+        <div id="routines-grid" class="cards-grid">
+          <!-- Dynamically populated routine cards -->
+        </div>
+      </section>
+
+      <!-- TAB 2: ACTIVE WORKOUT -->
+      <section id="view-workout" class="tab-view">
+        <!-- Idle state if no workout is active -->
+        <div id="workout-idle-state" class="idle-placeholder">
+          <div class="idle-icon-wrap">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"></path>
+            </svg>
+          </div>
+          <h2>No Active Workout</h2>
+          <p>Pick a template or start an empty session to begin logging sets, reps, and weights.</p>
+          <div class="idle-actions">
+            <button id="btn-idle-start-blank" class="primary-glow-btn">Start Blank Workout</button>
+            <button onclick="switchTab('routines')" class="secondary-btn">Browse Routines</button>
+          </div>
+        </div>
+
+        <!-- Active state when workout running -->
+        <div id="workout-active-state" class="active-workout-container hidden">
+          <!-- Workout Header & Timer bar -->
+          <div class="active-header-card">
+            <div class="active-title-row">
+              <input type="text" id="active-workout-name" class="editable-title-input" value="Workout Session">
+              <span class="active-live-badge">LIVE</span>
+            </div>
+            
+            <div class="active-metrics-grid">
+              <div class="active-metric">
+                <span class="metric-label">TIME</span>
+                <span class="metric-val mono" id="active-timer-display">00:00:00</span>
+              </div>
+              <div class="active-metric">
+                <span class="metric-label">VOLUME</span>
+                <span class="metric-val" id="active-volume-display">0 kg</span>
+              </div>
+              <div class="active-metric">
+                <span class="metric-label">SETS</span>
+                <span class="metric-val" id="active-sets-display">0</span>
+              </div>
+            </div>
+
+            <div class="active-header-actions">
+              <button id="btn-finish-workout" class="finish-btn">
+                <span>Finish Workout</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              <button id="btn-cancel-workout" class="discard-btn" title="Discard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Exercises List inside Active Workout -->
+          <div id="active-exercises-list" class="active-exercises-list">
+            <!-- Exercise cards injected here -->
+          </div>
+
+          <!-- Add Exercise Bottom Button -->
+          <div class="add-exercise-action-wrap">
+            <button id="btn-add-exercise-active" class="primary-glow-btn full-width">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+              <span>Add Exercise</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: HISTORY -->
+      <section id="view-history" class="tab-view">
+        <div class="section-hero">
+          <div class="hero-text">
+            <span class="greeting-subtitle">LOGBOOK</span>
+            <h1 class="hero-title">Workout History</h1>
+          </div>
+        </div>
+
+        <div id="history-list" class="history-list">
+          <!-- Populated with past workouts -->
+        </div>
+      </section>
+
+      <!-- TAB 4: PERSONAL RECORDS (PRs) -->
+      <section id="view-prs" class="tab-view">
+        <div class="section-hero">
+          <div class="hero-text">
+            <span class="greeting-subtitle">HALL OF GAINS</span>
+            <h1 class="hero-title">Personal Records</h1>
+          </div>
+        </div>
+
+        <!-- Muscle filter chips -->
+        <div class="filter-chips-row" id="pr-filter-chips">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="Chest">Chest</button>
+          <button class="chip" data-filter="Back">Back</button>
+          <button class="chip" data-filter="Legs">Legs</button>
+          <button class="chip" data-filter="Shoulders">Shoulders</button>
+          <button class="chip" data-filter="Arms">Arms</button>
+        </div>
+
+        <div id="prs-grid" class="prs-grid">
+          <!-- PR items injected here -->
+        </div>
+      </section>
+
+      <!-- TAB 5: SETTINGS & IPHONE INSTALL -->
+      <section id="view-settings" class="tab-view">
+        <div class="section-hero">
+          <div class="hero-text">
+            <span class="greeting-subtitle">PREFERENCES & SETUP</span>
+            <h1 class="hero-title">Settings</h1>
+          </div>
+        </div>
+
+        <!-- iOS Install Highlight Card -->
+        <div class="ios-install-hero-card">
+          <div class="ios-install-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.62-.75 1.04-1.8 0.93-2.84-.9.04-1.99.6-2.64 1.35-.58.65-1.08 1.72-.94 2.74 1.01.08 2.03-.5 2.65-1.25z"/>
+            </svg>
+            <span>iPhone Standalone App</span>
+          </div>
+          <h3>Install on your iPhone Home Screen</h3>
+          <p>Get full-screen immersion without browser bars, offline access at the gym, and lightning-fast launch.</p>
+          
+          <div class="ios-steps-container">
+            <div class="ios-step">
+              <div class="step-circle">1</div>
+              <div class="step-text">Open this page in <strong>Safari</strong> on your iPhone.</div>
+            </div>
+            <div class="ios-step">
+              <div class="step-circle">2</div>
+              <div class="step-text">Tap the <strong>Share</strong> icon (square with arrow up) at the bottom.</div>
+            </div>
+            <div class="ios-step">
+              <div class="step-circle">3</div>
+              <div class="step-text">Scroll down and tap <strong>"Add to Home Screen"</strong>.</div>
+            </div>
+            <div class="ios-step">
+              <div class="step-circle">4</div>
+              <div class="step-text">Tap <strong>"Add"</strong> in the top right. Done!</div>
+            </div>
+          </div>
+
+          <button id="btn-show-qr-settings" class="primary-glow-btn full-width">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Show iPhone Wi-Fi QR Code</span>
+          </button>
+        </div>
+
+        <!-- Settings Options -->
+        <div class="settings-group">
+          <h3 class="settings-group-title">General Preferences</h3>
+          
+          <div class="setting-item">
+            <div class="setting-label-col">
+              <span class="setting-name">Weight Unit</span>
+              <span class="setting-desc">Choose between Kilograms and Pounds</span>
+            </div>
+            <div class="unit-toggle" id="unit-toggle-group">
+              <button class="unit-btn active" data-unit="kg">KG</button>
+              <button class="unit-btn" data-unit="lbs">LBS</button>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label-col">
+              <span class="setting-name">Default Rest Timer</span>
+              <span class="setting-desc">Auto-triggered timer after completing a set</span>
+            </div>
+            <select id="default-rest-select" class="ios-select">
+              <option value="30">30 seconds</option>
+              <option value="60">60 seconds</option>
+              <option value="90" selected>90 seconds</option>
+              <option value="120">2 minutes</option>
+              <option value="180">3 minutes</option>
+            </select>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label-col">
+              <span class="setting-name">Sound Alert</span>
+              <span class="setting-desc">Audio bell when rest timer completes</span>
+            </div>
+            <label class="ios-switch">
+              <input type="checkbox" id="setting-sound" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label-col">
+              <span class="setting-name">Haptic Feedback</span>
+              <span class="setting-desc">Vibrate on set completion</span>
+            </div>
+            <label class="ios-switch">
+              <input type="checkbox" id="setting-haptics" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="settings-group">
+          <h3 class="settings-group-title">Data & Backup</h3>
+          <div class="data-actions-row">
+            <button id="btn-export-data" class="secondary-btn">Backup (JSON)</button>
+            <label class="secondary-btn file-input-label">
+              Restore (JSON)
+              <input type="file" id="file-import-data" accept=".json" style="display:none">
+            </label>
+            <button id="btn-reset-demo" class="secondary-btn danger-btn">Reset Demo</button>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- FLOATING REST TIMER PILL -->
+    <div id="rest-timer-bar" class="rest-timer-bar hidden">
+      <div class="timer-progress-ring">
+        <svg class="ring-svg" width="46" height="46">
+          <circle class="ring-bg" stroke="rgba(255,255,255,0.1)" stroke-width="4" cx="23" cy="23" r="18" fill="transparent"/>
+          <circle id="timer-ring-fill" class="ring-fill" stroke="#CCFF00" stroke-width="4" stroke-dasharray="113.09" stroke-dashoffset="0" stroke-linecap="round" cx="23" cy="23" r="18" fill="transparent"/>
+        </svg>
+        <span id="rest-timer-text" class="ring-time-text">90</span>
+      </div>
+      <div class="timer-info">
+        <span class="timer-tag">RESTING</span>
+        <span class="timer-sub">Next set coming up</span>
+      </div>
+      <div class="timer-controls">
+        <button id="timer-btn-minus" class="timer-pill-btn">-15s</button>
+        <button id="timer-btn-plus" class="timer-pill-btn">+30s</button>
+        <button id="timer-btn-skip" class="timer-pill-btn skip-btn">Skip</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM TAB NAVIGATION (iOS HIG STYLE) -->
+    <nav class="bottom-tab-bar">
+      <button class="nav-tab active" data-tab="routines" onclick="switchTab('routines')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="10" x2="16" y2="10"></line>
+          <line x1="8" y1="14" x2="12" y2="14"></line>
+        </svg>
+        <span class="tab-label">Routines</span>
+      </button>
+
+      <button class="nav-tab" data-tab="workout" onclick="switchTab('workout')">
+        <div class="workout-tab-badge-wrap">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"></path>
+          </svg>
+          <span id="tab-active-dot" class="tab-active-dot hidden"></span>
+        </div>
+        <span class="tab-label">Workout</span>
+      </button>
+
+      <button class="nav-tab" data-tab="history" onclick="switchTab('history')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span class="tab-label">History</span>
+      </button>
+
+      <button class="nav-tab" data-tab="prs" onclick="switchTab('prs')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+          <path d="M4 22h16"></path>
+          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+        </svg>
+        <span class="tab-label">PRs</span>
+      </button>
+
+      <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span class="tab-label">Settings</span>
+      </button>
+    </nav>
+
+    <!-- MODAL 1: ADD EXERCISE -->
+    <div id="modal-add-exercise" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Exercise Library</h3>
+          <button class="modal-close-btn" onclick="closeModal('modal-add-exercise')">&times;</button>
+        </div>
+        
+        <div class="search-input-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="exercise-search-input" placeholder="Search exercises (e.g. Bench, Squat)...">
+        </div>
+
+        <div class="filter-chips-row" id="exercise-category-chips">
+          <button class="chip active" data-cat="all">All</button>
+          <button class="chip" data-cat="Chest">Chest</button>
+          <button class="chip" data-cat="Back">Back</button>
+          <button class="chip" data-cat="Legs">Legs</button>
+          <button class="chip" data-cat="Shoulders">Shoulders</button>
+          <button class="chip" data-cat="Arms">Arms</button>
+          <button class="chip" data-cat="Core">Core</button>
+        </div>
+
+        <div class="custom-exercise-create-row">
+          <input type="text" id="custom-ex-name" placeholder="Or enter new custom exercise...">
+          <select id="custom-ex-cat" class="ios-select mini-select">
+            <option value="Chest">Chest</option>
+            <option value="Back">Back</option>
+            <option value="Legs">Legs</option>
+            <option value="Shoulders">Shoulders</option>
+            <option value="Arms">Arms</option>
+            <option value="Core">Core</option>
+          </select>
+          <button id="btn-save-custom-ex" class="secondary-btn mini-btn">+ Add</button>
+        </div>
+
+        <div id="exercise-list-container" class="exercise-picker-list">
+          <!-- Exercise item buttons -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: NEW ROUTINE TEMPLATE -->
+    <div id="modal-create-routine" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Create Routine</h3>
+          <button class="modal-close-btn" onclick="closeModal('modal-create-routine')">&times;</button>
+        </div>
+
+        <div class="form-group">
+          <label>Routine Name</label>
+          <input type="text" id="new-routine-name" class="ios-input" placeholder="e.g. Hypertrophy Chest & Back">
+        </div>
+
+        <div class="form-group">
+          <label>Focus / Tag</label>
+          <input type="text" id="new-routine-tag" class="ios-input" placeholder="e.g. Push, Strength, 45 mins">
+        </div>
+
+        <div class="form-group">
+          <label>Selected Exercises (<span id="routine-selected-count">0</span>)</label>
+          <div id="routine-exercises-list" class="routine-builder-exercises">
+            <p class="placeholder-text">No exercises added yet.</p>
+          </div>
+          <button id="btn-builder-add-exercise" class="secondary-btn full-width" style="margin-top:8px;">+ Pick Exercises</button>
+        </div>
+
+        <button id="btn-save-new-routine" class="primary-glow-btn full-width" style="margin-top:16px;">Save Routine</button>
+      </div>
+    </div>
+
+    <!-- MODAL 3: WORKOUT FINISHED CELEBRATION -->
+    <div id="modal-celebration" class="modal-overlay hidden">
+      <div class="modal-card celebration-card">
+        <div class="celebration-badge">🏆</div>
+        <h2>WORKOUT COMPLETED!</h2>
+        <p class="celebration-subtitle">Great hustle! Your session has been recorded.</p>
+        
+        <div class="celebration-stats-grid">
+          <div class="c-stat">
+            <span class="c-val" id="c-time">00:00</span>
+            <span class="c-label">DURATION</span>
+          </div>
+          <div class="c-stat">
+            <span class="c-val" id="c-volume">0 kg</span>
+            <span class="c-label">VOLUME</span>
+          </div>
+          <div class="c-stat">
+            <span class="c-val" id="c-sets">0</span>
+            <span class="c-label">SETS DONE</span>
+          </div>
+        </div>
+
+        <div id="celebration-prs-box" class="celebration-prs-box hidden">
+          <span class="pr-trophy-tag">⚡ NEW PERSONAL RECORD!</span>
+          <div id="c-prs-list" class="c-prs-list"></div>
+        </div>
+
+        <button id="btn-celebration-done" class="primary-glow-btn full-width" style="margin-top:18px;">Awesome</button>
+      </div>
+    </div>
+
+    <!-- MODAL 4: IPHONE QR CODE & LINK -->
+    <div id="modal-qr" class="modal-overlay hidden">
+      <div class="modal-card qr-card">
+        <div class="modal-header">
+          <h3>Open on iPhone</h3>
+          <button class="modal-close-btn" onclick="closeModal('modal-qr')">&times;</button>
+        </div>
+        
+        <p class="qr-helper-text">Scan with your iPhone Camera to open Moon directly in Safari:</p>
+        
+        <div class="qr-code-wrapper">
+          <div id="qr-code-canvas-box" class="qr-code-canvas-box">
+            <!-- QR code rendered here -->
+          </div>
+        </div>
+
+        <div class="qr-url-box">
+          <input type="text" id="lan-url-input" class="lan-url-input" readonly value="">
+          <button id="btn-copy-url" class="secondary-btn mini-btn">Copy</button>
+        </div>
+
+        <div class="iphone-tip-box">
+          <strong>💡 Pro Tip for iOS:</strong>
+          <span>Make sure your iPhone is connected to the same Wi-Fi network as this PC! Once opened in Safari, tap the Share icon &rarr; <strong>"Add to Home Screen"</strong>.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

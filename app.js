@@ -131,6 +131,12 @@ function getInitialState() {
 
 let AppState = getInitialState();
 
+// Doomscroll bank: balance (seconds earned), session (ms epoch when the current scroll session ends)
+function ensureScrollState() {
+  if (!AppState.scroll) AppState.scroll = { balance: 0, sessionEndsAt: null, earnedTotal: 0 };
+}
+ensureScrollState();
+
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(AppState));
 }
@@ -201,6 +207,42 @@ let workoutTimerInterval = null;
 let restTimerInterval = null;
 let restTimeRemaining = 0;
 let restTotalDuration = 90;
+let restEndsAt = 0;
+
+function notifyRestOver() {
+  const title = 'Rest over!';
+  const body = 'Time for your next set \uD83D\uDCAA';
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, icon: 'app_icon_192.png', vibrate: [200, 100, 200], tag: 'rest-over' }))
+          .catch(() => new Notification(title, { body }));
+      } else {
+        new Notification(title, { body });
+      }
+    }
+  } catch (e) {}
+}
+
+function requestNotifyPermission() {
+  try {
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  } catch (e) {}
+}
+
+function showToast(msg) {
+  let t = document.getElementById('moon-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'moon-toast';
+    t.className = 'moon-toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove('show'), 3500);
+}
 
 function startWorkoutTimer() {
   if (workoutTimerInterval) clearInterval(workoutTimerInterval);
@@ -233,6 +275,7 @@ function renderTimerDisplays(elapsed) {
 function triggerRestTimer(seconds) {
   restTotalDuration = seconds || AppState.settings.defaultRest || 90;
   restTimeRemaining = restTotalDuration;
+  restEndsAt = Date.now() + restTotalDuration * 1000;
 
   const bar = document.getElementById('rest-timer-bar');
   if (bar) bar.classList.remove('hidden');
@@ -240,23 +283,31 @@ function triggerRestTimer(seconds) {
   updateRestTimerUI();
 
   if (restTimerInterval) clearInterval(restTimerInterval);
-  restTimerInterval = setInterval(() => {
-    restTimeRemaining--;
-    if (restTimeRemaining <= 0) {
-      clearInterval(restTimerInterval);
-      restTimerInterval = null;
-      restTimeRemaining = 0;
-      updateRestTimerUI();
-      playRestTimerChime();
-      triggerHaptic([100, 50, 100, 50, 200]);
-      setTimeout(() => {
-        closeRestTimer();
-      }, 3000);
-    } else {
-      updateRestTimerUI();
-    }
-  }, 1000);
+  restTimerInterval = setInterval(tickRestTimer, 1000);
 }
+
+function tickRestTimer() {
+  restTimeRemaining = Math.max(0, Math.ceil((restEndsAt - Date.now()) / 1000));
+  if (restTimeRemaining <= 0) {
+    clearInterval(restTimerInterval);
+    restTimerInterval = null;
+    updateRestTimerUI();
+    playRestTimerChime();
+    triggerHaptic([100, 50, 100, 50, 200]);
+    notifyRestOver();
+    showToast('\u23F1\uFE0F Rest over \u2013 next set!');
+    setTimeout(() => {
+      closeRestTimer();
+    }, 3000);
+  } else {
+    updateRestTimerUI();
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && restTimerInterval) tickRestTimer();
+  if (!document.hidden) scrollTick();
+});
 
 function updateRestTimerUI() {
   const textEl = document.getElementById('rest-timer-text');
@@ -313,6 +364,7 @@ window.switchTab = function(tabName) {
   if (tabName === 'routines') renderRoutines();
   if (tabName === 'history') renderHistory();
   if (tabName === 'prs') renderPRs();
+  if (tabName === 'ranks') renderRanks();
   if (tabName === 'workout') renderActiveWorkout();
 
   window.scrollTo(0, 0);
@@ -460,6 +512,9 @@ function renderActiveWorkout() {
   activeState.classList.remove('hidden');
   dot.classList.remove('hidden');
 
+  const restSel = document.getElementById('active-rest-select');
+  if (restSel) restSel.value = String(AppState.activeWorkout.restSeconds || AppState.settings.defaultRest || 90);
+
   // Title input
   const titleInput = document.getElementById('active-workout-name');
   if (titleInput && titleInput.value !== AppState.activeWorkout.title) {
@@ -495,7 +550,7 @@ function renderActiveWorkout() {
         <div class="exercise-session-header">
           <div class="ex-title-group">
             <span class="ex-session-name">${escapeHtml(ex.name)}</span>
-            <span class="ex-session-cat">${escapeHtml(ex.category)}</span>
+            <span class="ex-session-cat">${escapeHtml(ex.category)}${scrollHint(ex.name)}</span>
           </div>
           <button class="remove-ex-btn" onclick="removeExerciseFromActive(${exIndex})" title="Remove Exercise">&times;</button>
         </div>
@@ -544,6 +599,12 @@ window.updateActiveSet = function(exIndex, setIndex, field, value) {
   const set = AppState.activeWorkout.exercises[exIndex].sets[setIndex];
   if (set) {
     set[field] = Number(value) || 0;
+    if (field === 'reps' && set.completed) {
+      const nc = calcScrollCredit(AppState.activeWorkout.exercises[exIndex].name, set.reps);
+      const diff = nc - (set.credit || 0);
+      if (diff !== 0) addScrollCredit(diff);
+      set.credit = nc;
+    }
     saveState();
     renderActiveWorkout();
   }
@@ -555,13 +616,23 @@ window.toggleSetComplete = function(exIndex, setIndex) {
   if (!set) return;
 
   set.completed = !set.completed;
+  const exName = AppState.activeWorkout.exercises[exIndex].name;
+  if (set.completed) {
+    const credit = calcScrollCredit(exName, set.reps);
+    set.credit = credit;
+    if (credit > 0) addScrollCredit(credit, exName);
+  } else if (set.credit) {
+    addScrollCredit(-set.credit);
+    set.credit = 0;
+  }
   saveState();
 
   if (set.completed) {
     playSetCompletePing();
     triggerHaptic([40, 30, 70]);
     // Start rest timer
-    triggerRestTimer(AppState.settings.defaultRest);
+    requestNotifyPermission();
+    triggerRestTimer(AppState.activeWorkout.restSeconds || AppState.settings.defaultRest);
   }
 
   renderActiveWorkout();
@@ -669,6 +740,7 @@ window.finishActiveWorkout = function() {
     exercises: recordedExercises
   };
 
+  const ranksBefore = getRankSnapshot();
   AppState.history.unshift(historyItem);
   AppState.activeWorkout = null;
   saveState();
@@ -676,6 +748,7 @@ window.finishActiveWorkout = function() {
 
   // Show celebration modal
   showCelebrationModal(historyItem, newPRsEarned);
+  setTimeout(() => announceRankUps(ranksBefore), 600);
 };
 
 window.cancelActiveWorkout = function() {
@@ -973,6 +1046,139 @@ function drawOfflineQRFallback(ctx, size, text) {
   }
 }
 
+// --- Doomscroll Bank ---
+// 2 minutes of scroll per pull-up / push-up rep, and per minute of plank (plank reps = seconds).
+const SCROLL_SECONDS_PER_UNIT = 120;
+
+function scrollKind(name) {
+  const n = (name || '').toLowerCase();
+  if (/pull[\s-]?up|push[\s-]?up/.test(n)) return 'rep';
+  if (/plank/.test(n)) return 'plank';
+  return null;
+}
+
+function calcScrollCredit(name, reps) {
+  if (AppState.settings.requireCamera !== false) return 0; // only camera-verified reps earn time
+  const kind = scrollKind(name);
+  const r = Number(reps) || 0;
+  if (kind === 'rep') return r * SCROLL_SECONDS_PER_UNIT;
+  if (kind === 'plank') return Math.floor(r / 60) * SCROLL_SECONDS_PER_UNIT;
+  return 0;
+}
+
+function scrollHint(name) {
+  const kind = scrollKind(name);
+  if (kind && AppState.settings.requireCamera !== false) return ' \u2022 use Camera Coach to earn scroll time';
+  if (kind === 'rep') return ' \u2022 +2 min scroll / rep';
+  if (kind === 'plank') return ' \u2022 reps = seconds, +2 min / minute';
+  return '';
+}
+
+function formatRest(s) {
+  return s < 60 ? s + ' sec' : (s % 60 === 0 ? (s / 60) + ' min' : Math.floor(s / 60) + ' min ' + (s % 60) + ' sec');
+}
+
+function fmtClock(sec) {
+  sec = Math.max(0, Math.round(sec));
+  return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+}
+
+function addScrollCredit(seconds, exName) {
+  ensureScrollState();
+  AppState.scroll.balance = Math.max(0, AppState.scroll.balance + seconds);
+  if (seconds > 0) {
+    AppState.scroll.earnedTotal = (AppState.scroll.earnedTotal || 0) + seconds;
+    showToast('\uD83D\uDCF1 +' + fmtClock(seconds) + ' scroll time earned' + (exName ? ' (' + exName + ')' : ''));
+  }
+  saveState();
+  renderScroll();
+  syncScrollToServer();
+}
+
+function scrollRemaining() {
+  const s = AppState.scroll;
+  if (s.sessionEndsAt) return Math.max(0, Math.ceil((s.sessionEndsAt - Date.now()) / 1000));
+  return s.balance;
+}
+
+function renderScroll() {
+  ensureScrollState();
+  const s = AppState.scroll;
+  const balEl = document.getElementById('scroll-balance');
+  const btn = document.getElementById('btn-scroll-toggle');
+  const sub = document.getElementById('scroll-sub');
+  if (!balEl) return;
+  balEl.textContent = fmtClock(scrollRemaining());
+  const card = document.getElementById('scroll-card');
+  if (s.sessionEndsAt) {
+    btn.textContent = 'Stop & Save';
+    sub.textContent = 'Scrolling... clock is ticking';
+    card.classList.add('scrolling');
+  } else {
+    btn.textContent = 'Start Scrolling';
+    sub.textContent = s.balance > 0 ? 'Banked time \u2013 spend it wisely' : 'Earn 2 min per pull-up, push-up & plank minute';
+    card.classList.remove('scrolling');
+  }
+}
+
+function toggleScrollSession() {
+  const s = AppState.scroll;
+  if (s.sessionEndsAt) {
+    s.balance = scrollRemaining();
+    s.sessionEndsAt = null;
+  } else {
+    if (s.balance <= 0) {
+      showToast('\uD83D\uDD12 No scroll time. Do some pull-ups, push-ups or planks first!');
+      return;
+    }
+    s.sessionEndsAt = Date.now() + s.balance * 1000;
+    s.balance = 0;
+    requestNotifyPermission();
+  }
+  saveState();
+  renderScroll();
+  syncScrollToServer();
+}
+
+function scrollTick() {
+  if (!AppState.scroll) return;
+  const s = AppState.scroll;
+  if (s.sessionEndsAt && Date.now() >= s.sessionEndsAt) {
+    s.sessionEndsAt = null;
+    s.balance = 0;
+    saveState();
+    syncScrollToServer();
+    playRestTimerChime();
+    triggerHaptic([300, 100, 300]);
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then(reg => reg.showNotification('Scroll time is up!', { body: 'Reels & Shorts are locked. Go work out.', icon: 'app_icon_192.png' }));
+      }
+    } catch (e) {}
+    const ov = document.getElementById('scroll-lock-overlay');
+    if (ov) ov.classList.remove('hidden');
+  }
+  renderScroll();
+}
+
+window.closeScrollLock = function() {
+  const ov = document.getElementById('scroll-lock-overlay');
+  if (ov) ov.classList.add('hidden');
+};
+
+// Tell the PC server how much scroll time is live so the iOS Shortcut can block Reels/Shorts.
+function syncScrollToServer() {
+  const s = AppState.scroll;
+  const remaining = s && s.sessionEndsAt ? scrollRemaining() : 0;
+  try {
+    fetch('/api/scroll', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ remainingSeconds: remaining })
+    }).catch(() => {});
+  } catch (e) {}
+}
+
 // Utility: Escape HTML
 function escapeHtml(str) {
   if (!str) return '';
@@ -1023,6 +1229,24 @@ document.addEventListener('DOMContentLoaded', () => {
     renderRoutines();
   }
 
+  // Rest time selector (per workout)
+  document.getElementById('active-rest-select').addEventListener('change', (e) => {
+    if (AppState.activeWorkout) {
+      AppState.activeWorkout.restSeconds = Number(e.target.value);
+      saveState();
+      requestNotifyPermission();
+      showToast('Rest time set to ' + formatRest(Number(e.target.value)));
+    }
+  });
+
+  // Doomscroll bank
+  document.getElementById('btn-scroll-toggle').addEventListener('click', toggleScrollSession);
+  const su = document.getElementById('scroll-status-url');
+  if (su) su.textContent = 'http://' + location.hostname + ':8080/api/scroll';
+  renderScroll();
+  setInterval(scrollTick, 1000);
+  syncScrollToServer();
+
   // Header QR buttons
   document.getElementById('qr-btn').addEventListener('click', openQRModal);
   document.getElementById('btn-show-qr-settings').addEventListener('click', openQRModal);
@@ -1052,11 +1276,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Rest Timer Controls
   document.getElementById('timer-btn-minus').addEventListener('click', () => {
     restTimeRemaining = Math.max(5, restTimeRemaining - 15);
+    restEndsAt -= 15000;
     updateRestTimerUI();
     triggerHaptic([20]);
   });
   document.getElementById('timer-btn-plus').addEventListener('click', () => {
     restTimeRemaining += 30;
+    restEndsAt += 30000;
     restTotalDuration += 30;
     updateRestTimerUI();
     triggerHaptic([20]);

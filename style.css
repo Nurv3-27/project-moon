@@ -1740,3 +1740,69 @@ input:checked + .slider:before {
   box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.3);
 }
 
+
+/* ---------- Doomscroll bank, rest select, toast, lock overlay ---------- */
+.scroll-card{background:linear-gradient(135deg,var(--bg-card),var(--bg-raised));border:1px solid var(--border-subtle);border-radius:20px;padding:16px;margin:16px 0;transition:box-shadow .3s,border-color .3s}
+.scroll-card.scrolling{border-color:var(--accent-lime);box-shadow:0 0 24px var(--accent-lime-glow)}
+.scroll-card-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.scroll-card-tag{font-size:.7rem;letter-spacing:.12em;font-weight:700;color:var(--text-muted)}
+.scroll-balance{font-family:var(--font-mono);font-size:2.2rem;font-weight:700;color:var(--accent-lime);line-height:1.1;margin:4px 0}
+.scroll-sub{font-size:.78rem;color:var(--text-dim)}
+.scroll-help{margin-top:12px;font-size:.8rem;color:var(--text-muted)}
+.scroll-help summary{cursor:pointer;font-weight:600;color:var(--text-main)}
+.scroll-help ol{padding-left:18px;margin:8px 0}
+.scroll-help code{background:var(--bg-input);padding:1px 6px;border-radius:6px;word-break:break-all}
+.rest-select-row{display:flex;justify-content:space-between;align-items:center;margin:12px 0 4px;padding:10px 12px;background:var(--bg-input);border-radius:14px}
+.rest-select-label{font-weight:600}
+.moon-toast{position:fixed;left:50%;top:calc(var(--safe-top) + 14px);transform:translate(-50%,-140%);background:var(--bg-card-hover);color:var(--text-main);border:1px solid var(--border-active);padding:10px 16px;border-radius:14px;z-index:9999;font-size:.85rem;max-width:90vw;text-align:center;transition:transform .35s cubic-bezier(.2,.9,.3,1.2);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.moon-toast.show{transform:translate(-50%,0)}
+.scroll-lock-overlay{position:fixed;inset:0;z-index:10000;background:rgba(6,3,4,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:24px}
+.scroll-lock-overlay.hidden{display:none}
+.scroll-lock-card{background:var(--bg-card);border:1px solid var(--accent-lime);border-radius:24px;padding:28px 22px;text-align:center;max-width:360px;width:100%;box-shadow:0 0 40px var(--accent-lime-glow)}
+.scroll-lock-emoji{font-size:3.4rem;margin-bottom:8px}
+.scroll-lock-card p{color:var(--text-muted);margin:8px 0 18px}
+
+/* ---------- Camera Coach ---------- */
+.cam-card{max-width:440px;width:100%}
+.cam-stage{position:relative;background:#000;border-radius:18px;overflow:hidden;aspect-ratio:4/3;margin:10px 0}
+.cam-stage video,.cam-stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam-stage .mirror{transform:scaleX(-1)}
+.cam-hud{position:absolute;left:12px;top:10px;display:flex;flex-direction:column;gap:2px;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+.cam-count{font-family:var(--font-mono);font-size:3rem;font-weight:700;line-height:1;color:#fff}
+.cam-earned{font-size:.8rem;color:var(--accent-lime);font-weight:700}
+.cam-feedback{padding:10px 12px;border-radius:12px;background:var(--bg-input);font-weight:600;font-size:.9rem;min-height:20px;transition:background .2s}
+.cam-feedback.good{background:rgba(52,199,89,.2);color:#6ee89a}
+.cam-feedback.bad{background:rgba(255,59,48,.2);color:#ff8a82}
+.cam-actions{display:flex;gap:8px;margin-top:10px}
+.cam-actions .primary-glow-btn{flex:1}
+.cam-privacy{font-size:.72rem;color:var(--text-dim);margin-top:8px}
+.scroll-toggle-row{display:flex;gap:8px;align-items:center;font-size:.78rem;color:var(--text-muted);margin-top:10px}
+
+/* ---------- Muscle Ranks ---------- */
+.ranks-overall{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,var(--bg-card),var(--bg-raised));border:1px solid var(--border-subtle);border-radius:20px;padding:16px;margin-bottom:14px}
+.rank-badge-big{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;border:3px solid var(--tc);box-shadow:0 0 22px var(--tc);flex-shrink:0}
+.rank-overall-name{font-size:1.6rem;font-weight:800;line-height:1.1}
+.rank-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:6px 0}
+.rank-bar.tall{height:10px}
+.rank-bar span{display:block;height:100%;border-radius:99px;transition:width .6s cubic-bezier(.2,.9,.3,1)}
+.rank-next{font-size:.75rem;color:var(--text-dim)}
+.ranks-body{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:20px;padding:10px}
+.body-svg{width:100%;height:auto;display:block}
+.body-neutral *{fill:#2a2a33}
+.body-label{fill:var(--text-dim);font-size:11px;letter-spacing:.2em}
+.muscle{cursor:pointer;stroke:rgba(0,0,0,.45);stroke-width:1.5;transition:filter .2s,transform .2s;transform-box:fill-box;transform-origin:center}
+.muscle:hover{filter:brightness(1.25)}
+.muscle.selected{stroke:#fff;stroke-width:2.5;filter:drop-shadow(0 0 6px rgba(255,255,255,.7))}
+.rank-detail{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:18px;padding:14px;margin-top:12px}
+.rank-detail-head{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.rank-detail-head h3{margin:0}
+.rank-top{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ranks-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.rank-row{display:flex;gap:12px;align-items:center;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:14px;padding:10px 12px;cursor:pointer}
+.rank-row.selected{border-color:var(--accent-lime)}
+.rank-row-main{flex:1}
+.rank-row-top{display:flex;justify-content:space-between;font-size:.9rem}
+.rank-icon{width:38px;height:38px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.rank-icon.big{width:48px;height:48px;font-size:1.4rem}
+.ranks-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.legend-chip{border:1px solid;border-radius:99px;padding:3px 10px;font-size:.72rem;font-weight:700}

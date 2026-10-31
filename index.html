@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -84,16 +84,40 @@
         <div class="stats-overview-bar">
           <div class="stat-pill">
             <span class="stat-num" id="stat-streak">0</span>
-            <span class="stat-label">DAY STREAK ðŸ”¥</span>
+            <span class="stat-label">DAY STREAK &#128293;</span>
           </div>
           <div class="stat-pill">
             <span class="stat-num" id="stat-weekly-count">0</span>
-            <span class="stat-label">THIS WEEK ðŸ‹ï¸</span>
+            <span class="stat-label">THIS WEEK &#127947;&#65039;</span>
           </div>
           <div class="stat-pill">
             <span class="stat-num" id="stat-total-volume">0</span>
-            <span class="stat-label" id="stat-volume-unit">TOTAL KG âš¡</span>
+            <span class="stat-label" id="stat-volume-unit">TOTAL KG &#9889;</span>
           </div>
+        </div>
+
+        <!-- Doomscroll Bank -->
+        <div class="scroll-card" id="scroll-card">
+          <div class="scroll-card-top">
+            <div>
+              <span class="scroll-card-tag">&#128241; DOOMSCROLL BANK</span>
+              <div class="scroll-balance" id="scroll-balance">0:00</div>
+              <span class="scroll-sub" id="scroll-sub">Earn 2 min per pull-up, push-up &amp; plank minute</span>
+            </div>
+            <button id="btn-scroll-toggle" class="primary-glow-btn small-btn">Start Scrolling</button>
+          </div>
+          <button id="btn-camera-coach" class="secondary-btn full-width" style="margin-top:12px;">&#128247; Earn time with camera</button>
+          <label class="scroll-toggle-row"><input type="checkbox" id="setting-require-camera" checked> Only camera-verified reps earn scroll time</label>
+          <details class="scroll-help">
+            <summary>How to actually block Reels &amp; Shorts (iPhone)</summary>
+            <ol>
+              <li>Keep this PC server running and the phone on the same Wi-Fi.</li>
+              <li>Shortcuts &rarr; Automation &rarr; New &rarr; <strong>App</strong> &rarr; Instagram + YouTube (Is Opened), Run Immediately.</li>
+              <li>Add action <strong>Get Contents of URL</strong>: <code id="scroll-status-url">/api/scroll</code></li>
+              <li>Add <strong>If</strong> result <em>contains</em> <code>blocked</code> &rarr; <strong>Go to Home Screen</strong>.</li>
+            </ol>
+            <p>A web app cannot close other apps itself; iOS only allows this through a Shortcuts automation like the one above.</p>
+          </details>
         </div>
 
         <!-- Routines List -->
@@ -146,6 +170,19 @@
                 <span class="metric-label">SETS</span>
                 <span class="metric-val" id="active-sets-display">0</span>
               </div>
+            </div>
+
+            <div class="rest-select-row">
+              <label for="active-rest-select" class="rest-select-label">&#9201;&#65039; Rest time</label>
+              <select id="active-rest-select" class="ios-select">
+                <option value="30">30 sec</option>
+                <option value="45">45 sec</option>
+                <option value="60">1 min</option>
+                <option value="90">1 min 30</option>
+                <option value="120">2 min</option>
+                <option value="150">2 min 30</option>
+                <option value="180">3 min</option>
+              </select>
             </div>
 
             <div class="active-header-actions">
@@ -216,6 +253,64 @@
         <div id="prs-grid" class="prs-grid">
           <!-- PR items injected here -->
         </div>
+      </section>
+
+      <!-- TAB: MUSCLE RANKS -->
+      <section id="view-ranks" class="tab-view">
+        <div class="section-hero">
+          <div class="hero-text">
+            <span class="greeting-subtitle">BRONZE &rarr; TITAN</span>
+            <h1 class="hero-title">Muscle Ranks</h1>
+          </div>
+        </div>
+        <div id="ranks-overall" class="ranks-overall"></div>
+        <div id="ranks-body" class="ranks-body">
+          <svg class="body-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Body muscle map">
+            <g class="body-neutral">
+              <circle cx="100" cy="34" r="22"/><rect x="92" y="54" width="16" height="16" rx="5"/>
+              <ellipse cx="40" cy="188" rx="8" ry="26"/><ellipse cx="160" cy="188" rx="8" ry="26"/>
+              <rect x="76" y="196" width="48" height="26" rx="12"/>
+              <ellipse cx="78" cy="386" rx="12" ry="7"/><ellipse cx="122" cy="386" rx="12" ry="7"/>
+            </g>
+            <ellipse class="muscle" data-muscle="shoulders" cx="62" cy="90" rx="16" ry="14"/>
+            <ellipse class="muscle" data-muscle="shoulders" cx="138" cy="90" rx="16" ry="14"/>
+            <ellipse class="muscle" data-muscle="chest" cx="83" cy="112" rx="20" ry="16"/>
+            <ellipse class="muscle" data-muscle="chest" cx="117" cy="112" rx="20" ry="16"/>
+            <ellipse class="muscle" data-muscle="biceps" cx="49" cy="135" rx="9" ry="22"/>
+            <ellipse class="muscle" data-muscle="biceps" cx="151" cy="135" rx="9" ry="22"/>
+            <rect class="muscle" data-muscle="abs" x="82" y="134" width="36" height="60" rx="10"/>
+            <ellipse class="muscle" data-muscle="quads" cx="80" cy="270" rx="17" ry="48"/>
+            <ellipse class="muscle" data-muscle="quads" cx="120" cy="270" rx="17" ry="48"/>
+            <ellipse class="muscle" data-muscle="calves" cx="78" cy="348" rx="11" ry="32"/>
+            <ellipse class="muscle" data-muscle="calves" cx="122" cy="348" rx="11" ry="32"/>
+            <text x="100" y="398" class="body-label" text-anchor="middle">FRONT</text>
+
+            <g transform="translate(200 0)">
+              <g class="body-neutral">
+                <circle cx="100" cy="34" r="22"/><rect x="92" y="54" width="16" height="16" rx="5"/>
+                <ellipse cx="40" cy="188" rx="8" ry="26"/><ellipse cx="160" cy="188" rx="8" ry="26"/>
+                <ellipse cx="78" cy="386" rx="12" ry="7"/><ellipse cx="122" cy="386" rx="12" ry="7"/>
+              </g>
+              <ellipse class="muscle" data-muscle="shoulders" cx="62" cy="90" rx="16" ry="14"/>
+              <ellipse class="muscle" data-muscle="shoulders" cx="138" cy="90" rx="16" ry="14"/>
+              <rect class="muscle" data-muscle="back" x="72" y="80" width="56" height="112" rx="24"/>
+              <ellipse class="muscle" data-muscle="triceps" cx="49" cy="135" rx="9" ry="22"/>
+              <ellipse class="muscle" data-muscle="triceps" cx="151" cy="135" rx="9" ry="22"/>
+              <ellipse class="muscle" data-muscle="hamstrings" cx="82" cy="222" rx="20" ry="20"/>
+              <ellipse class="muscle" data-muscle="hamstrings" cx="118" cy="222" rx="20" ry="20"/>
+              <ellipse class="muscle" data-muscle="hamstrings" cx="80" cy="278" rx="16" ry="36"/>
+              <ellipse class="muscle" data-muscle="hamstrings" cx="120" cy="278" rx="16" ry="36"/>
+              <ellipse class="muscle" data-muscle="calves" cx="78" cy="348" rx="11" ry="32"/>
+              <ellipse class="muscle" data-muscle="calves" cx="122" cy="348" rx="11" ry="32"/>
+              <text x="100" y="398" class="body-label" text-anchor="middle">BACK</text>
+            </g>
+          </svg>
+        </div>
+        <div id="ranks-detail" class="rank-detail"></div>
+        <div id="ranks-list" class="ranks-list"></div>
+        <h3 class="subheading" style="margin-top:18px;">Tiers (points per muscle)</h3>
+        <div id="ranks-legend" class="ranks-legend"></div>
+        <p class="rank-next" style="margin-top:10px;">Points = sets &times; reps &times; load. Heavier lifts and harder bodyweight moves (pull-ups, dips) score more. Camera-verified reps count too.</p>
       </section>
 
       <!-- TAB 5: SETTINGS & IPHONE INSTALL -->
@@ -412,6 +507,14 @@
         <span class="tab-label">PRs</span>
       </button>
 
+      <button class="nav-tab" data-tab="ranks" onclick="switchTab('ranks')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="5" r="2.5"></circle>
+          <path d="M12 8v7M8 10l4-1 4 1M9 21l3-6 3 6"></path>
+        </svg>
+        <span class="tab-label">Ranks</span>
+      </button>
+
       <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"></circle>
@@ -499,7 +602,7 @@
     <!-- MODAL 3: WORKOUT FINISHED CELEBRATION -->
     <div id="modal-celebration" class="modal-overlay hidden">
       <div class="modal-card celebration-card">
-        <div class="celebration-badge">ðŸ†</div>
+        <div class="celebration-badge">&#127942;</div>
         <h2>WORKOUT COMPLETED!</h2>
         <p class="celebration-subtitle">Great hustle! Your session has been recorded.</p>
         
@@ -519,7 +622,7 @@
         </div>
 
         <div id="celebration-prs-box" class="celebration-prs-box hidden">
-          <span class="pr-trophy-tag">âš¡ NEW PERSONAL RECORD!</span>
+          <span class="pr-trophy-tag">&#9889; NEW PERSONAL RECORD!</span>
           <div id="c-prs-list" class="c-prs-list"></div>
         </div>
 
@@ -549,7 +652,7 @@
         </div>
 
         <div class="iphone-tip-box">
-          <strong>ðŸ’¡ Pro Tip for iOS:</strong>
+          <strong>&#128161; Pro Tip for iOS:</strong>
           <span>Make sure your iPhone is connected to the same Wi-Fi network as this PC! Once opened in Safari, tap the Share icon &rarr; <strong>"Add to Home Screen"</strong>.</span>
         </div>
       </div>
@@ -557,7 +660,50 @@
 
   </div>
 
+  <!-- CAMERA COACH MODAL -->
+  <div id="modal-camera" class="modal-overlay hidden">
+    <div class="modal-card cam-card">
+      <div class="modal-header">
+        <h3>&#128247; Camera Coach</h3>
+        <button class="modal-close-btn" onclick="closeCameraCoach()">&times;</button>
+      </div>
+      <div class="filter-chips-row" id="cam-mode-chips">
+        <button class="chip active" data-mode="pushup">Push-Up</button>
+        <button class="chip" data-mode="pullup">Pull-Up</button>
+        <button class="chip" data-mode="plank">Plank</button>
+      </div>
+      <div class="cam-stage">
+        <video id="cam-video" playsinline muted></video>
+        <canvas id="cam-canvas"></canvas>
+        <div class="cam-hud">
+          <span id="cam-count" class="cam-count">0</span>
+          <span id="cam-earned" class="cam-earned">+0:00 earned</span>
+        </div>
+      </div>
+      <div id="cam-feedback" class="cam-feedback">Pick an exercise and start the camera.</div>
+      <div class="cam-actions">
+        <button id="cam-start" class="primary-glow-btn">Start Camera</button>
+        <button id="cam-flip" class="secondary-btn">Flip</button>
+      </div>
+      <p class="cam-privacy">Video is analysed on your device and never uploaded. Each verified rep (or plank minute) = 2 min of scroll time.</p>
+    </div>
+  </div>
+
+  <!-- DOOMSCROLL LOCK OVERLAY -->
+  <div id="scroll-lock-overlay" class="scroll-lock-overlay hidden">
+    <div class="scroll-lock-card">
+      <div class="scroll-lock-emoji">&#128274;</div>
+      <h2>Scroll time is up!</h2>
+      <p>No more Reels or Shorts. Do pull-ups, push-ups or planks to earn more.</p>
+      <button class="primary-glow-btn full-width" onclick="closeScrollLock(); switchTab('routines'); startBlankWorkout();">Go earn it &#128170;</button>
+      <button class="secondary-btn full-width" style="margin-top:8px;" onclick="closeScrollLock()">Dismiss</button>
+    </div>
+  </div>
+
   <script src="app.js"></script>
+  <script src="camera.js"></script>
+  <script src="ranks.js"></script>
+  <script src="camera.js"></script>
 </body>
 </html>
 

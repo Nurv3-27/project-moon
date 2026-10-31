@@ -1,9 +1,11 @@
-﻿const CACHE_NAME = 'moon-v4';
+const CACHE_NAME = 'moon-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './camera.js',
+  './ranks.js',
   './manifest.json',
   './app_icon.png',
   './app_icon_192.png'
@@ -32,6 +34,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET' || event.request.url.includes('/api/') || new URL(event.request.url).origin !== self.location.origin) return;
   // Navigation or asset requests: cache-first with network fallback
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {

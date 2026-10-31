@@ -14,8 +14,14 @@
     plank:  { label: 'Plank', tip: 'Place the phone side-on, full body in view. Hold with a straight line.' }
   };
 
-  let landmarker = null, stream = null, raf = 0, running = false;
-  let mode = 'pushup', facing = 'user', lastVideoTime = -1;
+  let landmarker = null;
+  let modelLoadingPromise = null;
+  let stream = null;
+  let raf = 0;
+  let running = false;
+  let mode = 'pushup';
+  let facing = 'user';
+  let lastVideoTime = -1;
   let S = null;
 
   const $ = (id) => document.getElementById(id);
@@ -160,22 +166,37 @@
   }
 
   // ---------- drawing ----------
-  const CONNECTIONS = [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28]];
+  const CONNECTIONS = [
+    [11, 12], [11, 13], [13, 15], [12, 14], [14, 16],
+    [11, 23], [12, 24], [23, 24], [23, 25], [25, 27],
+    [24, 26], [26, 28]
+  ];
+
   function draw(lm, W, H) {
     const c = $('cam-canvas');
     if (!c) return;
-    c.width = W; c.height = H;
+    if (c.width !== W || c.height !== H) {
+      c.width = W;
+      c.height = H;
+    }
     const g = c.getContext('2d');
     g.clearRect(0, 0, W, H);
     if (!lm) return;
-    g.lineWidth = 4; g.strokeStyle = 'rgba(120,255,180,.9)'; g.fillStyle = '#fff';
+    g.lineWidth = 4;
+    g.strokeStyle = 'rgba(120,255,180,.9)';
+    g.fillStyle = '#fff';
     CONNECTIONS.forEach(([a, b]) => {
       if ((lm[a].visibility || 0) < 0.4 || (lm[b].visibility || 0) < 0.4) return;
-      g.beginPath(); g.moveTo(lm[a].x * W, lm[a].y * H); g.lineTo(lm[b].x * W, lm[b].y * H); g.stroke();
+      g.beginPath();
+      g.moveTo(lm[a].x * W, lm[a].y * H);
+      g.lineTo(lm[b].x * W, lm[b].y * H);
+      g.stroke();
     });
     [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28].forEach((i) => {
       if ((lm[i].visibility || 0) < 0.4) return;
-      g.beginPath(); g.arc(lm[i].x * W, lm[i].y * H, 5, 0, 7); g.fill();
+      g.beginPath();
+      g.arc(lm[i].x * W, lm[i].y * H, 5, 0, 7);
+      g.fill();
     });
   }
 
@@ -183,80 +204,190 @@
   function loop() {
     if (!running) return;
     const v = $('cam-video');
-    if (v.readyState >= 2 && v.currentTime !== lastVideoTime && landmarker) {
+    if (v && v.readyState >= 2 && v.currentTime !== lastVideoTime && v.videoWidth > 0) {
       lastVideoTime = v.currentTime;
       const W = v.videoWidth, H = v.videoHeight;
-      let res = null;
-      try { res = landmarker.detectForVideo(v, performance.now()); } catch (e) {}
-      const lm = res && res.landmarks && res.landmarks[0];
-      draw(lm, W, H);
-      if (lm) {
-        if (mode === 'pushup') analysePushup(lm, W, H);
-        else if (mode === 'pullup') analysePullup(lm, W, H);
-        else analysePlank(lm, W, H, performance.now());
-        updateHud();
+      if (landmarker) {
+        let res = null;
+        try {
+          res = landmarker.detectForVideo(v, performance.now());
+        } catch (e) {
+          console.warn("Detection frame error:", e);
+        }
+        const lm = res && res.landmarks && res.landmarks[0];
+        draw(lm, W, H);
+        if (lm) {
+          if (mode === 'pushup') analysePushup(lm, W, H);
+          else if (mode === 'pullup') analysePullup(lm, W, H);
+          else analysePlank(lm, W, H, performance.now());
+          updateHud();
+        } else {
+          S.lastT = 0;
+          setMsg('No person detected - step into view', false);
+        }
       } else {
-        S.lastT = 0;
-        setMsg('No person detected - step into view', false);
+        draw(null, W, H);
       }
     }
     raf = requestAnimationFrame(loop);
   }
 
   async function loadModel() {
-    if (landmarker) return;
-    setMsg('Loading pose model (needs internet the first time)...', null);
-    const mod = await import(CDN + '/vision_bundle.mjs');
-    const fileset = await mod.FilesetResolver.forVisionTasks(CDN + '/wasm');
-    const make = (delegate) => mod.PoseLandmarker.createFromOptions(fileset, {
-      baseOptions: { modelAssetPath: MODEL, delegate },
-      runningMode: 'VIDEO', numPoses: 1
-    });
-    try { landmarker = await make('GPU'); } catch (e) { landmarker = await make('CPU'); }
+    if (landmarker) return landmarker;
+    if (modelLoadingPromise) return modelLoadingPromise;
+
+    modelLoadingPromise = (async () => {
+      console.log('Loading MediaPipe vision bundle...');
+      const mod = await import(CDN + '/vision_bundle.mjs');
+      const fileset = await mod.FilesetResolver.forVisionTasks(CDN + '/wasm');
+      const make = (delegate) => mod.PoseLandmarker.createFromOptions(fileset, {
+        baseOptions: { modelAssetPath: MODEL, delegate },
+        runningMode: 'VIDEO',
+        numPoses: 1
+      });
+      try {
+        console.log('Attempting GPU delegate...');
+        landmarker = await make('GPU');
+        console.log('PoseLandmarker initialized with GPU');
+      } catch (gpuErr) {
+        console.warn('GPU delegate failed, falling back to CPU:', gpuErr);
+        landmarker = await make('CPU');
+        console.log('PoseLandmarker initialized with CPU');
+      }
+      return landmarker;
+    })();
+
+    try {
+      return await modelLoadingPromise;
+    } catch (err) {
+      modelLoadingPromise = null;
+      throw err;
+    }
   }
 
   async function startCamera() {
-    if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setMsg('Camera needs HTTPS. Open the https:// address shown in the server window (or use localhost on the PC).', false);
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setMsg('Camera access requires HTTPS or localhost. If on iPhone, open the https:// address shown in server.', false);
       return;
     }
+
     stopCamera();
-    $('cam-start').disabled = true;
+    const btn = $('cam-start');
+    if (btn) btn.disabled = true;
+
     try {
-      setMsg('Requesting camera access...', null);
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false
-      });
+      setMsg('Starting camera...', null);
+
+      let videoConstraints = {
+        facingMode: facing ? { ideal: facing } : 'user',
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      };
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: videoConstraints,
+          audio: false
+        });
+      } catch (err1) {
+        console.warn('Specific facingMode constraint failed, retrying generic video constraint:', err1);
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      }
+
       const v = $('cam-video');
+      if (!v) throw new Error('Video element not found');
+
+      v.muted = true;
+      v.defaultMuted = true;
+      v.playsInline = true;
+      v.setAttribute('playsinline', '');
+      v.setAttribute('webkit-playsinline', '');
+      v.setAttribute('autoplay', '');
       v.srcObject = stream;
+
       v.classList.toggle('mirror', facing === 'user');
-      $('cam-canvas').classList.toggle('mirror', facing === 'user');
-      await v.play();
-      await loadModel();
-      resetState();
+      const c = $('cam-canvas');
+      if (c) c.classList.toggle('mirror', facing === 'user');
+
+      // Play video with metadata wait fallback
+      try {
+        await v.play();
+      } catch (playErr) {
+        console.warn('Direct v.play() pending loadedmetadata:', playErr);
+        await new Promise((resolve) => {
+          v.onloadedmetadata = () => {
+            v.play().catch(e => console.warn('play() error:', e)).finally(resolve);
+          };
+          setTimeout(resolve, 800);
+        });
+      }
+
+      // Live stream is now running!
       running = true;
       lastVideoTime = -1;
-      $('cam-start').textContent = 'Stop';
-      setMsg(EXERCISES[mode].tip, null);
-      loop();
+      resetState();
+      if (btn) {
+        btn.textContent = 'Stop Camera';
+        btn.disabled = false;
+      }
+
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(loop);
+
+      // Now ensure AI model is loaded without blocking the video feed
+      if (!landmarker) {
+        setMsg('Camera live! Loading AI pose detector...', null);
+        loadModel().then(() => {
+          if (running) setMsg(EXERCISES[mode].tip, true);
+        }).catch((modelErr) => {
+          console.error('AI Model failed to load:', modelErr);
+          if (running) {
+            setMsg('Camera live, but AI pose model failed to load. Check internet connection.', false);
+          }
+        });
+      } else {
+        setMsg(EXERCISES[mode].tip, true);
+      }
+
     } catch (e) {
-      const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
-      setMsg(denied ? 'Camera permission denied. Allow it in your browser/Settings and try again.'
-                    : 'Could not start: ' + (e && e.message ? e.message : e), false);
+      console.error('Camera start error:', e);
+      const isDenied = e && (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError' || e.name === 'SecurityError');
+      const isNotFound = e && (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError');
+
+      let msg = 'Could not start camera: ' + (e && e.message ? e.message : e);
+      if (isDenied) {
+        msg = 'Camera permission denied. Allow camera in your browser address bar / settings.';
+      } else if (isNotFound) {
+        msg = 'No camera device found on this system.';
+      }
+      setMsg(msg, false);
       stopCamera();
     }
-    $('cam-start').disabled = false;
   }
 
   function stopCamera() {
     running = false;
     cancelAnimationFrame(raf);
-    if (stream) stream.getTracks().forEach((t) => t.stop());
+    raf = 0;
+    if (stream) {
+      stream.getTracks().forEach((t) => {
+        try { t.stop(); } catch (e) {}
+      });
+    }
     stream = null;
     const v = $('cam-video');
-    if (v) v.srcObject = null;
+    if (v) {
+      try { v.pause(); } catch (e) {}
+      v.srcObject = null;
+    }
     const b = $('cam-start');
-    if (b) b.textContent = 'Start Camera';
+    if (b) {
+      b.textContent = 'Start Camera';
+      b.disabled = false;
+    }
     draw(null, 1, 1);
   }
 
@@ -264,7 +395,10 @@
     resetState();
     setMsg(EXERCISES[mode].tip, null);
     openModal('modal-camera');
+    // Preload model in background
+    loadModel().catch(e => console.log('Preload pose model status:', e.message || e));
   };
+
   window.closeCameraCoach = function () {
     stopCamera();
     closeModal('modal-camera');
@@ -272,12 +406,18 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    $('btn-camera-coach').addEventListener('click', openCameraCoach);
-    $('cam-start').addEventListener('click', () => (running ? stopCamera() : startCamera()));
-    $('cam-flip').addEventListener('click', () => {
+    const coachBtn = $('btn-camera-coach');
+    if (coachBtn) coachBtn.addEventListener('click', openCameraCoach);
+
+    const startBtn = $('cam-start');
+    if (startBtn) startBtn.addEventListener('click', () => (running ? stopCamera() : startCamera()));
+
+    const flipBtn = $('cam-flip');
+    if (flipBtn) flipBtn.addEventListener('click', async () => {
       facing = facing === 'user' ? 'environment' : 'user';
-      if (running) startCamera();
+      if (running) await startCamera();
     });
+
     document.querySelectorAll('#cam-mode-chips .chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         document.querySelectorAll('#cam-mode-chips .chip').forEach((c) => c.classList.remove('active'));
@@ -287,12 +427,15 @@
         setMsg(EXERCISES[mode].tip, null);
       });
     });
+
     const req = $('setting-require-camera');
-    req.checked = AppState.settings.requireCamera !== false;
-    req.addEventListener('change', () => {
-      AppState.settings.requireCamera = req.checked;
-      saveState();
-      if (AppState.activeWorkout) renderActiveWorkout();
-    });
+    if (req) {
+      req.checked = AppState.settings.requireCamera !== false;
+      req.addEventListener('change', () => {
+        AppState.settings.requireCamera = req.checked;
+        saveState();
+        if (AppState.activeWorkout) renderActiveWorkout();
+      });
+    }
   });
 })();

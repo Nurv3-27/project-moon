@@ -1,4 +1,4 @@
-﻿/* ==========================================================
+/* ==========================================================
    IRONPULSE - iOS Fitness PWA Design System
    ========================================================== */
 
@@ -1766,6 +1766,7 @@ input:checked + .slider:before {
 .cam-card{max-width:440px;width:100%}
 .cam-stage{position:relative;background:#000;border-radius:18px;overflow:hidden;aspect-ratio:4/3;margin:10px 0}
 .cam-stage video,.cam-stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam-stage canvas{pointer-events:none}
 .cam-stage .mirror{transform:scaleX(-1)}
 .cam-hud{position:absolute;left:12px;top:10px;display:flex;flex-direction:column;gap:2px;text-shadow:0 2px 8px rgba(0,0,0,.8)}
 .cam-count{font-family:var(--font-mono);font-size:3rem;font-weight:700;line-height:1;color:#fff}

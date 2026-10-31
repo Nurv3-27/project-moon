@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v8';
+const CACHE_NAME = 'moon-v9';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
   './camera.js',
   './ranks.js',
   './manifest.json',
+  './apple-touch-icon.png',
   './app_icon.png',
   './app_icon_192.png'
 ];
@@ -37,7 +38,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || event.request.url.includes('/api/') || new URL(event.request.url).origin !== self.location.origin) return;
   // Navigation or asset requests: cache-first with network fallback
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
         // Fetch in background to update cache (stale-while-revalidate)
         fetch(event.request).then((networkResponse) => {
@@ -66,6 +67,3 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
-
-
-

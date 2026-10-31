@@ -14,8 +14,11 @@
   <meta name="description" content="Next-generation workout logger and fitness tracker with set logging, rest timer, and PR tracking.">
   
   <!-- Icons & Manifest -->
-  <link rel="apple-touch-icon" href="app_icon.png?v=3">
-  <link rel="icon" type="image/png" href="app_icon.png?v=3">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="app_icon_192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="app_icon.png">
+  <link rel="shortcut icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
   
   <!-- Fonts -->
@@ -32,7 +35,7 @@
     <header class="app-header">
       <div class="header-left">
         <div class="brand-pill">
-          <img src="app_icon.png?v=3" alt="Logo" class="brand-icon">
+          <img src="app_icon.png" alt="Logo" class="brand-icon" onerror="this.onerror=null;this.src='app_icon_192.png'">
           <div class="brand-text">
             <span class="brand-name">MOON</span>
             <span class="brand-tag">FITNESS OS</span>

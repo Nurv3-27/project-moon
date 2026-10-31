@@ -230,21 +230,21 @@
       const isRanked = pts[m] > 0 && t.id !== 'unranked';
 
       // Default highlight color (deep crimson red matching the user's screenshot, or tier color)
-      const highlightColor = t.id === 'unranked' ? '#9e1b34' : t.color;
+      const highlightColor = t.id === 'unranked' ? '#841A23' : t.color;
       el.style.setProperty('--tier-color', highlightColor);
 
       const isActiveOrRanked = isRanked || (m === selected);
-      const targets = el.tagName.toLowerCase() === 'g' ? el.querySelectorAll('path, rect, ellipse') : [el];
+      const targets = el.tagName.toLowerCase() === 'g' ? el.querySelectorAll('path, rect, ellipse, line') : [el];
       targets.forEach(tgt => {
-        if (tgt.classList.contains('muscle-line')) {
+        if (tgt.classList.contains('muscle-line') || tgt.tagName.toLowerCase() === 'line') {
           tgt.style.fill = 'none';
           tgt.style.stroke = '#111113';
-          tgt.style.strokeWidth = '1.8';
+          tgt.style.strokeWidth = '2.2';
         } else {
           // If the muscle has sets/reps/points or is active selection, fill with bold red/tier color; else clean off-white
           tgt.style.fill = isActiveOrRanked ? highlightColor : '#ECEEF2';
           tgt.style.stroke = '#111113';
-          tgt.style.strokeWidth = '2.4';
+          tgt.style.strokeWidth = '2.2';
         }
       });
 

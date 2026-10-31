@@ -1909,7 +1909,7 @@ input:checked + .slider:before {
   background: #000000;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
-  padding: 20px 14px 22px;
+  padding: 24px 14px 22px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
@@ -1927,7 +1927,7 @@ input:checked + .slider:before {
 .anatomy-svg {
   width: 100%;
   height: auto;
-  max-height: 520px;
+  max-height: 540px;
   display: block;
 }
 .body-neutral path,
@@ -1936,7 +1936,7 @@ input:checked + .slider:before {
 .body-neutral ellipse {
   fill: #ECEEF2;
   stroke: #111113;
-  stroke-width: 2.4;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -1950,7 +1950,7 @@ input:checked + .slider:before {
 .muscle rect,
 .muscle ellipse {
   stroke: #111113;
-  stroke-width: 2.4;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: fill 0.3s ease;
@@ -1958,7 +1958,7 @@ input:checked + .slider:before {
 .muscle .muscle-line {
   fill: none !important;
   stroke: #111113 !important;
-  stroke-width: 1.8 !important;
+  stroke-width: 2.2 !important;
   stroke-linecap: round;
   stroke-linejoin: round;
 }

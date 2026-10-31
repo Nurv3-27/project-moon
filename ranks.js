@@ -1,11 +1,11 @@
 /**
- * Moon Muscle Ranks - Biometric Body Scanner & Tier System
- * Sculpted anatomical vector map, Bronze -> Titan rank progression,
- * multi-angle inspection (Dual / Front / Back) and real-time exercise telemetry.
+ * Moon Muscle Ranks - Bodybuilder Comic Anatomy Model
+ * Matches the iconic dark fitness app aesthetic (Hevy / Alpha Progression)
+ * with front / back toggle pill, bold ink contours, and tier color highlights.
  */
 (function () {
   const TIERS = [
-    { id: 'unranked', name: 'Unranked', min: 0, color: '#3a3a46', icon: '\u25CB' },
+    { id: 'unranked', name: 'Unranked', min: 0, color: '#cd7f32', icon: '\u25CB' },
     { id: 'bronze', name: 'Bronze', min: 50, color: '#cd7f32', icon: '\uD83E\uDD49' },
     { id: 'silver', name: 'Silver', min: 200, color: '#c9d1da', icon: '\uD83E\uDD48' },
     { id: 'gold', name: 'Gold', min: 500, color: '#ffd02e', icon: '\uD83E\uDD47' },
@@ -13,7 +13,7 @@
     { id: 'diamond', name: 'Diamond', min: 2500, color: '#62b8ff', icon: '\uD83D\uDC8E' },
     { id: 'gymbro', name: 'Gym Bro', min: 5000, color: '#ff5ea8', icon: '\uD83D\uDCAA' },
     { id: 'olympian', name: 'Olympian', min: 10000, color: '#b57bff', icon: '\uD83C\uDFC5' },
-    { id: 'titan', name: 'Titan', min: 20000, color: '#ff4d4d', icon: '\uD83D\uDD25' }
+    { id: 'titan', name: 'Titan', min: 20000, color: '#ff3b30', icon: '\uD83D\uDD25' }
   ];
 
   const MUSCLES = {
@@ -21,8 +21,8 @@
     shoulders: 'Shoulders',
     biceps: 'Biceps',
     triceps: 'Triceps',
-    back: 'Back & Lats',
-    abs: 'Abs & Core',
+    back: 'Back',
+    abs: 'Abs',
     quads: 'Quads',
     hamstrings: 'Hamstrings & Glutes',
     calves: 'Calves'
@@ -126,30 +126,32 @@
   };
 
   let selected = 'chest';
-  let currentView = 'both'; // 'both', 'front', 'back'
+  let currentView = 'front'; // 'front' or 'back'
 
   function overall(pts) {
     const vals = Object.values(pts);
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   }
 
-  function setScannerView(view) {
+  function setAnatomyView(view) {
     currentView = view;
-    const svg = document.getElementById('ranks-body-svg');
-    if (!svg) return;
+    const frontGroup = document.getElementById('body-front-group');
+    const backGroup = document.getElementById('body-back-group');
+    if (!frontGroup || !backGroup) return;
 
-    document.querySelectorAll('.scanner-pill-btn').forEach(b => {
+    document.querySelectorAll('.anatomy-pill-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.view === view);
     });
 
     if (view === 'front') {
-      svg.setAttribute('viewBox', '20 5 220 460');
-    } else if (view === 'back') {
-      svg.setAttribute('viewBox', '280 5 220 460');
+      frontGroup.style.display = 'inline';
+      backGroup.style.display = 'none';
     } else {
-      svg.setAttribute('viewBox', '0 0 520 470');
+      frontGroup.style.display = 'none';
+      backGroup.style.display = 'inline';
     }
   }
+  window.setAnatomyView = setAnatomyView;
 
   window.renderRanks = function () {
     const root = document.getElementById('ranks-body');
@@ -177,7 +179,7 @@
     const topTier = tierFor(pts[topMuscle]).cur;
     const nextTier = tierFor(pts[closestMuscle]);
 
-    // Hologram Overall Card
+    // Overall Physique Banner
     const overallEl = document.getElementById('ranks-overall');
     if (overallEl) {
       overallEl.innerHTML = `
@@ -192,7 +194,7 @@
               <div class="rank-overall-name" style="color:${ov.cur.color}">
                 ${ov.cur.name.toUpperCase()}
               </div>
-              <div class="rank-level-tag">LEVEL ${ov.idx + 1} BODY SCULPT</div>
+              <div class="rank-level-tag">LEVEL ${ov.idx + 1} &bull; ${Math.round(avgPts)} TOTAL AVG XP</div>
             </div>
           </div>
 
@@ -211,7 +213,7 @@
               <span class="intel-sub">${topTier.name} (${Math.round(pts[topMuscle])} pts)</span>
             </div>
             <div class="intel-stat-box" onclick="selectMuscle('${closestMuscle}')">
-              <span class="intel-label">⚡ NEXT RANK UP</span>
+              <span class="intel-label">⚡ NEXT LEVEL UP</span>
               <span class="intel-val" style="color:${nextTier.next ? nextTier.next.color : '#fff'}">${MUSCLES[closestMuscle]}</span>
               <span class="intel-sub">${nextTier.next ? Math.ceil(minGap) + ' pts to ' + nextTier.next.name : 'Max Tier'}</span>
             </div>
@@ -220,18 +222,36 @@
       `;
     }
 
-    // Color and animate muscle SVG paths
+    // Color the comic body muscles (white if unranked, bold tier color if ranked)
     document.querySelectorAll('.muscle').forEach((el) => {
       const m = el.dataset.muscle;
       if (!m || pts[m] === undefined) return;
       const t = tierFor(pts[m]).cur;
-      el.style.setProperty('--tier-color', t.color);
-      el.style.fill = t.color;
-      el.style.fillOpacity = t.id === 'unranked' ? '0.45' : '0.88';
+      const isRanked = pts[m] > 0 && t.id !== 'unranked';
+
+      // Default highlight color (deep crimson red matching the user's screenshot, or tier color)
+      const highlightColor = t.id === 'unranked' ? '#9e1b34' : t.color;
+      el.style.setProperty('--tier-color', highlightColor);
+
+      const isActiveOrRanked = isRanked || (m === selected);
+      const targets = el.tagName.toLowerCase() === 'g' ? el.querySelectorAll('path, rect, ellipse') : [el];
+      targets.forEach(tgt => {
+        if (tgt.classList.contains('muscle-line')) {
+          tgt.style.fill = 'none';
+          tgt.style.stroke = '#111113';
+          tgt.style.strokeWidth = '1.8';
+        } else {
+          // If the muscle has sets/reps/points or is active selection, fill with bold red/tier color; else clean off-white
+          tgt.style.fill = isActiveOrRanked ? highlightColor : '#ECEEF2';
+          tgt.style.stroke = '#111113';
+          tgt.style.strokeWidth = '2.4';
+        }
+      });
+
       el.classList.toggle('selected', m === selected);
     });
 
-    // Detailed Selected Muscle Inspector
+    // Inspector Detail Card for selected muscle
     const t = tierFor(pts[selected]);
     const top = Object.entries(src[selected]).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const detailEl = document.getElementById('ranks-detail');
@@ -241,7 +261,7 @@
           <div class="rank-detail-head">
             <span class="rank-icon big" style="border-color:${t.cur.color};box-shadow:0 0 16px ${t.cur.color}44">${t.cur.icon}</span>
             <div class="rank-detail-title-col">
-              <div class="detail-label-sub">ACTIVE SELECTION</div>
+              <div class="detail-label-sub">ACTIVE MUSCLE GROUP</div>
               <h3>${escapeHtml(MUSCLES[selected])}</h3>
               <div class="detail-tier-row">
                 <span class="tier-pill" style="background:${t.cur.color}22;color:${t.cur.color};border:1px solid ${t.cur.color}">
@@ -302,8 +322,17 @@
     }
   };
 
+  const BACK_ONLY = ['back', 'triceps', 'hamstrings'];
+  const FRONT_ONLY = ['chest', 'abs', 'biceps', 'quads'];
+
   function selectMuscle(m) {
     selected = m;
+    // Auto switch front / back view if muscle is only visible on the other side
+    if (BACK_ONLY.includes(m) && currentView === 'front') {
+      setAnatomyView('back');
+    } else if (FRONT_ONLY.includes(m) && currentView === 'back') {
+      setAnatomyView('front');
+    }
     window.renderRanks();
   }
   window.selectMuscle = selectMuscle;
@@ -317,12 +346,15 @@
       });
     });
 
-    // Scanner view controls (Dual, Front, Back)
-    document.querySelectorAll('.scanner-pill-btn').forEach(btn => {
+    // Pill Toggle (front / back) matching screenshot
+    document.querySelectorAll('.anatomy-pill-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        setScannerView(btn.dataset.view);
+        setAnatomyView(btn.dataset.view);
       });
     });
+
+    // Ensure front view is active on start
+    setAnatomyView('front');
 
     // Render Legend
     const legend = document.getElementById('ranks-legend');

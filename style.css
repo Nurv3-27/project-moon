@@ -1904,156 +1904,111 @@ input:checked + .slider:before {
   margin-top: 2px;
 }
 
-/* Scanner Frame */
-.ranks-scanner-frame {
-  background: #090b10;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 22px;
-  padding: 14px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-  position: relative;
-}
-.scanner-header {
+/* Comic / Hevy Bodybuilder Anatomy Frame (Matching Uploaded Image) */
+.anatomy-card-frame {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 20px 14px 22px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.scanner-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.scanner-blip {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent-lime);
-  box-shadow: 0 0 10px var(--accent-lime);
-  animation: blip-pulse 1.8s infinite ease-in-out;
-}
-@keyframes blip-pulse {
-  0%, 100% { opacity: 0.4; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.25); }
-}
-.scanner-title {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-}
-.scanner-view-toggle {
-  display: flex;
-  background: var(--bg-input);
-  padding: 3px;
-  border-radius: 99px;
-  border: 1px solid var(--border-subtle);
-  gap: 3px;
-}
-.scanner-pill-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 99px;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(.2,.9,.3,1);
-}
-.scanner-pill-btn.active {
-  background: var(--accent-lime);
-  color: #060709;
-  box-shadow: 0 2px 10px var(--accent-lime-glow);
-}
-
-/* Scanner Viewport with Scanline Beam & Reticle Corners */
-.scanner-viewport {
   position: relative;
   overflow: hidden;
-  border-radius: 16px;
-  background: radial-gradient(circle at 50% 50%, #11141c 0%, #06070a 100%);
-  border: 1px solid rgba(255,255,255,0.04);
 }
-.scanner-beam {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent 0%, rgba(var(--accent-rgb), 0.8) 50%, transparent 100%);
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.7);
-  opacity: 0.7;
-  pointer-events: none;
-  z-index: 5;
-  animation: scan-sweep 6s ease-in-out infinite;
+.anatomy-viewport {
+  width: 100%;
+  max-width: 330px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-@keyframes scan-sweep {
-  0% { top: 0%; opacity: 0; }
-  10% { opacity: 0.8; }
-  90% { opacity: 0.8; }
-  100% { top: 100%; opacity: 0; }
-}
-.scanner-corner {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  pointer-events: none;
-  z-index: 6;
-  border-color: rgba(255, 255, 255, 0.35);
-  border-style: solid;
-}
-.scanner-corner.tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
-.scanner-corner.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
-.scanner-corner.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
-.scanner-corner.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
-
-.body-svg {
+.anatomy-svg {
   width: 100%;
   height: auto;
+  max-height: 520px;
   display: block;
-  transition: all 0.4s cubic-bezier(.2,.9,.3,1);
 }
 .body-neutral path,
 .body-neutral circle,
 .body-neutral rect,
 .body-neutral ellipse {
-  fill: #191c24;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 1;
+  fill: #ECEEF2;
+  stroke: #111113;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.body-label {
-  fill: var(--text-dim);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-}
-
-/* Anatomical Muscle Groups */
 .muscle {
   cursor: pointer;
-  stroke: rgba(0, 0, 0, 0.65);
-  stroke-width: 1.5px;
-  transition: fill 0.35s ease, filter 0.3s, transform 0.2s, stroke-width 0.2s;
+  transition: transform 0.15s ease, filter 0.2s ease;
   transform-box: fill-box;
   transform-origin: center;
 }
+.muscle path,
+.muscle rect,
+.muscle ellipse {
+  stroke: #111113;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: fill 0.3s ease;
+}
+.muscle .muscle-line {
+  fill: none !important;
+  stroke: #111113 !important;
+  stroke-width: 1.8 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .muscle:hover {
-  filter: brightness(1.3) drop-shadow(0 0 10px var(--tier-color, #00e5ff)) !important;
-  transform: scale(1.03);
+  filter: brightness(1.15) drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
+  transform: scale(1.02);
 }
 .muscle.selected {
-  stroke: #ffffff !important;
-  stroke-width: 2.5px !important;
-  filter: brightness(1.4) drop-shadow(0 0 16px var(--tier-color, #00e5ff)) !important;
-  animation: muscle-glow-pulse 2s infinite ease-in-out;
+  filter: drop-shadow(0 0 14px var(--tier-color, #E0506A));
 }
-@keyframes muscle-glow-pulse {
-  0%, 100% { filter: brightness(1.3) drop-shadow(0 0 12px var(--tier-color, #00e5ff)); }
-  50% { filter: brightness(1.5) drop-shadow(0 0 24px var(--tier-color, #00e5ff)); }
+.muscle.selected path,
+.muscle.selected rect {
+  stroke: #FFFFFF !important;
+  stroke-width: 3.2px !important;
+}
+
+/* Bottom Pill Toggle (Exact Replica of Uploaded Screenshot) */
+.anatomy-pill-wrapper {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.anatomy-pill-toggle {
+  display: inline-flex;
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 2px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+.anatomy-pill-btn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 7px 28px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
+  text-transform: lowercase;
+}
+.anatomy-pill-btn.active {
+  background: #d4d4d8;
+  color: #09090b;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 /* Active Muscle Inspector Detail Card */

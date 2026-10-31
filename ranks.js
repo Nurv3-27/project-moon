@@ -133,22 +133,22 @@
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   }
 
-  function setAnatomyView(view) {
+    function setAnatomyView(view) {
     currentView = view;
-    const frontGroup = document.getElementById('body-front-group');
-    const backGroup = document.getElementById('body-back-group');
-    if (!frontGroup || !backGroup) return;
+    const frontView = document.getElementById('ranks-front-view');
+    const backView = document.getElementById('ranks-back-view');
+    if (!frontView || !backView) return;
 
     document.querySelectorAll('.anatomy-pill-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.view === view);
     });
 
     if (view === 'front') {
-      frontGroup.style.display = 'inline';
-      backGroup.style.display = 'none';
+      frontView.style.display = 'flex';
+      backView.style.display = 'none';
     } else {
-      frontGroup.style.display = 'none';
-      backGroup.style.display = 'inline';
+      frontView.style.display = 'none';
+      backView.style.display = 'flex';
     }
   }
   window.setAnatomyView = setAnatomyView;
@@ -222,33 +222,17 @@
       `;
     }
 
-    // Color the comic body muscles (white if unranked, bold tier color if ranked)
+        // Highlight active and ranked muscles on the character overlay
     document.querySelectorAll('.muscle').forEach((el) => {
       const m = el.dataset.muscle;
       if (!m || pts[m] === undefined) return;
       const t = tierFor(pts[m]).cur;
       const isRanked = pts[m] > 0 && t.id !== 'unranked';
+      const isSelected = (m === selected);
 
-      // Default highlight color (deep crimson red matching the user's screenshot, or tier color)
-      const highlightColor = t.id === 'unranked' ? '#841A23' : t.color;
-      el.style.setProperty('--tier-color', highlightColor);
-
-      const isActiveOrRanked = isRanked || (m === selected);
-      const targets = el.tagName.toLowerCase() === 'g' ? el.querySelectorAll('path, rect, ellipse, line') : [el];
-      targets.forEach(tgt => {
-        if (tgt.classList.contains('muscle-line') || tgt.tagName.toLowerCase() === 'line') {
-          tgt.style.fill = 'none';
-          tgt.style.stroke = '#111113';
-          tgt.style.strokeWidth = '2.2';
-        } else {
-          // If the muscle has sets/reps/points or is active selection, fill with bold red/tier color; else clean off-white
-          tgt.style.fill = isActiveOrRanked ? highlightColor : '#ECEEF2';
-          tgt.style.stroke = '#111113';
-          tgt.style.strokeWidth = '2.2';
-        }
-      });
-
-      el.classList.toggle('selected', m === selected);
+      el.style.setProperty('--tier-color', t.color);
+      el.classList.toggle('selected', isSelected);
+      el.classList.toggle('ranked', isRanked);
     });
 
     // Inspector Detail Card for selected muscle
@@ -322,6 +306,7 @@
     }
   };
 
+  // Mark the head path and add a hair tuft so the figure matches the reference art
   const BACK_ONLY = ['back', 'triceps', 'hamstrings'];
   const FRONT_ONLY = ['chest', 'abs', 'biceps', 'quads'];
 

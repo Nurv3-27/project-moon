@@ -1906,7 +1906,7 @@ input:checked + .slider:before {
 
 /* Comic / Hevy Bodybuilder Anatomy Frame (Matching Uploaded Image) */
 .anatomy-card-frame {
-  background: #000000;
+  background: radial-gradient(circle at 50% 30%, #15102a 0%, #0c0817 80%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   padding: 24px 14px 22px;
@@ -1919,60 +1919,69 @@ input:checked + .slider:before {
 }
 .anatomy-viewport {
   width: 100%;
-  max-width: 330px;
+  max-width: 320px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.anatomy-svg {
+.ranks-anatomy-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.anatomy-image-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 250px;
+  width: 100%;
+}
+.anatomy-char-img {
   width: 100%;
   height: auto;
-  max-height: 540px;
+  max-height: 480px;
+  object-fit: contain;
   display: block;
+  filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.8));
 }
-.body-neutral path,
-.body-neutral circle,
-.body-neutral rect,
-.body-neutral ellipse {
-  fill: #ECEEF2;
-  stroke: #111113;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.anatomy-click-map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
 }
-.muscle {
+.anatomy-click-map .muscle {
   cursor: pointer;
-  transition: transform 0.15s ease, filter 0.2s ease;
-  transform-box: fill-box;
-  transform-origin: center;
 }
-.muscle path,
-.muscle rect,
-.muscle ellipse {
-  stroke: #111113;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: fill 0.3s ease;
+.anatomy-click-map .muscle polygon,
+.anatomy-click-map .muscle path {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 1.5;
+  transition: all 0.25s ease;
 }
-.muscle .muscle-line {
-  fill: none !important;
-  stroke: #111113 !important;
-  stroke-width: 2.2 !important;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.anatomy-click-map .muscle:hover polygon,
+.anatomy-click-map .muscle:hover path {
+  fill: rgba(255, 255, 255, 0.2);
+  stroke: rgba(255, 255, 255, 0.8);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
 }
-.muscle:hover {
-  filter: brightness(1.15) drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
-  transform: scale(1.02);
+.anatomy-click-map .muscle.selected polygon,
+.anatomy-click-map .muscle.selected path {
+  fill: var(--tier-color, #ffd02e) !important;
+  fill-opacity: 0.38 !important;
+  stroke: #ffffff !important;
+  stroke-width: 2.5 !important;
+  filter: drop-shadow(0 0 14px var(--tier-color, #ffd02e)) !important;
 }
-.muscle.selected {
-  filter: drop-shadow(0 0 14px var(--tier-color, #E0506A));
-}
-.muscle.selected path,
-.muscle.selected rect {
-  stroke: #FFFFFF !important;
-  stroke-width: 3.2px !important;
+.anatomy-click-map .muscle.ranked:not(.selected) polygon,
+.anatomy-click-map .muscle.ranked:not(.selected) path {
+  fill: var(--tier-color, #ffd02e);
+  fill-opacity: 0.16;
+  stroke: var(--tier-color, #ffd02e);
+  stroke-width: 1.2;
 }
 
 /* Bottom Pill Toggle (Exact Replica of Uploaded Screenshot) */

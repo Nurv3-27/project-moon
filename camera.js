@@ -28,6 +28,9 @@
 
   function resetState() {
     S = { reps: 0, phase: 'up', badForm: false, plankSec: 0, plankPaid: 0, lastT: 0, earned: 0, msg: '' };
+    pushupSmoothedElbow = null;
+    badFormFrames = 0;
+    totalDownFrames = 0;
     updateHud();
   }
 
@@ -86,29 +89,102 @@
   }
 
   // ---------- exercise analysers ----------
-  function analysePushup(lm, W, H) {
-    const s = sideInfo(lm, W, H);
-    if (s.vis < 0.5) return setMsg('Step back - show your whole body side-on', false);
-    const b = bodyLine(s);
-    if (!b.horizontal) { S.phase = 'up'; return setMsg('Get into push-up position', null); }
-    const elbow = angle(s.sh, s.el, s.wr);
-    if (elbow < 130 && b.body < 150) S.badForm = true;
+  let pushupSmoothedElbow = null;
+  let lastPushupTime = 0;
+  let badFormFrames = 0;
+  let totalDownFrames = 0;
 
-    if (S.phase === 'up' && elbow < 95) {
-      S.phase = 'down';
-      setMsg('Now push up!', true);
-    } else if (S.phase === 'down' && elbow > 150) {
-      S.phase = 'up';
-      if (S.badForm) {
-        setMsg('Not counted - keep hips in line with shoulders', false);
+  function analysePushup(lm, W, H) {
+    const P = (i) => ({ x: lm[i].x * W, y: lm[i].y * H, v: lm[i].visibility || 0 });
+    
+    // Left & Right Arms
+    const lsh = P(11), lel = P(13), lwr = P(15);
+    const rsh = P(12), rel = P(14), rwr = P(16);
+    const lhip = P(23), rhip = P(24);
+    const lank = P(27), rank = P(28);
+
+    const lvis = (lsh.v + lel.v + lwr.v) / 3;
+    const rvis = (rsh.v + rel.v + rwr.v) / 3;
+
+    if (Math.max(lvis, rvis) < 0.25) {
+      return setMsg('Step back - show your arms & torso in view', false);
+    }
+
+    const elbowL = lvis > 0.25 ? angle(lsh, lel, lwr) : 180;
+    const elbowR = rvis > 0.25 ? angle(rsh, rel, rwr) : 180;
+    
+    // Use the arm that is bending (closer / flexing more towards camera)
+    let rawElbow = 180;
+    if (lvis > 0.25 && rvis > 0.25) {
+      rawElbow = Math.min(elbowL, elbowR);
+    } else if (lvis > 0.25) {
+      rawElbow = elbowL;
+    } else {
+      rawElbow = elbowR;
+    }
+
+    // Smooth elbow angle with Exponential Moving Average to prevent frame jitter
+    if (pushupSmoothedElbow === null) pushupSmoothedElbow = rawElbow;
+    else pushupSmoothedElbow = pushupSmoothedElbow * 0.35 + rawElbow * 0.65;
+    const elbow = pushupSmoothedElbow;
+
+    // Body alignment check
+    const sh = lvis >= rvis ? lsh : rsh;
+    const hip = lvis >= rvis ? lhip : rhip;
+    const ank = (lank.v > 0.2 || rank.v > 0.2) ? (lank.v >= rank.v ? lank : rank) : null;
+    
+    let bodyStraight = true;
+    if (ank && hip.v > 0.25 && sh.v > 0.25) {
+      const bodyAngle = angle(sh, hip, ank);
+      if (bodyAngle < 120) bodyStraight = false;
+    }
+
+    const now = performance.now();
+
+    // High-accuracy push-up thresholds:
+    // DOWN: 112 deg (captures proper depth even with perspective foreshortening)
+    // UP:   138 deg (captures full extension cleanly without requiring locked elbows)
+    const DOWN_ANGLE = 112;
+    const UP_ANGLE = 138;
+
+    if (S.phase === 'up') {
+      if (elbow < DOWN_ANGLE) {
+        S.phase = 'down';
+        badFormFrames = 0;
+        totalDownFrames = 0;
+        setMsg('Good depth! Push up!', true);
+        triggerHaptic([30]);
       } else {
-        S.reps++;
-        setMsg('Rep ' + S.reps + ' verified!', true);
-        award(CREDIT, 'Push-Up');
+        const depthPct = Math.min(100, Math.max(0, Math.round(((160 - elbow) / (160 - DOWN_ANGLE)) * 100)));
+        if (depthPct > 25) {
+          setMsg(`Lowering... ${depthPct}%`, null);
+        } else {
+          setMsg('Lower chest towards floor to count rep', null);
+        }
       }
-      S.badForm = false;
-    } else if (S.phase === 'up') {
-      setMsg(b.body < 150 ? 'Straighten your body' : 'Lower until elbows hit 90\u00B0', b.body < 150 ? false : null);
+    } else if (S.phase === 'down') {
+      totalDownFrames++;
+      if (!bodyStraight) badFormFrames++;
+
+      if (elbow > UP_ANGLE) {
+        if (now - lastPushupTime > 350) {
+          lastPushupTime = now;
+          S.phase = 'up';
+
+          const severeSag = totalDownFrames > 5 && (badFormFrames / totalDownFrames > 0.75);
+          if (severeSag) {
+            setMsg('Keep hips raised in line with body', false);
+          } else {
+            S.reps++;
+            setMsg(`\u2705 Push-up ${S.reps} verified! +2m scroll time`, true);
+            award(CREDIT, 'Push-Up');
+          }
+        } else {
+          S.phase = 'up';
+        }
+      } else {
+        setMsg('Push all the way up!', true);
+      }
     }
   }
 

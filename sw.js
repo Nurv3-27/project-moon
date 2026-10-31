@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v13';
+const CACHE_NAME = 'moon-v14';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,7 +9,9 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './apple-touch-icon.png',
   './app_icon.png',
-  './app_icon_192.png'
+  './app_icon_192.png',
+  './front_ranking_body.png',
+  './back_ranking_body.png'
 ];
 
 self.addEventListener('install', (event) => {

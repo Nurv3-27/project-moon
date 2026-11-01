@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
   <div id="app" class="app-root">
@@ -43,6 +43,10 @@
         </div>
       </div>
       <div class="header-right">
+        <button id="header-antiscroll-btn" class="header-antiscroll-btn active" title="1-Tap Anti-Doomscroll Shield (Allow Chat Inbox & Friend Reels Only)">
+          <span class="antiscroll-dot"></span>
+          <span id="header-antiscroll-label">&#128737;&#65039; Anti-Scroll: ON</span>
+        </button>
         <button id="qr-btn" class="header-action-btn" title="Open on iPhone">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="7" height="7"></rect>
@@ -649,6 +653,19 @@
           </div>
         </div>
 
+        <!-- 1-Tap Anti-Scroll Big Power Button -->
+        <button type="button" id="btn-activate-antiscroll" class="antiscroll-hero-btn active">
+          <div class="antiscroll-hero-left">
+            <span class="antiscroll-hero-icon" id="antiscroll-hero-icon">&#128737;&#65039;</span>
+            <div class="antiscroll-hero-copy">
+              <span class="antiscroll-hero-kicker" id="antiscroll-hero-kicker">1-TAP ANTI-SCROLL SHIELD</span>
+              <strong class="antiscroll-hero-title" id="antiscroll-hero-title">ANTI-SCROLL: ON (DMs &amp; Friend Reels Allowed)</strong>
+              <span class="antiscroll-hero-sub" id="antiscroll-hero-sub">Blocks endless Reels &amp; Home feeds while keeping IG Chat Inbox &amp; friend-sent Reels unlocked. Tap to toggle!</span>
+            </div>
+          </div>
+          <span class="antiscroll-hero-pill" id="antiscroll-hero-pill">ACTIVE</span>
+        </button>
+
         <!-- Doomscroll Bank Card -->
         <div class="scroll-card" id="scroll-card">
           <div class="scroll-card-top">
@@ -660,6 +677,11 @@
             <button id="btn-scroll-toggle" class="primary-glow-btn small-btn">Start Scrolling</button>
           </div>
           <button id="btn-camera-coach" class="secondary-btn full-width" style="margin-top:12px;">&#128247; Earn time with camera</button>
+          <div class="cam-quick-modes-row">
+            <button type="button" class="cam-quick-mode-btn" onclick="openCameraCoach('pushup')">&#128170; Push-Ups</button>
+            <button type="button" class="cam-quick-mode-btn" onclick="openCameraCoach('pullup')">&#129495; Pull-Ups</button>
+            <button type="button" class="cam-quick-mode-btn" onclick="openCameraCoach('plank')">&#9201;&#65039; Plank</button>
+          </div>
           <label class="scroll-toggle-row"><input type="checkbox" id="setting-require-camera" checked> Only camera-verified reps earn scroll time</label>
         </div>
 
@@ -1165,9 +1187,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=24"></script>
-  <script src="camera.js?v=24"></script>
-  <script src="ranks.js?v=24"></script>
+  <script src="app.js?v=25"></script>
+  <script src="camera.js?v=25"></script>
+  <script src="ranks.js?v=25"></script>
 </body>
 </html>
 

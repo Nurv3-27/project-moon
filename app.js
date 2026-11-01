@@ -1166,7 +1166,7 @@ function renderScroll() {
     card.classList.remove('scrolling');
   }
 
-  // Update Non-Scrolling Messenger Shield UI
+  // Update Non-Scrolling Messenger Shield UI & 1-Tap Anti-Scroll Buttons
   const dmToggle = document.getElementById('setting-dm-only-mode');
   const dmBadge  = document.getElementById('noscroll-status-badge');
   const dmCard   = document.getElementById('noscroll-dm-card');
@@ -1181,7 +1181,78 @@ function renderScroll() {
   if (dmCard) {
     dmCard.classList.toggle('dm-disabled', !dmEnabled);
   }
+
+  // Update Header 1-Tap Anti-Scroll Pill
+  const headerBtn = document.getElementById('header-antiscroll-btn');
+  const headerLbl = document.getElementById('header-antiscroll-label');
+  if (headerBtn) {
+    headerBtn.classList.toggle('active', dmEnabled);
+  }
+  if (headerLbl) {
+    headerLbl.innerHTML = dmEnabled
+      ? '&#128737;&#65039; Anti-Scroll: ON'
+      : '&#9889; Activate Anti-Scroll';
+  }
+
+  // Update Focus Tab 1-Tap Hero Anti-Scroll Button
+  const heroBtn   = document.getElementById('btn-activate-antiscroll');
+  const heroIcon  = document.getElementById('antiscroll-hero-icon');
+  const heroTitle = document.getElementById('antiscroll-hero-title');
+  const heroSub   = document.getElementById('antiscroll-hero-sub');
+  const heroPill  = document.getElementById('antiscroll-hero-pill');
+  if (heroBtn) {
+    heroBtn.classList.toggle('active', dmEnabled);
+  }
+  if (heroIcon) {
+    heroIcon.innerHTML = dmEnabled ? '&#128737;&#65039;' : '&#9889;';
+  }
+  if (heroTitle) {
+    heroTitle.innerHTML = dmEnabled
+      ? 'ANTI-SCROLL: ON (DMs &amp; Friend Reels Allowed)'
+      : 'TAP TO ACTIVATE ANTI-SCROLL SHIELD';
+  }
+  if (heroSub) {
+    heroSub.textContent = dmEnabled
+      ? 'Blocks endless Reels & Home feeds while keeping IG Chat Inbox & friend-sent Reels unlocked. Tap to toggle!'
+      : 'Currently in Strict Full Block mode. Tap here to enable Non-Scrolling DM & Friend Reel Shield in 1 click!';
+  }
+  if (heroPill) {
+    heroPill.textContent = dmEnabled ? 'ACTIVE' : 'ACTIVATE';
+  }
 }
+
+function setAntiScrollMode(enabled) {
+  AppState.settings.dmOnlyMode = Boolean(enabled);
+  saveState();
+  renderScroll();
+  syncScrollToServer();
+  triggerHaptic([45]);
+  showToast(AppState.settings.dmOnlyMode
+    ? '\uD83D\uDEE1\uFE0F Anti-Scroll ON: IG Chat Inboxes & Friend Reels allowed (Infinite feeds blocked)'
+    : '\uD83D\uDD12 Strict Full Block ON: Everything locked at 0:00');
+}
+
+function toggleAntiScrollMode(fromHeader = false) {
+  const currentlyEnabled = AppState.settings.dmOnlyMode !== false;
+  const focusView = document.getElementById('view-focus');
+  const onFocusTab = focusView && focusView.classList.contains('active');
+
+  if (fromHeader && !currentlyEnabled) {
+    // 1-tap from anywhere turns Anti-Scroll ON immediately and opens the Focus shield
+    setAntiScrollMode(true);
+    if (!onFocusTab) switchTab('focus');
+    return;
+  }
+  if (fromHeader && currentlyEnabled && !onFocusTab) {
+    // If already ON and tapped from another tab, jump straight to Focus & Anti-Scroll controls
+    switchTab('focus');
+    triggerHaptic([30]);
+    showToast('\uD83D\uDEE1\uFE0F Anti-Scroll Shield is ON \u2014 open IG Chat Inbox or toggle below');
+    return;
+  }
+  setAntiScrollMode(!currentlyEnabled);
+}
+window.toggleAntiScrollMode = toggleAntiScrollMode;
 
 function toggleScrollSession() {
   const s = AppState.scroll;
@@ -1380,14 +1451,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dmModeCheckbox) {
     dmModeCheckbox.checked = AppState.settings.dmOnlyMode !== false;
     dmModeCheckbox.addEventListener('change', (e) => {
-      AppState.settings.dmOnlyMode = Boolean(e.target.checked);
-      saveState();
-      renderScroll();
-      syncScrollToServer();
-      showToast(AppState.settings.dmOnlyMode
-        ? '\uD83D\uDEE1\uFE0F Non-Scrolling Mode ON: Chat Inboxes & Friend Reels allowed'
-        : '\uD83D\uDD12 Strict Full Block ON: Everything locked at 0:00');
+      setAntiScrollMode(Boolean(e.target.checked));
     });
+  }
+
+  const headerAntiScrollBtn = document.getElementById('header-antiscroll-btn');
+  if (headerAntiScrollBtn) {
+    headerAntiScrollBtn.addEventListener('click', () => toggleAntiScrollMode(true));
+  }
+
+  const heroAntiScrollBtn = document.getElementById('btn-activate-antiscroll');
+  if (heroAntiScrollBtn) {
+    heroAntiScrollBtn.addEventListener('click', () => toggleAntiScrollMode(false));
   }
 
   const btnOpenInbox = document.getElementById('btn-open-ig-inbox');

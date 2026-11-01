@@ -133,22 +133,22 @@
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   }
 
-    function setAnatomyView(view) {
+  function setAnatomyView(view) {
     currentView = view;
-    const frontView = document.getElementById('ranks-front-view');
-    const backView = document.getElementById('ranks-back-view');
-    if (!frontView || !backView) return;
+    const frontGroup = document.getElementById('body-front-group');
+    const backGroup = document.getElementById('body-back-group');
+    if (!frontGroup || !backGroup) return;
 
     document.querySelectorAll('.anatomy-pill-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.view === view);
     });
 
     if (view === 'front') {
-      frontView.style.display = 'flex';
-      backView.style.display = 'none';
+      frontGroup.style.display = 'inline';
+      backGroup.style.display = 'none';
     } else {
-      frontView.style.display = 'none';
-      backView.style.display = 'flex';
+      frontGroup.style.display = 'none';
+      backGroup.style.display = 'inline';
     }
   }
   window.setAnatomyView = setAnatomyView;
@@ -222,17 +222,38 @@
       `;
     }
 
-        // Highlight active and ranked muscles on the character overlay
+    // Dynamically color each anatomical muscle group according to its actual Rank Tier
     document.querySelectorAll('.muscle').forEach((el) => {
       const m = el.dataset.muscle;
       if (!m || pts[m] === undefined) return;
       const t = tierFor(pts[m]).cur;
-      const isRanked = pts[m] > 0 && t.id !== 'unranked';
+      const hasPoints = pts[m] > 0;
       const isSelected = (m === selected);
 
-      el.style.setProperty('--tier-color', t.color);
+      const fillColor = hasPoints
+        ? t.color
+        : (isSelected ? '#cfd8e3' : '#ECEEF2');
+      const glowColor = hasPoints ? t.color : '#ffffff';
+
+      el.style.setProperty('--tier-color', glowColor);
+
+      const targets = el.tagName.toLowerCase() === 'g'
+        ? el.querySelectorAll('path, polygon, rect, ellipse, line')
+        : [el];
+      targets.forEach((tgt) => {
+        if (tgt.classList.contains('muscle-line') || tgt.tagName.toLowerCase() === 'line') {
+          tgt.style.fill = 'none';
+          tgt.style.stroke = '#111113';
+          tgt.style.strokeWidth = '2.2';
+        } else {
+          tgt.style.fill = fillColor;
+          tgt.style.stroke = isSelected ? '#FFFFFF' : '#111113';
+          tgt.style.strokeWidth = isSelected ? '3.2' : '2.2';
+        }
+      });
+
       el.classList.toggle('selected', isSelected);
-      el.classList.toggle('ranked', isRanked);
+      el.classList.toggle('ranked', hasPoints);
     });
 
     // Inspector Detail Card for selected muscle
@@ -328,6 +349,14 @@
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         selectMuscle(el.dataset.muscle);
+      });
+    });
+
+    // Handle clicking neutral structural plates mapped to a muscle group (e.g. upper/lower back)
+    document.querySelectorAll('[data-click-muscle]').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectMuscle(el.dataset.clickMuscle);
       });
     });
 

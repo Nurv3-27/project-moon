@@ -1939,7 +1939,7 @@ input:checked + .slider:before {
 .anatomy-char-img {
   width: 100%;
   height: auto;
-  aspect-ratio: 340 / 860;
+  aspect-ratio: 170 / 420;
   max-height: 480px;
   object-fit: contain;
   display: block;

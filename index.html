@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=25">
+  <link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
   <div id="app" class="app-root">
@@ -43,9 +43,9 @@
         </div>
       </div>
       <div class="header-right">
-        <button id="header-antiscroll-btn" class="header-antiscroll-btn active" title="1-Tap Anti-Doomscroll Shield (Allow Chat Inbox & Friend Reels Only)">
+        <button type="button" id="header-antiscroll-btn" class="header-antiscroll-btn" onclick="toggleAntiScrollMode(true)" title="1-Tap Anti-Doomscroll Shield (Allow Chat Inbox & Friend Reels Only)">
           <span class="antiscroll-dot"></span>
-          <span id="header-antiscroll-label">&#128737;&#65039; Anti-Scroll: ON</span>
+          <span id="header-antiscroll-label">&#9889; Activate Anti-Scroll</span>
         </button>
         <button id="qr-btn" class="header-action-btn" title="Open on iPhone">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -58,6 +58,22 @@
         </button>
       </div>
     </header>
+
+    <!-- Live Anti-Scroll Shield Active Bar (Visible across all tabs when Anti-Scroll is ON) -->
+    <div id="antiscroll-live-banner" class="antiscroll-live-banner hidden">
+      <div class="antiscroll-live-left" onclick="switchTab('focus')">
+        <span class="antiscroll-live-dot"></span>
+        <div class="antiscroll-live-text">
+          <strong id="antiscroll-live-title">&#128737;&#65039; ANTI-SCROLL SHIELD ACTIVE</strong>
+          <span id="antiscroll-live-sub">Feeds blocked &bull; DMs &amp; 1 Friend Reel allowed &bull; <b id="antiscroll-live-timer">00:00</b></span>
+        </div>
+      </div>
+      <div class="antiscroll-live-actions">
+        <button type="button" class="antiscroll-mini-btn" onclick="openInstagramInboxNoScroll()" title="Open IG Chat Inbox Only">&#128172; Inbox</button>
+        <button type="button" class="antiscroll-mini-btn" onclick="openAntiScrollLockScreen()" title="Open Full Anti-Scroll Lock Screen">&#128274; Lock</button>
+        <button type="button" class="antiscroll-mini-btn off" onclick="setAntiScrollMode(false)" title="Turn Off Anti-Scroll Shield">Off</button>
+      </div>
+    </div>
 
     <!-- Active Workout Banner (Sticky mini banner if workout in progress and on another tab) -->
     <div id="floating-active-banner" class="floating-active-banner hidden" onclick="switchTab('workout')">
@@ -654,16 +670,16 @@
         </div>
 
         <!-- 1-Tap Anti-Scroll Big Power Button -->
-        <button type="button" id="btn-activate-antiscroll" class="antiscroll-hero-btn active">
+        <button type="button" id="btn-activate-antiscroll" class="antiscroll-hero-btn" onclick="toggleAntiScrollMode(false)">
           <div class="antiscroll-hero-left">
-            <span class="antiscroll-hero-icon" id="antiscroll-hero-icon">&#128737;&#65039;</span>
+            <span class="antiscroll-hero-icon" id="antiscroll-hero-icon">&#9889;</span>
             <div class="antiscroll-hero-copy">
               <span class="antiscroll-hero-kicker" id="antiscroll-hero-kicker">1-TAP ANTI-SCROLL SHIELD</span>
-              <strong class="antiscroll-hero-title" id="antiscroll-hero-title">ANTI-SCROLL: ON (DMs &amp; Friend Reels Allowed)</strong>
-              <span class="antiscroll-hero-sub" id="antiscroll-hero-sub">Blocks endless Reels &amp; Home feeds while keeping IG Chat Inbox &amp; friend-sent Reels unlocked. Tap to toggle!</span>
+              <strong class="antiscroll-hero-title" id="antiscroll-hero-title">TAP TO ACTIVATE ANTI-SCROLL SHIELD</strong>
+              <span class="antiscroll-hero-sub" id="antiscroll-hero-sub">Blocks endless Reels &amp; Home feeds while keeping IG Chat Inbox &amp; friend-sent Reels unlocked.</span>
             </div>
           </div>
-          <span class="antiscroll-hero-pill" id="antiscroll-hero-pill">ACTIVE</span>
+          <span class="antiscroll-hero-pill" id="antiscroll-hero-pill">ACTIVATE</span>
         </button>
 
         <!-- Doomscroll Bank Card -->
@@ -723,36 +739,47 @@
             </div>
           </div>
 
-          <!-- Direct No-Scroll Instagram Messenger Launcher -->
+          <!-- Direct No-Scroll Instagram Messenger Launcher & Lock Screen Trigger -->
           <div class="noscroll-actions-box">
-            <button type="button" id="btn-open-ig-inbox" class="primary-glow-btn full-width">
+            <button type="button" id="btn-open-ig-inbox" class="primary-glow-btn full-width" onclick="openInstagramInboxNoScroll()">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
               </svg>
               <span>Open Instagram Chat Inbox (No-Scroll)</span>
             </button>
+            <button type="button" id="btn-trigger-lock-screen" class="secondary-btn full-width" style="margin-top:8px;" onclick="openAntiScrollLockScreen()">
+              &#128274; Activate Full-Screen Anti-Scroll Lock Shield
+            </button>
           </div>
 
           <!-- Friend-Sent Reel Safe Viewer (Scroll-Locked) -->
-          <div class="friend-reel-box">
+          <div class="friend-reel-box" id="friend-reel-box">
             <div class="friend-reel-header">
               <span class="friend-reel-label">&#127902;&#65039; WATCH A REEL YOUR FRIEND SENT IN MESSENGER (SCROLL-LOCKED)</span>
-              <span class="friend-reel-sub">Paste or open any Instagram Reel link from your friend's chat. Plays that single Reel with vertical scrolling physically disabled so you can't doomscroll!</span>
+              <span class="friend-reel-sub">Paste any Instagram Reel link from your friend's chat (or tap <strong>Test Sample Reel</strong> below). Plays that single Reel with vertical scrolling physically disabled so you can't doomscroll!</span>
             </div>
             <div class="friend-reel-input-row">
               <input type="url" id="friend-reel-url-input" class="ios-input" placeholder="Paste friend's Reel link (https://www.instagram.com/reel/...)">
               <button type="button" id="btn-paste-friend-reel" class="secondary-btn small-btn" title="Paste from clipboard">Paste</button>
               <button type="button" id="btn-watch-friend-reel" class="primary-glow-btn small-btn">Watch</button>
             </div>
+            <div class="friend-reel-quick-row">
+              <button type="button" class="cam-quick-mode-btn" onclick="loadSampleFriendReel()">&#127916; Test Sample Friend Reel (Scroll-Locked)</button>
+            </div>
 
             <!-- Scroll-Locked Single-Reel Stage -->
             <div id="friend-reel-viewer" class="friend-reel-viewer hidden">
               <div class="friend-reel-lock-bar">
-                <span>&#128274; <strong>Scroll-Lock Active:</strong> Single friend Reel only &mdash; swiping to next Reel is disabled</span>
-                <button type="button" id="btn-close-friend-reel" class="friend-reel-close-btn">&times; Close</button>
+                <span>&#128274; <strong>Scroll-Lock Active:</strong> Single Reel only &mdash; next-Reel swipe blocked</span>
+                <div class="friend-reel-lock-actions">
+                  <button type="button" id="btn-toggle-reel-interact" class="friend-reel-interact-btn" onclick="toggleFriendReelInteract()">&#128266; Tap Video</button>
+                  <button type="button" id="btn-close-friend-reel" class="friend-reel-close-btn">&times; Close</button>
+                </div>
               </div>
               <div class="friend-reel-frame-wrap" id="friend-reel-frame-wrap">
                 <iframe id="friend-reel-iframe" class="friend-reel-iframe" src="about:blank" allow="autoplay; encrypted-media" scrolling="no" frameborder="0"></iframe>
+                <!-- Physical Touch & Wheel Scroll Blocker over Cross-Origin Iframe -->
+                <div id="friend-reel-touch-shield" class="friend-reel-touch-shield" title="Vertical scrolling is locked! Tap here to play/pause."></div>
                 <div id="friend-reel-swipe-guard" class="friend-reel-swipe-guard hidden">
                   <span>&#128721; Anti-Doomscroll Shield: Vertical scrolling to random Reels is blocked!</span>
                 </div>
@@ -1178,18 +1205,23 @@
   <!-- DOOMSCROLL LOCK OVERLAY -->
   <div id="scroll-lock-overlay" class="scroll-lock-overlay hidden">
     <div class="scroll-lock-card">
-      <div class="scroll-lock-emoji">&#128274;</div>
-      <h2>Scroll time is up!</h2>
-      <p>Infinite Reels &amp; Shorts scrolling is locked. You can still open your Chat Inbox &amp; watch Reels sent by friends, or work out to earn scroll time.</p>
-      <button class="primary-glow-btn full-width" onclick="closeScrollLock(); switchTab('routines'); startBlankWorkout();">Go earn it &#128170;</button>
-      <button class="secondary-btn full-width" style="margin-top:8px;" onclick="closeScrollLock(); switchTab('focus'); openInstagramInboxNoScroll();">&#128172; Open IG Chat Inbox Only (No-Scroll)</button>
-      <button class="secondary-btn full-width" style="margin-top:8px;" onclick="closeScrollLock()">Dismiss</button>
+      <div class="scroll-lock-emoji">&#128737;&#65039;</div>
+      <h2>Anti-Scroll Shield Active!</h2>
+      <p>Infinite Reels, Shorts &amp; Explore feeds are locked. You can still open your <strong>Instagram Chat Inbox</strong>, watch <strong>single Reels sent by friends</strong>, or do reps on camera to unlock scroll time.</p>
+      <button type="button" class="primary-glow-btn full-width" onclick="closeScrollLock(); openInstagramInboxNoScroll();">&#128172; Open IG Chat Inbox Only (No-Scroll)</button>
+      <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="closeScrollLock(); switchTab('focus'); focusFriendReelBox();">&#127916; Watch Friend-Sent Reel (Scroll-Locked)</button>
+      <div class="cam-quick-modes-row" style="margin-top:10px; width:100%;">
+        <button type="button" class="cam-quick-mode-btn" onclick="closeScrollLock(); openCameraCoach('pushup')">&#128170; Push-Ups</button>
+        <button type="button" class="cam-quick-mode-btn" onclick="closeScrollLock(); openCameraCoach('pullup')">&#129495; Pull-Ups</button>
+        <button type="button" class="cam-quick-mode-btn" onclick="closeScrollLock(); openCameraCoach('plank')">&#9201;&#65039; Plank</button>
+      </div>
+      <button type="button" class="secondary-btn full-width" style="margin-top:10px;" onclick="closeScrollLock()">Return to App</button>
     </div>
   </div>
 
-  <script src="app.js?v=25"></script>
-  <script src="camera.js?v=25"></script>
-  <script src="ranks.js?v=25"></script>
+  <script src="app.js?v=26"></script>
+  <script src="camera.js?v=26"></script>
+  <script src="ranks.js?v=26"></script>
 </body>
 </html>
 

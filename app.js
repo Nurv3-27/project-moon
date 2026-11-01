@@ -1038,10 +1038,22 @@ window.closeModal = function(id) {
 };
 
 // --- QR Code & Local Network Link Modal ---
+let cachedLanInfo = null;
+async function fetchLanInfo() {
+  try {
+    const res = await fetch('/api/lan-info');
+    if (res.ok) {
+      cachedLanInfo = await res.json();
+      const su = document.getElementById('scroll-status-url');
+      if (su && cachedLanInfo.scrollUrl) su.textContent = cachedLanInfo.scrollUrl;
+    }
+  } catch (e) {}
+}
+
 function openQRModal() {
   const box = document.getElementById('qr-code-canvas-box');
   const input = document.getElementById('lan-url-input');
-  const url = window.location.href;
+  const url = (cachedLanInfo && cachedLanInfo.appUrl) ? cachedLanInfo.appUrl : window.location.href;
 
   input.value = url;
   box.innerHTML = '';
@@ -1433,7 +1445,7 @@ function syncScrollToServer() {
 }
 
 // Open Instagram Messenger / Direct Inbox directly without opening Home or Reels feeds
-function openInstagramInboxNoScroll() {
+async function openInstagramInboxNoScroll() {
   ensureScrollState();
   if (!AppState.scroll.antiScrollActive) {
     AppState.scroll.antiScrollActive = true;
@@ -1446,21 +1458,33 @@ function openInstagramInboxNoScroll() {
     showToast('\uD83D\uDD12 Strict Full Block is on \u2014 enable "Chat Inbox & Friend Reels Only" switch first!');
     return;
   }
-  showToast('\uD83D\uDCAC Opening Instagram Chat Inbox (No-Scroll Mode \u2014 Infinite Feeds Blocked)');
+  showToast('\uD83D\uDEE1\uFE0F Launching No-Scroll Instagram Chat Inbox (Feeds & Next-Reel Scroll Locked)');
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   if (isMobile) {
-    // Launch directly into Instagram native Direct Inbox (bypasses Home & Reels feed)
+    // Launch directly into Instagram Direct Inbox
     window.location.href = 'instagram://direct-inbox';
-  } else {
-    // Open a compact Messenger-style window on desktop so feeds are minimized
-    const popup = window.open(
-      'https://www.instagram.com/direct/inbox/',
-      'MoonIGMessengerNoScroll',
-      'width=430,height=760,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes'
-    );
-    if (!popup) {
-      window.open('https://www.instagram.com/direct/inbox/', '_blank', 'noopener');
+    return;
+  }
+
+  // On PC, ask serve.py to launch Chrome/Edge in App Mode with the Moon Anti-Scroll Extension automatically loaded!
+  try {
+    const res = await fetch('/api/launch-noscroll-ig');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.ok) {
+        return;
+      }
     }
+  } catch (e) {}
+
+  // Fallback compact Messenger-style window
+  const popup = window.open(
+    'https://www.instagram.com/direct/inbox/',
+    'MoonIGMessengerNoScroll',
+    'width=430,height=760,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes'
+  );
+  if (!popup) {
+    window.open('https://www.instagram.com/direct/inbox/', '_blank', 'noopener');
   }
 }
 window.openInstagramInboxNoScroll = openInstagramInboxNoScroll;
@@ -1780,6 +1804,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-scroll-toggle').addEventListener('click', toggleScrollSession);
   const su = document.getElementById('scroll-status-url');
   if (su) su.textContent = 'http://' + location.hostname + ':8080/api/scroll';
+  fetchLanInfo();
 
   const dmModeCheckbox = document.getElementById('setting-dm-only-mode');
   if (dmModeCheckbox) {

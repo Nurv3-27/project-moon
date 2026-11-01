@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Moon Anti-Scroll Shield (Instagram DM & Friend Reels Only + YouTube Shorts Blocker)
 // @namespace    https://moon-fitness.local/
-// @version      2.0
+// @version      2.1
 // @description  Blocks YouTube Shorts (/shorts/*) and Instagram infinite feeds (Reels/Home/Explore) while allowing Instagram Chat Inboxes (/direct/inbox/) and watching 1 single Reel sent by a friend!
 // @match        *://*.instagram.com/*
 // @match        *://*.youtube.com/*
@@ -20,7 +20,7 @@
     remainingSeconds: 0
   };
 
-  let lastFriendReelPath = null;
+  let lastFriendReelKey = null;
   let lastTouchY = null;
 
   async function syncWithMoonServer() {
@@ -46,11 +46,12 @@
         overscroll-behavior: none !important;
         touch-action: manipulation !important;
       }
+      html.moon-ig-shield a[href="/"],
       html.moon-ig-shield a[href="/explore/"],
       html.moon-ig-shield a[href="/reels/"],
-      html.moon-ig-shield a[href^="/reels/?"] {
+      html.moon-ig-shield a[href^="/reels/"] {
         pointer-events: none !important;
-        opacity: 0.18 !important;
+        opacity: 0.12 !important;
         filter: grayscale(1) !important;
       }
       html.moon-yt-shield ytd-rich-shelf-renderer[is-shorts],
@@ -67,7 +68,7 @@
         left: 50%;
         transform: translateX(-50%);
         z-index: 2147483646;
-        background: rgba(12, 24, 18, 0.95);
+        background: rgba(12, 24, 18, 0.96);
         border: 1.5px solid #34c759;
         color: #7ef7a6;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -75,7 +76,7 @@
         font-weight: 800;
         padding: 8px 16px;
         border-radius: 999px;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.65);
+        box-shadow: 0 6px 24px rgba(0,0,0,0.75);
         display: flex;
         align-items: center;
         gap: 10px;
@@ -146,7 +147,7 @@
     (document.head || document.documentElement).appendChild(style);
   }
 
-  function showInstagramBanner(text) {
+  function showInstagramBanner(text, locked) {
     if (!document.body) return;
     let b = document.getElementById('moon-shield-banner');
     if (!b) {
@@ -154,7 +155,8 @@
       b.id = 'moon-shield-banner';
       document.body.appendChild(b);
     }
-    b.innerHTML = `<span>\uD83D\uDEE1\uFE0F ${text}</span><a href="${IG_INBOX_PATH}">\uD83D\uDCAC Back to Inbox</a>`;
+    b.style.borderColor = locked ? '#ff453a' : '#34c759';
+    b.innerHTML = `<span>\uD83D\uDEE1\uFE0F ${text}</span><a href="${IG_INBOX_PATH}">\uD83D\uDCAC DM Inbox</a>`;
   }
 
   function removeInstagramBanner() {
@@ -195,22 +197,35 @@
     }
 
     const parts = path.split('/').filter(Boolean);
-    const isSingleReel = (path.startsWith('/reel/') || path.startsWith('/reels/') || path.startsWith('/p/')) && parts.length >= 2;
+    const isReelUrl = (path.startsWith('/reel/') || path.startsWith('/reels/') || path.startsWith('/p/')) && parts.length >= 2;
+    const dialogVideo = document.querySelector('[role="dialog"] video, [role="presentation"] video');
+    const isWatchingReel = isReelUrl || Boolean(dialogVideo);
 
-    if (isSingleReel) {
-      if (!lastFriendReelPath) {
-        lastFriendReelPath = path;
-      } else if (lastFriendReelPath !== path) {
-        lastFriendReelPath = null;
-        window.location.replace(IG_INBOX_PATH);
+    if (isWatchingReel) {
+      const currentKey = isReelUrl ? path : (dialogVideo ? (dialogVideo.currentSrc || dialogVideo.src || 'dm_video_1') : 'reel_1');
+      if (!lastFriendReelKey) {
+        lastFriendReelKey = currentKey;
+      } else if (lastFriendReelKey !== currentKey) {
+        lastFriendReelKey = null;
+        if (dialogVideo) {
+          try { dialogVideo.pause(); } catch (e) {}
+          const closeBtn = document.querySelector('[role="dialog"] svg[aria-label="Close"], [aria-label="Close"]');
+          if (closeBtn && closeBtn.closest('button, [role="button"]')) {
+            closeBtn.closest('button, [role="button"]').click();
+          } else {
+            window.location.replace(IG_INBOX_PATH);
+          }
+        } else {
+          window.location.replace(IG_INBOX_PATH);
+        }
         return;
       }
       document.documentElement.classList.add('moon-noscroll-lock');
-      showInstagramBanner('Watching 1 Friend-Sent Reel \u2022 Next-Reel Scroll Locked');
+      showInstagramBanner('Watching 1 Friend Reel \u2022 Next-Reel Scroll LOCKED', true);
     } else {
-      lastFriendReelPath = null;
+      lastFriendReelKey = null;
       document.documentElement.classList.remove('moon-noscroll-lock');
-      showInstagramBanner('Anti-Scroll Active: Chat Inbox & Friend Reels Only');
+      showInstagramBanner('Anti-Scroll ON: Chat Inbox & 1 Friend Reel Only', false);
     }
   }
 
@@ -264,9 +279,10 @@
 
   window.addEventListener('wheel', (e) => {
     if (!state.allowed && document.documentElement.classList.contains('moon-noscroll-lock')) {
-      if (Math.abs(e.deltaY) > 6) {
+      if (Math.abs(e.deltaY) > 4) {
         e.preventDefault();
         e.stopPropagation();
+        showInstagramBanner('\uD83D\uDED1 Scroll Blocked! Only 1 Friend-Sent Reel Allowed', true);
       }
     }
   }, { passive: false, capture: true });
@@ -280,9 +296,10 @@
   window.addEventListener('touchmove', (e) => {
     if (!state.allowed && document.documentElement.classList.contains('moon-noscroll-lock')) {
       if (lastTouchY !== null && e.touches && e.touches.length === 1) {
-        if (Math.abs(e.touches[0].clientY - lastTouchY) > 12) {
+        if (Math.abs(e.touches[0].clientY - lastTouchY) > 10) {
           e.preventDefault();
           e.stopPropagation();
+          showInstagramBanner('\uD83D\uDED1 Swipe Blocked! Only 1 Friend-Sent Reel Allowed', true);
         }
       }
     }
@@ -299,5 +316,5 @@
 
   syncWithMoonServer().then(enforce);
   setInterval(syncWithMoonServer, 1500);
-  setInterval(enforce, 250);
+  setInterval(enforce, 200);
 })();

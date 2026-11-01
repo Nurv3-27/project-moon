@@ -63,6 +63,7 @@
     plankSmoothedDev = 0;
     badFormFrames = 0;
     totalDownFrames = 0;
+    pushupReadyFrames = 0;
     updateHud();
   }
 
@@ -125,96 +126,148 @@
     updateHud();
   }
 
-  // ==================== 1. IMPROVED PUSH-UP ANALYSER (SIDE, 45° & FRONT VIEW) ====================
+  // ==================== 1. STRICT FULL-BODY PUSH-UP ANALYSER (REQUIRES CHEST, ARMS & LEGS) ====================
   let pushupSmoothedElbow = null;
   let pushupSmoothedDrop = 0;
   let lastPushupTime = 0;
   let badFormFrames = 0;
   let totalDownFrames = 0;
+  let pushupReadyFrames = 0;
+
+  function inFrame(rawPt, minVis) {
+    if (!rawPt) return false;
+    const v = rawPt.visibility || 0;
+    return v >= minVis && rawPt.x >= 0.03 && rawPt.x <= 0.97 && rawPt.y >= 0.03 && rawPt.y <= 0.97;
+  }
 
   function analysePushup(lm, W, H) {
-    const P = (i) => ({ x: lm[i].x * W, y: lm[i].y * H, v: lm[i].visibility || 0 });
+    const P = (i) => ({
+      x: lm[i].x * W,
+      y: lm[i].y * H,
+      nx: lm[i].x,
+      ny: lm[i].y,
+      v: lm[i].visibility || 0,
+      inBounds: inFrame(lm[i], 0.45)
+    });
 
-    const nose = P(0);
     const lsh = P(11), lel = P(13), lwr = P(15);
     const rsh = P(12), rel = P(14), rwr = P(16);
     const lhip = P(23), rhip = P(24);
     const lknee = P(25), rknee = P(26);
     const lank = P(27), rank = P(28);
 
-    const lArmVis = (lsh.v + lel.v + Math.max(lwr.v, lel.v * 0.8)) / 3;
-    const rArmVis = (rsh.v + rel.v + Math.max(rwr.v, rel.v * 0.8)) / 3;
+    // 1. CHECK ARMS (Shoulder + Elbow + Wrist must be inside camera frame & wrists planted below shoulders)
+    const leftArmVisible  = lsh.inBounds && lel.inBounds && inFrame(lm[15], 0.42);
+    const rightArmVisible = rsh.inBounds && rel.inBounds && inFrame(lm[16], 0.42);
+    const useLeftArm = leftArmVisible && (!rightArmVisible || (lsh.v + lel.v + lwr.v) >= (rsh.v + rel.v + rwr.v));
+    const sh = useLeftArm ? lsh : (rightArmVisible ? rsh : (lsh.v >= rsh.v ? lsh : rsh));
+    const el = useLeftArm ? lel : (rightArmVisible ? rel : (lel.v >= rel.v ? lel : rel));
+    const wr = useLeftArm ? lwr : (rightArmVisible ? rwr : (lwr.v >= rwr.v ? lwr : rwr));
 
-    if (Math.max(lArmVis, rArmVis) < 0.2) {
-      S.progressPct = 0;
-      S.hudMetric = 'Show shoulders & arms';
-      return setMsg('Step back slightly so your shoulders & arms are in view', false);
+    // 2. CHECK CHEST / TORSO (Shoulders + Hips must be inside camera frame)
+    const leftTorsoVisible  = lsh.inBounds && inFrame(lm[23], 0.42);
+    const rightTorsoVisible = rsh.inBounds && inFrame(lm[24], 0.42);
+    const hip = (leftTorsoVisible && (!rightTorsoVisible || lhip.v >= rhip.v)) ? lhip : rhip;
+    const torsoLen = Math.hypot(sh.x - hip.x, sh.y - hip.y);
+    const chestOk = (leftTorsoVisible || rightTorsoVisible) && torsoLen >= 35;
+
+    // Hands/wrists must be planted on the floor below the chest/shoulders
+    const wristsPlantedBelowChest = wr.y > sh.y + Math.max(18, torsoLen * 0.14);
+    const armsOk = (leftArmVisible || rightArmVisible) && wristsPlantedBelowChest;
+
+    // 3. CHECK LEGS (Knees and/or Ankles must be inside camera frame)
+    const leftKneeOk  = inFrame(lm[25], 0.42);
+    const rightKneeOk = inFrame(lm[26], 0.42);
+    const leftAnkOk   = inFrame(lm[27], 0.40);
+    const rightAnkOk  = inFrame(lm[28], 0.40);
+    let legPt = null;
+    if (leftAnkOk || rightAnkOk) {
+      legPt = (leftAnkOk && (!rightAnkOk || lank.v >= rank.v)) ? lank : rank;
+    } else if (leftKneeOk || rightKneeOk) {
+      legPt = (leftKneeOk && (!rightKneeOk || lknee.v >= rknee.v)) ? lknee : rknee;
+    }
+    const legLen = legPt ? Math.hypot(legPt.x - hip.x, legPt.y - hip.y) : 0;
+    const legsOk = Boolean(legPt) && legLen >= 30;
+
+    // 4. CHECK HORIZONTAL PUSH-UP PLANK POSTURE (Reject standing upright or sitting in a chair!)
+    let bodyAngle = 0;
+    let slopeDeg = 90;
+    let plankPostureOk = false;
+    if (chestOk && legsOk && legPt) {
+      bodyAngle = angle(sh, hip, legPt);
+      const dx = Math.abs(legPt.x - sh.x);
+      const dy = Math.abs(legPt.y - sh.y);
+      slopeDeg = Math.atan2(dy, Math.max(1, dx)) * 180 / Math.PI;
+      // Straight body line (>= 132°) and horizontal/floor plank orientation (slope <= 48°)
+      plankPostureOk = bodyAngle >= 132 && slopeDeg <= 48;
     }
 
-    // Signal A: Elbow flexion angle (works great for side, 45° and wide front views)
-    const elbowL = (lsh.v > 0.2 && lel.v > 0.2 && lwr.v > 0.18) ? angle(lsh, lel, lwr) : 180;
-    const elbowR = (rsh.v > 0.2 && rel.v > 0.2 && rwr.v > 0.18) ? angle(rsh, rel, rwr) : 180;
-    let rawElbow = 180;
-    if (elbowL < 179 && elbowR < 179) {
-      rawElbow = (elbowL + elbowR) * 0.5;
-      // If side-on, one arm is much clearer; bias toward the clearer/more-flexed arm
-      if (Math.abs(lArmVis - rArmVis) > 0.2) {
-        rawElbow = lArmVis > rArmVis ? elbowL : elbowR;
-      } else {
-        rawElbow = Math.min(elbowL, elbowR) * 0.65 + Math.max(elbowL, elbowR) * 0.35;
+    const checklistStr = `Chest:${chestOk ? '\u2713' : '\u2717'} Arms:${armsOk ? '\u2713' : '\u2717'} Legs:${legsOk ? '\u2713' : '\u2717'}`;
+
+    if (!chestOk || !armsOk || !legsOk || !plankPostureOk) {
+      pushupReadyFrames = 0;
+      S.phase = 'up';
+      S.topShY = null;
+      S.progressPct = 0;
+      S.hudMetric = checklistStr;
+
+      const missing = [];
+      if (!chestOk) missing.push('Chest/Torso');
+      if (!armsOk) missing.push('Arms on floor');
+      if (!legsOk) missing.push('Legs');
+      if (missing.length > 0) {
+        return setMsg(`Step back so camera sees: ${missing.join(', ')} (${checklistStr})`, false);
       }
-    } else if (elbowL < 179) {
+      return setMsg(`Get into horizontal push-up plank position on the floor (${checklistStr})`, false);
+    }
+
+    pushupReadyFrames++;
+    if (pushupReadyFrames < 8) {
+      S.progressPct = Math.round((pushupReadyFrames / 8) * 25);
+      S.hudMetric = `${checklistStr} • Locking pose...`;
+      return setMsg(`Full body detected (${checklistStr}) — hold plank to start counting!`, null);
+    }
+
+    // Compute elbow angle from visible arm(s)
+    const elbowL = leftArmVisible ? angle(lsh, lel, lwr) : 180;
+    const elbowR = rightArmVisible ? angle(rsh, rel, rwr) : 180;
+    let rawElbow = 180;
+    if (leftArmVisible && rightArmVisible) {
+      rawElbow = Math.min(elbowL, elbowR) * 0.65 + Math.max(elbowL, elbowR) * 0.35;
+    } else if (leftArmVisible) {
       rawElbow = elbowL;
-    } else if (elbowR < 179) {
+    } else {
       rawElbow = elbowR;
     }
 
     if (pushupSmoothedElbow === null) pushupSmoothedElbow = rawElbow;
-    else pushupSmoothedElbow = pushupSmoothedElbow * 0.3 + rawElbow * 0.7;
+    else pushupSmoothedElbow = pushupSmoothedElbow * 0.35 + rawElbow * 0.65;
     const elbow = pushupSmoothedElbow;
 
-    // Signal B: Shoulder-to-Wrist / Elbow vertical compression (crucial when facing camera head-on!)
-    const shY = (lsh.v > 0.2 && rsh.v > 0.2) ? (lsh.y + rsh.y) * 0.5 : (lArmVis >= rArmVis ? lsh.y : rsh.y);
-    const elY = (lel.v > 0.2 && rel.v > 0.2) ? (lel.y + rel.y) * 0.5 : (lArmVis >= rArmVis ? lel.y : rel.y);
-    const wrY = (lwr.v > 0.2 && rwr.v > 0.2) ? (lwr.y + rwr.y) * 0.5 : (lArmVis >= rArmVis ? lwr.y : rwr.y);
-    const refSpan = Math.max(45, Math.hypot(lsh.x - rsh.x, lsh.y - rsh.y), Math.abs(wrY - shY));
+    const shY = sh.y;
+    const wrY = wr.y;
+    const armSpan = Math.max(45, Math.abs(wrY - (S.topShY !== null ? S.topShY : shY)), torsoLen * 0.7);
 
-    // Track highest plank shoulder position (smallest Y) while in UP state
-    if (S.topShY === null || shY < S.topShY) {
+    // Calibrate top plank shoulder height while arms are extended
+    if (S.topShY === null || (S.phase === 'up' && shY < S.topShY)) {
       S.topShY = shY;
-    } else if (S.phase === 'up' && elbow > 145) {
-      S.topShY = S.topShY * 0.92 + shY * 0.08;
+    } else if (S.phase === 'up' && elbow >= 150) {
+      S.topShY = S.topShY * 0.9 + shY * 0.1;
     }
-    const rawDropRatio = Math.max(0, (shY - S.topShY) / refSpan);
+
+    const rawDropRatio = Math.max(0, (shY - S.topShY) / armSpan);
     pushupSmoothedDrop = pushupSmoothedDrop * 0.35 + rawDropRatio * 0.65;
 
-    // Also check if shoulders dropped close to elbow level (classic push-up bottom position from any angle)
-    const shNearElbows = (elY - shY) < refSpan * 0.22 && pushupSmoothedDrop > 0.18;
+    const DOWN_ANGLE = 98;  // Real push-up bottom bend
+    const UP_ANGLE   = 148; // Full lockout at top
 
-    // Body line check (only when hips and knees/ankles are clearly visible)
-    const sh = lArmVis >= rArmVis ? lsh : rsh;
-    const hip = (lhip.v >= rhip.v) ? lhip : rhip;
-    const lowerPt = (lank.v > 0.25 || rank.v > 0.25)
-      ? (lank.v >= rank.v ? lank : rank)
-      : ((lknee.v > 0.25 || rknee.v > 0.25) ? (lknee.v >= rknee.v ? lknee : rknee) : null);
+    const elbowDepthPct = Math.min(100, Math.max(0, Math.round(((160 - elbow) / (160 - DOWN_ANGLE)) * 100)));
+    S.progressPct = elbowDepthPct;
+    S.hudMetric = `${checklistStr} • Elbow ${Math.round(elbow)}°`;
 
-    let bodyStraight = true;
-    if (lowerPt && hip.v > 0.3 && sh.v > 0.3) {
-      const bodyAngle = angle(sh, hip, lowerPt);
-      if (bodyAngle < 118) bodyStraight = false;
-    }
-
-    const DOWN_ANGLE = 118; // Forgiving for front/45° foreshortening while requiring real bend
-    const UP_ANGLE = 136;
-
-    const elbowDepthPct = Math.min(100, Math.max(0, Math.round(((162 - elbow) / (162 - DOWN_ANGLE)) * 100)));
-    const dropDepthPct  = Math.min(100, Math.max(0, Math.round((pushupSmoothedDrop / 0.32) * 100)));
-    const depthPct = Math.max(elbowDepthPct, shNearElbows ? 100 : dropDepthPct);
-    S.progressPct = depthPct;
-    S.hudMetric = `Elbow ${Math.round(elbow)}° • Depth ${depthPct}%`;
-
-    const isAtBottom = (elbow <= DOWN_ANGLE) || shNearElbows || (elbow <= 128 && pushupSmoothedDrop >= 0.30);
-    const isAtTop    = (elbow >= UP_ANGLE) && (pushupSmoothedDrop <= 0.20 || (elY - shY) > refSpan * 0.24);
+    // Require BOTH real elbow flexion (<= 98°) AND physical chest drop toward floor (>= 0.18)
+    const isAtBottom = (elbow <= DOWN_ANGLE) && (pushupSmoothedDrop >= 0.18 || (wr.y - sh.y) < armSpan * 0.62);
+    const isAtTop    = (elbow >= UP_ANGLE) && (pushupSmoothedDrop <= 0.14);
 
     const now = performance.now();
 
@@ -223,37 +276,37 @@
         S.phase = 'down';
         S.bottomReachedAt = now;
         badFormFrames = 0;
-        totalDownFrames = 0;
-        setMsg('\uD83D\uDD25 Bottom reached! Drive back up!', true);
+        totalDownFrames = 1;
+        setMsg('\uD83D\uDD25 Good depth! Now push all the way back up!', true);
         triggerHaptic([30]);
-      } else if (depthPct > 20) {
-        setMsg(`Lowering... ${depthPct}% depth (Elbow ${Math.round(elbow)}°)`, null);
+      } else if (elbow < 135) {
+        setMsg(`Go lower — bend elbows to 90° (Current: ${Math.round(elbow)}°)`, null);
       } else {
-        setMsg('Ready — lower your chest toward the floor', null);
+        setMsg(`Ready (${checklistStr}) — lower your chest to the floor`, true);
       }
     } else if (S.phase === 'down') {
       totalDownFrames++;
-      if (!bodyStraight) badFormFrames++;
+      if (bodyAngle < 138) badFormFrames++;
 
       if (isAtTop) {
-        if (now - lastPushupTime > 350) {
+        if (totalDownFrames >= 3 && (now - lastPushupTime > 950)) {
           lastPushupTime = now;
           S.phase = 'up';
-          S.topShY = shY; // recalibrate top position
+          S.topShY = shY;
 
-          const severeSag = totalDownFrames > 6 && (badFormFrames / totalDownFrames > 0.8);
+          const severeSag = totalDownFrames > 6 && (badFormFrames / totalDownFrames > 0.75);
           if (severeSag) {
-            setMsg('\u26A0\uFE0F Keep your core tight & hips in line with shoulders', false);
+            setMsg('\u26A0\uFE0F Keep your hips & legs straight in line with your chest!', false);
           } else {
             S.reps++;
-            setMsg(`\u2705 Push-Up #${S.reps} verified! +2:00 scroll time`, true);
+            setMsg(`\u2705 Push-Up #${S.reps} verified (Chest+Arms+Legs)! +2:00 scroll time`, true);
             award(CREDIT, 'Push-Up', 1);
           }
         } else {
           S.phase = 'up';
         }
       } else {
-        setMsg('Push all the way up to lock out rep!', true);
+        setMsg('Drive up until your arms lock out!', true);
       }
     }
   }

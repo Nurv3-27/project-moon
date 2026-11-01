@@ -68,68 +68,93 @@ const DEFAULT_ROUTINES = [
 // Initial state helpers
 const STORAGE_KEY = 'ironpulse_app_state_v1';
 
+const DEMO_HISTORY = [
+  {
+    id: 'hist_demo_1',
+    title: 'Push Power (Chest & Shoulders)',
+    date: new Date(Date.now() - 86400000 * 2).toISOString(),
+    durationSeconds: 3120,
+    volume: 6840,
+    unit: 'kg',
+    setsCount: 16,
+    exercises: [
+      { name: 'Barbell Bench Press', sets: 4, bestWeight: 85, bestReps: 8 },
+      { name: 'Incline Dumbbell Press', sets: 4, bestWeight: 28, bestReps: 10 },
+      { name: 'Dumbbell Lateral Raise', sets: 4, bestWeight: 14, bestReps: 12 },
+      { name: 'Tricep Rope Pushdown', sets: 4, bestWeight: 32, bestReps: 12 }
+    ]
+  },
+  {
+    id: 'hist_demo_2',
+    title: 'Leg Day & Core Hypertrophy',
+    date: new Date(Date.now() - 86400000 * 4).toISOString(),
+    durationSeconds: 3480,
+    volume: 8450,
+    unit: 'kg',
+    setsCount: 18,
+    exercises: [
+      { name: 'Barbell Back Squat', sets: 5, bestWeight: 120, bestReps: 6 },
+      { name: 'Romanian Deadlift', sets: 4, bestWeight: 100, bestReps: 8 },
+      { name: 'Leg Press', sets: 5, bestWeight: 220, bestReps: 10 }
+    ]
+  }
+];
+
+function rebuildPRsFromHistory(historyList) {
+  const prs = {};
+  (historyList || []).forEach((h) => {
+    (h.exercises || []).forEach((ex) => {
+      const w = Number(ex.bestWeight) || 0;
+      const r = Number(ex.bestReps) || 0;
+      if (w > 0) {
+        if (!prs[ex.name] || w > prs[ex.name].weight || (w === prs[ex.name].weight && r > prs[ex.name].reps)) {
+          prs[ex.name] = { weight: w, reps: r, date: h.date };
+        }
+      }
+    });
+  });
+  return prs;
+}
+
+function syncDemoState(state) {
+  state.settings = state.settings || {};
+  const demoOn = state.settings.demoMode === true;
+  const realHistory = (state.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
+  state.history = demoOn ? [...realHistory, ...DEMO_HISTORY] : realHistory;
+  state.prs = rebuildPRsFromHistory(state.history);
+  return state;
+}
+
 function getInitialState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      return syncDemoState(parsed);
     } catch (e) {
       console.error('Failed to parse saved state', e);
     }
   }
 
-  // Sample initial state with some baseline records
+  // Clean initial state with demo mode disabled by default
   return {
     settings: {
       unit: 'kg',
       defaultRest: 90,
       sound: true,
-      haptics: true
+      haptics: true,
+      demoMode: false
     },
     exercises: [...DEFAULT_EXERCISES],
     routines: [...DEFAULT_ROUTINES],
-    history: [
-      {
-        id: 'hist_demo_1',
-        title: 'Push Power (Chest & Shoulders)',
-        date: new Date(Date.now() - 86400000 * 2).toISOString(),
-        durationSeconds: 3120,
-        volume: 6840,
-        unit: 'kg',
-        setsCount: 16,
-        exercises: [
-          { name: 'Barbell Bench Press', sets: 4, bestWeight: 85, bestReps: 8 },
-          { name: 'Incline Dumbbell Press', sets: 4, bestWeight: 28, bestReps: 10 },
-          { name: 'Dumbbell Lateral Raise', sets: 4, bestWeight: 14, bestReps: 12 },
-          { name: 'Tricep Rope Pushdown', sets: 4, bestWeight: 32, bestReps: 12 }
-        ]
-      },
-      {
-        id: 'hist_demo_2',
-        title: 'Leg Day & Core Hypertrophy',
-        date: new Date(Date.now() - 86400000 * 4).toISOString(),
-        durationSeconds: 3480,
-        volume: 8450,
-        unit: 'kg',
-        setsCount: 18,
-        exercises: [
-          { name: 'Barbell Back Squat', sets: 5, bestWeight: 120, bestReps: 6 },
-          { name: 'Romanian Deadlift', sets: 4, bestWeight: 100, bestReps: 8 },
-          { name: 'Leg Press', sets: 5, bestWeight: 220, bestReps: 10 }
-        ]
-      }
-    ],
-    prs: {
-      'Barbell Bench Press': { weight: 85, reps: 8, date: new Date(Date.now() - 86400000 * 2).toISOString() },
-      'Barbell Back Squat': { weight: 120, reps: 6, date: new Date(Date.now() - 86400000 * 4).toISOString() },
-      'Romanian Deadlift': { weight: 100, reps: 8, date: new Date(Date.now() - 86400000 * 4).toISOString() },
-      'Leg Press': { weight: 220, reps: 10, date: new Date(Date.now() - 86400000 * 4).toISOString() }
-    },
+    history: [],
+    prs: {},
     activeWorkout: null
   };
 }
 
 let AppState = getInitialState();
+saveState();
 
 // Doomscroll bank: balance (seconds earned), session (ms epoch when the current scroll session ends)
 function ensureScrollState() {
@@ -1428,6 +1453,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.checked) triggerHaptic([50]);
   });
 
+  const demoToggle = document.getElementById('setting-demo-mode');
+  if (demoToggle) {
+    demoToggle.checked = AppState.settings.demoMode === true;
+    demoToggle.addEventListener('change', (e) => {
+      AppState.settings.demoMode = e.target.checked;
+      syncDemoState(AppState);
+      saveState();
+      updateOverviewStats();
+      renderHistory();
+      renderPRs();
+      if (typeof renderRanks === 'function') renderRanks();
+      showToast(e.target.checked ? 'Demo mode enabled (sample data loaded)' : 'Demo mode disabled');
+    });
+  }
+
   // Settings: Backup & Restore
   document.getElementById('btn-export-data').addEventListener('click', () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState, null, 2));
@@ -1462,7 +1502,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-reset-demo').addEventListener('click', () => {
-    if (confirm('Reset to default demo routines and exercises?')) {
+    if (confirm('Reset all workout history, PRs, and ranks to a clean state?')) {
       localStorage.removeItem(STORAGE_KEY);
       AppState = getInitialState();
       saveState();

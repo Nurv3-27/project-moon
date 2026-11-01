@@ -19,44 +19,78 @@
   const MUSCLES = {
     chest: 'Chest',
     shoulders: 'Shoulders',
+    traps: 'Traps',
+    neck: 'Neck',
+    back: 'Lats & Upper Back',
+    lower_back: 'Lower Back',
     biceps: 'Biceps',
     triceps: 'Triceps',
-    back: 'Back',
+    forearms: 'Forearms',
     abs: 'Abs',
+    obliques: 'Obliques & Serratus',
+    glutes: 'Glutes',
     quads: 'Quads',
-    hamstrings: 'Hamstrings & Glutes',
+    hamstrings: 'Hamstrings',
+    adductors: 'Adductors & Hips',
     calves: 'Calves'
   };
 
   const EX = {
     'barbell bench press': { m: { chest: 1, triceps: 0.4, shoulders: 0.3 } },
-    'incline dumbbell press': { m: { chest: 1, shoulders: 0.5, triceps: 0.3 } },
-    'cable chest fly': { m: { chest: 1 } },
-    'chest dips': { m: { chest: 1, triceps: 0.6 }, bw: 3 },
-    'push-ups': { m: { chest: 1, triceps: 0.4, shoulders: 0.3 }, bw: 2 },
-    'barbell deadlift': { m: { back: 1, hamstrings: 1, quads: 0.3 } },
-    'lat pulldown': { m: { back: 1, biceps: 0.4 } },
-    'barbell bent-over row': { m: { back: 1, biceps: 0.4 } },
-    'pull-ups': { m: { back: 1, biceps: 0.6 }, bw: 4 },
-    'seated cable row': { m: { back: 1, biceps: 0.3 } },
-    'barbell back squat': { m: { quads: 1, hamstrings: 0.5 } },
-    'romanian deadlift': { m: { hamstrings: 1, back: 0.4 } },
-    'leg press': { m: { quads: 1, hamstrings: 0.3 } },
-    'walking lunges': { m: { quads: 1, hamstrings: 0.5, calves: 0.2 } },
+    'incline dumbbell press': { m: { chest: 1, shoulders: 0.5, triceps: 0.3, traps: 0.15 } },
+    'cable chest fly': { m: { chest: 1, shoulders: 0.2, obliques: 0.15 } },
+    'chest dips': { m: { chest: 1, triceps: 0.6, shoulders: 0.3, obliques: 0.2 }, bw: 3 },
+    'push-ups': { m: { chest: 1, triceps: 0.4, shoulders: 0.3, abs: 0.2, obliques: 0.2 }, bw: 2 },
+    'pushup': { m: { chest: 1, triceps: 0.4, shoulders: 0.3, abs: 0.2, obliques: 0.2 }, bw: 2 },
+    'barbell deadlift': { m: { back: 1, lower_back: 1, hamstrings: 0.9, glutes: 0.9, traps: 0.7, forearms: 0.6, quads: 0.3, adductors: 0.3, neck: 0.2 } },
+    'lat pulldown': { m: { back: 1, biceps: 0.4, forearms: 0.3 } },
+    'barbell bent-over row': { m: { back: 1, traps: 0.5, lower_back: 0.5, biceps: 0.4, forearms: 0.4, shoulders: 0.3 } },
+    'pull-ups': { m: { back: 1, biceps: 0.6, forearms: 0.5, abs: 0.2, obliques: 0.2 }, bw: 4 },
+    'seated cable row': { m: { back: 1, traps: 0.5, biceps: 0.3, forearms: 0.3, lower_back: 0.3 } },
+    'barbell back squat': { m: { quads: 1, glutes: 0.85, adductors: 0.6, hamstrings: 0.5, lower_back: 0.4, abs: 0.2, calves: 0.15 } },
+    'squats': { m: { quads: 1, glutes: 0.75, adductors: 0.5, hamstrings: 0.4, calves: 0.2 }, bw: 2 },
+    'romanian deadlift': { m: { hamstrings: 1, glutes: 0.85, lower_back: 0.7, forearms: 0.4, traps: 0.3, back: 0.4, adductors: 0.3 } },
+    'leg press': { m: { quads: 1, glutes: 0.6, adductors: 0.5, hamstrings: 0.3, calves: 0.2 } },
+    'walking lunges': { m: { quads: 1, glutes: 0.8, adductors: 0.6, hamstrings: 0.5, calves: 0.3 } },
     'standing calf raise': { m: { calves: 1 } },
-    'overhead shoulder press': { m: { shoulders: 1, triceps: 0.4 } },
-    'dumbbell lateral raise': { m: { shoulders: 1 } },
-    'face pull': { m: { shoulders: 1, back: 0.4 } },
-    'rear delt fly': { m: { shoulders: 1, back: 0.3 } },
-    'barbell bicep curl': { m: { biceps: 1 } },
-    'tricep rope pushdown': { m: { triceps: 1 } },
-    'incline dumbbell curl': { m: { biceps: 1 } },
-    'skull crushers': { m: { triceps: 1 } },
-    'hanging leg raise': { m: { abs: 1 }, bw: 2 },
-    'plank': { m: { abs: 1 }, bw: 3, repDiv: 5 }
+    'overhead shoulder press': { m: { shoulders: 1, traps: 0.5, triceps: 0.4, neck: 0.3, abs: 0.2 } },
+    'dumbbell lateral raise': { m: { shoulders: 1, traps: 0.4, neck: 0.2, forearms: 0.15 } },
+    'face pull': { m: { shoulders: 1, traps: 0.6, back: 0.4, neck: 0.3, forearms: 0.2 } },
+    'rear delt fly': { m: { shoulders: 1, traps: 0.5, back: 0.3 } },
+    'barbell bicep curl': { m: { biceps: 1, forearms: 0.4 } },
+    'curl': { m: { biceps: 1, forearms: 0.4 }, bw: 1.5 },
+    'tricep rope pushdown': { m: { triceps: 1, forearms: 0.2 } },
+    'incline dumbbell curl': { m: { biceps: 1, forearms: 0.35 } },
+    'skull crushers': { m: { triceps: 1, forearms: 0.2 } },
+    'hanging leg raise': { m: { abs: 1, obliques: 0.6, forearms: 0.4, adductors: 0.2 }, bw: 2 },
+    'plank': { m: { abs: 1, obliques: 0.7, lower_back: 0.4, shoulders: 0.2 }, bw: 3, repDiv: 5 },
+    'barbell shrugs': { m: { traps: 1, neck: 0.5, forearms: 0.4, shoulders: 0.2 } },
+    'neck curl & extension': { m: { neck: 1, traps: 0.3 } },
+    'hammer curls & wrist curl': { m: { forearms: 1, biceps: 0.6 } },
+    "farmer's walk": { m: { forearms: 1, traps: 0.8, lower_back: 0.5, calves: 0.3, abs: 0.3 } },
+    'hyperextension (back extension)': { m: { lower_back: 1, glutes: 0.6, hamstrings: 0.5 } },
+    'barbell hip thrust': { m: { glutes: 1, hamstrings: 0.5, adductors: 0.4, lower_back: 0.3 } },
+    'hip adduction & abduction': { m: { adductors: 1, glutes: 0.4 } },
+    'russian twists & woodchoppers': { m: { obliques: 1, abs: 0.5 }, bw: 2 }
   };
 
   const CAT_FALLBACK = { chest: 'chest', back: 'back', legs: 'quads', shoulders: 'shoulders', arms: 'biceps', core: 'abs' };
+
+  function inferCustomMuscles(key, fallbackCat) {
+    if (key.includes('shrug') || key.includes('trap')) return { traps: 1, neck: 0.4, forearms: 0.3 };
+    if (key.includes('neck')) return { neck: 1, traps: 0.3 };
+    if (key.includes('forearm') || key.includes('wrist') || key.includes('grip') || key.includes('reverse curl')) return { forearms: 1, biceps: 0.3 };
+    if (key.includes('hammer')) return { forearms: 0.8, biceps: 1 };
+    if (key.includes('glute') || key.includes('thrust') || key.includes('bridge') || key.includes('kickback')) return { glutes: 1, hamstrings: 0.4, adductors: 0.3 };
+    if (key.includes('adduct') || key.includes('abduct') || key.includes('groin')) return { adductors: 1, glutes: 0.3 };
+    if (key.includes('oblique') || key.includes('twist') || key.includes('woodchop') || key.includes('side plank')) return { obliques: 1, abs: 0.4 };
+    if (key.includes('lower back') || key.includes('hyperextension') || key.includes('back extension') || key.includes('good morning')) return { lower_back: 1, glutes: 0.5, hamstrings: 0.5 };
+    if (key.includes('calf') || key.includes('calves') || key.includes('tibialis')) return { calves: 1 };
+    if (key.includes('hamstring') || key.includes('leg curl')) return { hamstrings: 1, glutes: 0.3 };
+    if (key.includes('tricep') || key.includes('pushdown') || key.includes('kickback')) return { triceps: 1 };
+    if (key.includes('bicep') || key.includes('curl')) return { biceps: 1, forearms: 0.3 };
+    return { [fallbackCat || 'chest']: 1 };
+  }
 
   function entryPoints(name, sets, reps, weight, unit) {
     const key = (name || '').toLowerCase();
@@ -64,7 +98,7 @@
     if (!cfg) {
       const ex = (AppState.exercises || []).find((e) => (e.name || '').toLowerCase() === key);
       const m = ex && CAT_FALLBACK[(ex.category || '').toLowerCase()];
-      cfg = { m: { [m || 'chest']: 1 } };
+      cfg = { m: inferCustomMuscles(key, m) };
     }
     const r = (Number(reps) || 0) / (cfg.repDiv || 1);
     const kg = (Number(weight) || 0) * (unit === 'lbs' ? 0.4536 : 1);
@@ -327,9 +361,8 @@
     }
   };
 
-  // Mark the head path and add a hair tuft so the figure matches the reference art
-  const BACK_ONLY = ['back', 'triceps', 'hamstrings'];
-  const FRONT_ONLY = ['chest', 'abs', 'biceps', 'quads'];
+  const BACK_ONLY = ['back', 'lower_back', 'triceps', 'glutes', 'hamstrings'];
+  const FRONT_ONLY = ['chest', 'biceps', 'abs', 'quads'];
 
   function selectMuscle(m) {
     selected = m;

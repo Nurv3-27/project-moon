@@ -23,19 +23,28 @@ const DEFAULT_EXERCISES = [
   { id: 'ex_13', name: 'Leg Press', category: 'Legs' },
   { id: 'ex_14', name: 'Walking Lunges', category: 'Legs' },
   { id: 'ex_15', name: 'Standing Calf Raise', category: 'Legs' },
-  // Shoulders
+  //Shoulders & Traps / Neck
   { id: 'ex_16', name: 'Overhead Shoulder Press', category: 'Shoulders' },
   { id: 'ex_17', name: 'Dumbbell Lateral Raise', category: 'Shoulders' },
   { id: 'ex_18', name: 'Face Pull', category: 'Shoulders' },
   { id: 'ex_19', name: 'Rear Delt Fly', category: 'Shoulders' },
-  // Arms
+  { id: 'ex_26', name: 'Barbell Shrugs', category: 'Shoulders' },
+  { id: 'ex_27', name: 'Neck Curl & Extension', category: 'Shoulders' },
+  // Arms & Forearms
   { id: 'ex_20', name: 'Barbell Bicep Curl', category: 'Arms' },
   { id: 'ex_21', name: 'Tricep Rope Pushdown', category: 'Arms' },
   { id: 'ex_22', name: 'Incline Dumbbell Curl', category: 'Arms' },
   { id: 'ex_23', name: 'Skull Crushers', category: 'Arms' },
-  // Core
+  { id: 'ex_28', name: 'Hammer Curls & Wrist Curl', category: 'Arms' },
+  // Core & Obliques
   { id: 'ex_24', name: 'Hanging Leg Raise', category: 'Core' },
-  { id: 'ex_25', name: 'Plank', category: 'Core' }
+  { id: 'ex_25', name: 'Plank', category: 'Core' },
+  { id: 'ex_33', name: 'Russian Twists & Woodchoppers', category: 'Core' },
+  // Posterior Chain, Forearms & Hips
+  { id: 'ex_29', name: "Farmer's Walk", category: 'Back' },
+  { id: 'ex_30', name: 'Hyperextension (Back Extension)', category: 'Back' },
+  { id: 'ex_31', name: 'Barbell Hip Thrust', category: 'Legs' },
+  { id: 'ex_32', name: 'Hip Adduction & Abduction', category: 'Legs' }
 ];
 
 const DEFAULT_ROUTINES = [
@@ -118,6 +127,13 @@ function rebuildPRsFromHistory(historyList) {
 
 function syncDemoState(state) {
   state.settings = state.settings || {};
+  state.exercises = state.exercises || [...DEFAULT_EXERCISES];
+  const existingNames = new Set(state.exercises.map(e => (e.name || '').toLowerCase()));
+  DEFAULT_EXERCISES.forEach(def => {
+    if (!existingNames.has(def.name.toLowerCase())) {
+      state.exercises.push({ ...def });
+    }
+  });
   const demoOn = state.settings.demoMode === true;
   const realHistory = (state.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
   state.history = demoOn ? [...realHistory, ...DEMO_HISTORY] : realHistory;

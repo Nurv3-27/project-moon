@@ -164,31 +164,62 @@
 
   let selected = 'chest';
   let currentView = 'front'; // 'front' or 'back'
+  let currentGender = 'male'; // 'male' or 'female'
+  try {
+    currentGender = (window.AppState && AppState.settings && AppState.settings.bodyGender) ||
+      localStorage.getItem('moon_body_gender') ||
+      'male';
+  } catch (e) {}
 
   function overall(pts) {
     const vals = Object.values(pts);
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   }
 
+  function updateVisibleAnatomyGroup() {
+    const mFront = document.getElementById('body-front-group');
+    const mBack  = document.getElementById('body-back-group');
+    const fFront = document.getElementById('body-female-front-group');
+    const fBack  = document.getElementById('body-female-back-group');
+    if (!mFront || !mBack) return;
+
+    const isFemale = currentGender === 'female' && fFront && fBack;
+    mFront.style.display = (!isFemale && currentView === 'front') ? 'inline' : 'none';
+    mBack.style.display  = (!isFemale && currentView === 'back')  ? 'inline' : 'none';
+    if (fFront && fBack) {
+      fFront.style.display = (isFemale && currentView === 'front') ? 'inline' : 'none';
+      fBack.style.display  = (isFemale && currentView === 'back')  ? 'inline' : 'none';
+    }
+  }
+
   function setAnatomyView(view) {
     currentView = view;
-    const frontGroup = document.getElementById('body-front-group');
-    const backGroup = document.getElementById('body-back-group');
-    if (!frontGroup || !backGroup) return;
-
     document.querySelectorAll('.anatomy-pill-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.view === view);
     });
-
-    if (view === 'front') {
-      frontGroup.style.display = 'inline';
-      backGroup.style.display = 'none';
-    } else {
-      frontGroup.style.display = 'none';
-      backGroup.style.display = 'inline';
-    }
+    updateVisibleAnatomyGroup();
   }
   window.setAnatomyView = setAnatomyView;
+
+  function setBodyGender(gender) {
+    currentGender = gender === 'female' ? 'female' : 'male';
+    try {
+      localStorage.setItem('moon_body_gender', currentGender);
+      if (window.AppState && AppState.settings) {
+        AppState.settings.bodyGender = currentGender;
+        if (typeof saveState === 'function') saveState();
+      }
+    } catch (e) {}
+
+    document.querySelectorAll('.anatomy-gender-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.gender === currentGender);
+    });
+    updateVisibleAnatomyGroup();
+    if (typeof window.renderRanks === 'function') {
+      window.renderRanks();
+    }
+  }
+  window.setBodyGender = setBodyGender;
 
   window.renderRanks = function () {
     const root = document.getElementById('ranks-body');
@@ -403,7 +434,15 @@
       });
     });
 
-    // Ensure front view is active on start
+    // Top-right corner Male / Lady Body Toggle
+    document.querySelectorAll('.anatomy-gender-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setBodyGender(btn.dataset.gender);
+      });
+    });
+
+    // Ensure saved gender & front view are active on start
+    setBodyGender(currentGender);
     setAnatomyView('front');
 
     // Render Legend

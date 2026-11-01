@@ -80,22 +80,24 @@ const STORAGE_KEY = 'ironpulse_app_state_v1';
 const DEMO_HISTORY = [
   {
     id: 'hist_demo_1',
-    title: 'Push Power (Chest & Shoulders)',
+    title: 'Upper Body Power (Push & Pull)',
     date: new Date(Date.now() - 86400000 * 2).toISOString(),
     durationSeconds: 3120,
     volume: 6840,
     unit: 'kg',
-    setsCount: 16,
+    setsCount: 22,
     exercises: [
       { name: 'Barbell Bench Press', sets: 4, bestWeight: 85, bestReps: 8 },
       { name: 'Incline Dumbbell Press', sets: 4, bestWeight: 28, bestReps: 10 },
+      { name: 'Barbell Bent-Over Row', sets: 4, bestWeight: 80, bestReps: 10 },
       { name: 'Dumbbell Lateral Raise', sets: 4, bestWeight: 14, bestReps: 12 },
+      { name: 'Barbell Bicep Curl', sets: 3, bestWeight: 35, bestReps: 10 },
       { name: 'Tricep Rope Pushdown', sets: 4, bestWeight: 32, bestReps: 12 }
     ]
   },
   {
     id: 'hist_demo_2',
-    title: 'Leg Day & Core Hypertrophy',
+    title: 'Leg Day & Posterior Hypertrophy',
     date: new Date(Date.now() - 86400000 * 4).toISOString(),
     durationSeconds: 3480,
     volume: 8450,
@@ -104,7 +106,8 @@ const DEMO_HISTORY = [
     exercises: [
       { name: 'Barbell Back Squat', sets: 5, bestWeight: 120, bestReps: 6 },
       { name: 'Romanian Deadlift', sets: 4, bestWeight: 100, bestReps: 8 },
-      { name: 'Leg Press', sets: 5, bestWeight: 220, bestReps: 10 }
+      { name: 'Leg Press', sets: 5, bestWeight: 220, bestReps: 10 },
+      { name: 'Standing Calf Raise', sets: 4, bestWeight: 90, bestReps: 15 }
     ]
   }
 ];

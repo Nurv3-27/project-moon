@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Moon Anti-Scroll Shield (Instagram DMs Only & YouTube Shorts Blocker)",
+  "version": "1.0.0",
+  "description": "Blocks YouTube Shorts and Instagram infinite feeds (Reels/Home/Explore) while allowing Instagram Chat Inboxes (/direct/inbox/) and watching 1 single Reel sent by a friend!",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "http://localhost:8080/*",
+    "http://127.0.0.1:8080/*",
+    "*://*.instagram.com/*",
+    "*://*.youtube.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.instagram.com/*",
+        "*://*.youtube.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

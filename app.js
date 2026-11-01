@@ -183,12 +183,13 @@ function ensureScrollState() {
       balance: 0,
       sessionEndsAt: null,
       earnedTotal: 0,
-      antiScrollActive: false,
-      antiScrollStartedAt: null
+      antiScrollActive: true,
+      antiScrollStartedAt: Date.now()
     };
   }
   if (typeof AppState.scroll.antiScrollActive !== 'boolean') {
-    AppState.scroll.antiScrollActive = false;
+    AppState.scroll.antiScrollActive = true;
+    AppState.scroll.antiScrollStartedAt = Date.now();
   }
 }
 ensureScrollState();
@@ -1259,6 +1260,11 @@ function setAntiScrollMode(enabled, openFocusIfActivated = false) {
   const turnOn = Boolean(enabled);
   AppState.scroll.antiScrollActive = turnOn;
   if (turnOn) {
+    // If a paid scroll session was running, pause it and bank remaining time so Instagram & YouTube Shorts lock immediately
+    if (AppState.scroll.sessionEndsAt) {
+      AppState.scroll.balance = scrollRemaining();
+      AppState.scroll.sessionEndsAt = null;
+    }
     if (!AppState.scroll.antiScrollStartedAt) {
       AppState.scroll.antiScrollStartedAt = Date.now();
     }
@@ -1283,8 +1289,8 @@ function setAntiScrollMode(enabled, openFocusIfActivated = false) {
   }
 
   showToast(turnOn
-    ? '\uD83D\uDEE1\uFE0F Anti-Scroll Shield ACTIVATED! Infinite feeds blocked \u2014 Chat Inbox & Friend Reels ready.'
-    : '\u26A1 Anti-Scroll Shield turned OFF.');
+    ? '\uD83D\uDEE1\uFE0F Anti-Scroll Shield LOCKED! IG Reels & YouTube Shorts blocked \u2014 IG Chat Inbox & 1 Friend Reel allowed.'
+    : '\u26A1 Anti-Scroll Shield paused.');
 }
 window.setAntiScrollMode = setAntiScrollMode;
 
@@ -1295,10 +1301,47 @@ function toggleAntiScrollMode(fromHeader = false) {
   lastAntiScrollToggleTs = now;
 
   ensureScrollState();
-  const currentlyActive = Boolean(AppState.scroll.antiScrollActive);
-  setAntiScrollMode(!currentlyActive, fromHeader && !currentlyActive);
+  const currentlyActive = Boolean(AppState.scroll.antiScrollActive) && !AppState.scroll.sessionEndsAt;
+  if (!currentlyActive) {
+    // Immediately turn Anti-Scroll ON and stop any active scroll timer
+    setAntiScrollMode(true, fromHeader);
+  } else {
+    // Already active -> never accidentally disable the blocker! Jump to Focus & open the Anti-Scroll Lock Shield
+    if (fromHeader) {
+      const focusView = document.getElementById('view-focus');
+      if (!focusView || !focusView.classList.contains('active')) {
+        switchTab('focus');
+      }
+    }
+    openAntiScrollLockScreen();
+    showToast('\uD83D\uDEE1\uFE0F Anti-Scroll Shield is ACTIVE & locking feeds!');
+  }
 }
 window.toggleAntiScrollMode = toggleAntiScrollMode;
+
+async function installPcBrowserBlocker() {
+  let extPath = 'c:\\Users\\nurvi\\Downloads\\PortableGit\\fitness_tracker_app\\moon_antiscroll_extension';
+  try {
+    const res = await fetch('/api/open-extension-folder');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.path) extPath = data.path;
+    }
+  } catch (e) {}
+  try {
+    await navigator.clipboard.writeText(extPath);
+  } catch (e) {}
+  showToast('\uD83E\uDDE9 Extension folder opened & path copied! Load it in chrome://extensions or edge://extensions');
+  alert(
+    'HOW TO BLOCK INSTAGRAM REELS & YOUTUBE SHORTS IN YOUR PC BROWSER (10 SECONDS):\n\n' +
+    '1. We just copied the extension folder path to your clipboard (and opened the folder):\n   ' + extPath + '\n\n' +
+    '2. Open a new tab and type:  chrome://extensions  (or edge://extensions)\n' +
+    '3. Turn ON "Developer mode" (top-right switch).\n' +
+    '4. Click "Load unpacked" (top-left) and paste/select the moon_antiscroll_extension folder.\n\n' +
+    'Done! YouTube Shorts (/shorts) and Instagram Feeds are now physically blocked in your browser while Instagram Chat Inbox (/direct/inbox/) and 1 Friend-Sent Reel stay unlocked!'
+  );
+}
+window.installPcBrowserBlocker = installPcBrowserBlocker;
 
 function openAntiScrollLockScreen() {
   ensureScrollState();
@@ -1422,11 +1465,14 @@ function openInstagramInboxNoScroll() {
 }
 window.openInstagramInboxNoScroll = openInstagramInboxNoScroll;
 
-// Extract Instagram Reel / Post shortcode from any friend-sent Messenger URL
+// Extract Instagram Reel / Post shortcode OR YouTube Short ID from any friend-sent URL
 function parseFriendReelShortcode(raw) {
   const str = (raw || '').trim();
   if (!str) return null;
-  // Standard /reel/CODE, /reels/CODE, /p/CODE, /tv/CODE
+  // YouTube Shorts or YouTube video sent by a friend
+  const ytMatch = str.match(/(?:youtube\.com\/(?:shorts\/|watch\?v=)|youtu\.be\/)([A-Za-z0-9_-]{6,15})/i);
+  if (ytMatch && ytMatch[1]) return { type: 'youtube', code: ytMatch[1] };
+  // Standard Instagram /reel/CODE, /reels/CODE, /p/CODE, /tv/CODE
   const m = str.match(/instagram\.com\/(?:[^/]+\/)?(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
   if (m && m[1]) return { type: 'shortcode', code: m[1] };
   // Modern Instagram share URLs: instagram.com/share/reel/CODE or instagram.com/share/CODE
@@ -1520,10 +1566,14 @@ async function watchFriendSentReel(rawUrl) {
 
   setFriendReelInteract(false);
   iframe.removeAttribute('srcdoc');
-  iframe.src = `https://www.instagram.com/reel/${encodeURIComponent(code)}/embed/`;
+  if (parsed.type === 'youtube') {
+    iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(code)}?rel=0&modestbranding=1&playsinline=1`;
+  } else {
+    iframe.src = `https://www.instagram.com/reel/${encodeURIComponent(code)}/embed/`;
+  }
   viewer.classList.remove('hidden');
   viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  showToast('\uD83C\uDFAC Playing friend-sent Reel in Scroll-Locked Mode (Swiping to next Reel is blocked!)');
+  showToast('\uD83C\uDFAC Playing friend-sent video in Scroll-Locked Mode (Swiping to next Reel/Short is blocked!)');
 }
 window.watchFriendSentReel = watchFriendSentReel;
 

@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=26">
+  <link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
   <div id="app" class="app-root">
@@ -747,6 +747,9 @@
               </svg>
               <span>Open Instagram Chat Inbox (No-Scroll)</span>
             </button>
+            <button type="button" id="btn-install-browser-blocker" class="secondary-btn full-width" style="margin-top:8px; border-color: rgba(52,199,89,0.5); color:#7ef7a6;" onclick="installPcBrowserBlocker()">
+              &#129513; Enable Browser Blocker (Blocks IG Reels &amp; YouTube Shorts)
+            </button>
             <button type="button" id="btn-trigger-lock-screen" class="secondary-btn full-width" style="margin-top:8px;" onclick="openAntiScrollLockScreen()">
               &#128274; Activate Full-Screen Anti-Scroll Lock Shield
             </button>
@@ -755,11 +758,11 @@
           <!-- Friend-Sent Reel Safe Viewer (Scroll-Locked) -->
           <div class="friend-reel-box" id="friend-reel-box">
             <div class="friend-reel-header">
-              <span class="friend-reel-label">&#127902;&#65039; WATCH A REEL YOUR FRIEND SENT IN MESSENGER (SCROLL-LOCKED)</span>
-              <span class="friend-reel-sub">Paste any Instagram Reel link from your friend's chat (or tap <strong>Test Sample Reel</strong> below). Plays that single Reel with vertical scrolling physically disabled so you can't doomscroll!</span>
+              <span class="friend-reel-label">&#127902;&#65039; WATCH A FRIEND'S IG REEL OR YOUTUBE SHORT (SCROLL-LOCKED)</span>
+              <span class="friend-reel-sub">Paste any Instagram Reel or YouTube Short link sent by a friend (or tap <strong>Test Sample Reel</strong> below). Plays that single video with vertical scrolling physically disabled so you can't doomscroll!</span>
             </div>
             <div class="friend-reel-input-row">
-              <input type="url" id="friend-reel-url-input" class="ios-input" placeholder="Paste friend's Reel link (https://www.instagram.com/reel/...)">
+              <input type="url" id="friend-reel-url-input" class="ios-input" placeholder="Paste friend's IG Reel or YouTube Short link...">
               <button type="button" id="btn-paste-friend-reel" class="secondary-btn small-btn" title="Paste from clipboard">Paste</button>
               <button type="button" id="btn-watch-friend-reel" class="primary-glow-btn small-btn">Watch</button>
             </div>
@@ -770,7 +773,7 @@
             <!-- Scroll-Locked Single-Reel Stage -->
             <div id="friend-reel-viewer" class="friend-reel-viewer hidden">
               <div class="friend-reel-lock-bar">
-                <span>&#128274; <strong>Scroll-Lock Active:</strong> Single Reel only &mdash; next-Reel swipe blocked</span>
+                <span>&#128274; <strong>Scroll-Lock Active:</strong> Single video only &mdash; next-Reel/Short swipe blocked</span>
                 <div class="friend-reel-lock-actions">
                   <button type="button" id="btn-toggle-reel-interact" class="friend-reel-interact-btn" onclick="toggleFriendReelInteract()">&#128266; Tap Video</button>
                   <button type="button" id="btn-close-friend-reel" class="friend-reel-close-btn">&times; Close</button>
@@ -781,7 +784,7 @@
                 <!-- Physical Touch & Wheel Scroll Blocker over Cross-Origin Iframe -->
                 <div id="friend-reel-touch-shield" class="friend-reel-touch-shield" title="Vertical scrolling is locked! Tap here to play/pause."></div>
                 <div id="friend-reel-swipe-guard" class="friend-reel-swipe-guard hidden">
-                  <span>&#128721; Anti-Doomscroll Shield: Vertical scrolling to random Reels is blocked!</span>
+                  <span>&#128721; Anti-Doomscroll Shield: Vertical scrolling to random Reels/Shorts is blocked!</span>
                 </div>
               </div>
               <div class="friend-reel-footer">
@@ -790,18 +793,22 @@
             </div>
           </div>
 
-          <details class="scroll-help" style="margin-top:14px;">
-            <summary>How to enforce DM-Only &amp; No-Scrolling on iPhone / Browser</summary>
+          <details class="scroll-help" style="margin-top:14px;" open>
+            <summary>How to block Instagram &amp; YouTube Shorts outside Moon (PC &amp; iPhone)</summary>
             <ol>
-              <li>Keep this PC server running and your iPhone on the same Wi-Fi.</li>
-              <li><strong>iOS Shortcuts (Auto-Redirect to IG Chat Inbox):</strong> In Shortcuts &rarr; Automation &rarr; <strong>Instagram (Is Opened)</strong>, Run Immediately:
+              <li><strong>On PC Browser (Chrome / Edge / Brave):</strong> Tap <strong>"&#129513; Enable Browser Blocker"</strong> above &rarr; open <code>chrome://extensions</code> &rarr; enable <strong>Developer mode</strong> &rarr; click <strong>Load unpacked</strong> and select the <code>moon_antiscroll_extension</code> folder. It automatically blocks <strong>YouTube Shorts</strong> (<code>/shorts</code>) and redirects <strong>Instagram Feeds</strong> to <code>/direct/inbox/</code> (DMs &amp; 1 Friend Reel only)!</li>
+              <li><strong>On iPhone (iOS Shortcuts Automation for Instagram + YouTube Apps):</strong>
                 <ul>
-                  <li>Action 1: <strong>Get Contents of URL</strong> <code id="scroll-status-url">/api/scroll</code></li>
-                  <li>Action 2: <strong>If</strong> result <em>contains</em> <code>dm_only</code> &rarr; <strong>Open URLs</strong> <code>instagram://direct-inbox</code> (jumps straight into your Chat Inbox, bypassing Home &amp; Reels feeds!).</li>
-                  <li>Action 3: <strong>Otherwise If</strong> result <em>contains</em> <code>blocked</code> &rarr; <strong>Go to Home Screen</strong>.</li>
+                  <li>Keep <code>run_app.bat</code> / <code>serve.py</code> running on your PC (same Wi-Fi).</li>
+                  <li>In iPhone <strong>Shortcuts &rarr; Automation &rarr; + &rarr; App</strong>: select <strong>YouTube</strong> (Is Opened, Run Immediately):<br>
+                    Action 1: <strong>Get Contents of URL</strong> <code id="scroll-status-url">/api/scroll</code><br>
+                    Action 2: <strong>If</strong> result <em>contains</em> <code>blocked</code> &rarr; <strong>Go to Home Screen</strong>.</li>
+                  <li>For <strong>Instagram (Is Opened, Run Immediately)</strong>:<br>
+                    Action 1: <strong>Get Contents of URL</strong> <code>/api/scroll</code><br>
+                    Action 2: <strong>If</strong> result <em>contains</em> <code>dm_only</code> &rarr; <strong>Open URLs</strong> <code>instagram://direct-inbox</code> (forces Instagram straight into your Chat Inbox, skipping Reels &amp; Home!).</li>
                 </ul>
               </li>
-              <li><strong>Safari / Browser No-Scroll Script:</strong> Install <a href="/ig-noscroll.user.js" target="_blank" style="color:var(--accent-lime);font-weight:700;">ig-noscroll.user.js</a> in Safari Userscripts / StayFree to lock vertical scrolling after 1 friend-sent Reel inside Instagram DMs.</li>
+              <li><strong>Safari / Tampermonkey Userscript (iOS &amp; PC):</strong> Install <a href="/ig-noscroll.user.js" target="_blank" style="color:var(--accent-lime);font-weight:700;">ig-noscroll.user.js</a> to block YouTube Shorts &amp; lock Instagram to DMs + 1 Friend Reel in Safari.</li>
             </ol>
           </details>
         </div>
@@ -1219,9 +1226,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=26"></script>
-  <script src="camera.js?v=26"></script>
-  <script src="ranks.js?v=26"></script>
+  <script src="app.js?v=27"></script>
+  <script src="camera.js?v=27"></script>
+  <script src="ranks.js?v=27"></script>
 </body>
 </html>
 

@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=23">
+  <link rel="stylesheet" href="style.css?v=24">
 </head>
 <body>
   <div id="app" class="app-root">
@@ -97,30 +97,6 @@
             <span class="stat-num" id="stat-total-volume">0</span>
             <span class="stat-label" id="stat-volume-unit">TOTAL KG &#9889;</span>
           </div>
-        </div>
-
-        <!-- Doomscroll Bank -->
-        <div class="scroll-card" id="scroll-card">
-          <div class="scroll-card-top">
-            <div>
-              <span class="scroll-card-tag">&#128241; DOOMSCROLL BANK</span>
-              <div class="scroll-balance" id="scroll-balance">0:00</div>
-              <span class="scroll-sub" id="scroll-sub">Earn 2 min per pull-up, push-up &amp; plank minute</span>
-            </div>
-            <button id="btn-scroll-toggle" class="primary-glow-btn small-btn">Start Scrolling</button>
-          </div>
-          <button id="btn-camera-coach" class="secondary-btn full-width" style="margin-top:12px;">&#128247; Earn time with camera</button>
-          <label class="scroll-toggle-row"><input type="checkbox" id="setting-require-camera" checked> Only camera-verified reps earn scroll time</label>
-          <details class="scroll-help">
-            <summary>How to actually block Reels &amp; Shorts (iPhone)</summary>
-            <ol>
-              <li>Keep this PC server running and the phone on the same Wi-Fi.</li>
-              <li>Shortcuts &rarr; Automation &rarr; New &rarr; <strong>App</strong> &rarr; Instagram + YouTube (Is Opened), Run Immediately.</li>
-              <li>Add action <strong>Get Contents of URL</strong>: <code id="scroll-status-url">/api/scroll</code></li>
-              <li>Add <strong>If</strong> result <em>contains</em> <code>blocked</code> &rarr; <strong>Go to Home Screen</strong>.</li>
-            </ol>
-            <p>A web app cannot close other apps itself; iOS only allows this through a Shortcuts automation like the one above.</p>
-          </details>
         </div>
 
         <!-- Routines List -->
@@ -664,6 +640,124 @@
         <p class="rank-next" style="margin-top:10px;">Points = sets &times; reps &times; load. Heavier lifts and harder bodyweight moves (pull-ups, dips) score more. Camera-verified reps count too.</p>
       </section>
 
+      <!-- TAB: FOCUS & DOOMSCROLL BANK -->
+      <section id="view-focus" class="tab-view">
+        <div class="section-hero">
+          <div class="hero-text">
+            <span class="greeting-subtitle">ANTI-DOOMSCROLL SHIELD</span>
+            <h1 class="hero-title">Focus &amp; Scroll Bank</h1>
+          </div>
+        </div>
+
+        <!-- Doomscroll Bank Card -->
+        <div class="scroll-card" id="scroll-card">
+          <div class="scroll-card-top">
+            <div>
+              <span class="scroll-card-tag">&#128241; DOOMSCROLL BANK</span>
+              <div class="scroll-balance" id="scroll-balance">0:00</div>
+              <span class="scroll-sub" id="scroll-sub">Earn 2 min per pull-up, push-up &amp; plank minute</span>
+            </div>
+            <button id="btn-scroll-toggle" class="primary-glow-btn small-btn">Start Scrolling</button>
+          </div>
+          <button id="btn-camera-coach" class="secondary-btn full-width" style="margin-top:12px;">&#128247; Earn time with camera</button>
+          <label class="scroll-toggle-row"><input type="checkbox" id="setting-require-camera" checked> Only camera-verified reps earn scroll time</label>
+        </div>
+
+        <!-- Non-Scrolling Messenger Shield: Chat Inbox & Friend-Sent Reels Allowed -->
+        <div class="noscroll-shield-card" id="noscroll-dm-card">
+          <div class="noscroll-shield-header">
+            <div>
+              <span class="noscroll-badge" id="noscroll-status-badge">&#128737;&#65039; NON-SCROLLING MODE ACTIVE</span>
+              <h2 class="noscroll-title">Chat Inbox &amp; Friend Reels Only</h2>
+              <p class="noscroll-desc">Stops endless feed doomscrolling while letting you open Instagram Messenger DMs and watch the specific Reels your friends sent you.</p>
+            </div>
+            <label class="ios-switch" title="Allow Chat Inbox & Friend Reels without scrolling">
+              <input type="checkbox" id="setting-dm-only-mode" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="noscroll-rules-grid">
+            <div class="noscroll-rule-pill allowed">
+              <span class="rule-icon">&#128172;</span>
+              <div>
+                <strong>Chat Inboxes Allowed</strong>
+                <span>Open IG Messenger &amp; reply to DMs anytime (0:00 cost)</span>
+              </div>
+            </div>
+            <div class="noscroll-rule-pill allowed">
+              <span class="rule-icon">&#127916;</span>
+              <div>
+                <strong>Friend-Sent Reels Allowed</strong>
+                <span>Watch the Reel your friend sent &mdash; next-Reel swipe locked</span>
+              </div>
+            </div>
+            <div class="noscroll-rule-pill blocked">
+              <span class="rule-icon">&#128721;</span>
+              <div>
+                <strong>Infinite Feeds Blocked</strong>
+                <span>Reels tab, Explore &amp; Home feed scrolling locked at 0:00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Direct No-Scroll Instagram Messenger Launcher -->
+          <div class="noscroll-actions-box">
+            <button type="button" id="btn-open-ig-inbox" class="primary-glow-btn full-width">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              </svg>
+              <span>Open Instagram Chat Inbox (No-Scroll)</span>
+            </button>
+          </div>
+
+          <!-- Friend-Sent Reel Safe Viewer (Scroll-Locked) -->
+          <div class="friend-reel-box">
+            <div class="friend-reel-header">
+              <span class="friend-reel-label">&#127902;&#65039; WATCH A REEL YOUR FRIEND SENT IN MESSENGER (SCROLL-LOCKED)</span>
+              <span class="friend-reel-sub">Paste or open any Instagram Reel link from your friend's chat. Plays that single Reel with vertical scrolling physically disabled so you can't doomscroll!</span>
+            </div>
+            <div class="friend-reel-input-row">
+              <input type="url" id="friend-reel-url-input" class="ios-input" placeholder="Paste friend's Reel link (https://www.instagram.com/reel/...)">
+              <button type="button" id="btn-paste-friend-reel" class="secondary-btn small-btn" title="Paste from clipboard">Paste</button>
+              <button type="button" id="btn-watch-friend-reel" class="primary-glow-btn small-btn">Watch</button>
+            </div>
+
+            <!-- Scroll-Locked Single-Reel Stage -->
+            <div id="friend-reel-viewer" class="friend-reel-viewer hidden">
+              <div class="friend-reel-lock-bar">
+                <span>&#128274; <strong>Scroll-Lock Active:</strong> Single friend Reel only &mdash; swiping to next Reel is disabled</span>
+                <button type="button" id="btn-close-friend-reel" class="friend-reel-close-btn">&times; Close</button>
+              </div>
+              <div class="friend-reel-frame-wrap" id="friend-reel-frame-wrap">
+                <iframe id="friend-reel-iframe" class="friend-reel-iframe" src="about:blank" allow="autoplay; encrypted-media" scrolling="no" frameborder="0"></iframe>
+                <div id="friend-reel-swipe-guard" class="friend-reel-swipe-guard hidden">
+                  <span>&#128721; Anti-Doomscroll Shield: Vertical scrolling to random Reels is blocked!</span>
+                </div>
+              </div>
+              <div class="friend-reel-footer">
+                <button type="button" id="btn-reply-ig-dm" class="secondary-btn full-width">&#128172; Done Watching &rarr; Reply in IG Messenger</button>
+              </div>
+            </div>
+          </div>
+
+          <details class="scroll-help" style="margin-top:14px;">
+            <summary>How to enforce DM-Only &amp; No-Scrolling on iPhone / Browser</summary>
+            <ol>
+              <li>Keep this PC server running and your iPhone on the same Wi-Fi.</li>
+              <li><strong>iOS Shortcuts (Auto-Redirect to IG Chat Inbox):</strong> In Shortcuts &rarr; Automation &rarr; <strong>Instagram (Is Opened)</strong>, Run Immediately:
+                <ul>
+                  <li>Action 1: <strong>Get Contents of URL</strong> <code id="scroll-status-url">/api/scroll</code></li>
+                  <li>Action 2: <strong>If</strong> result <em>contains</em> <code>dm_only</code> &rarr; <strong>Open URLs</strong> <code>instagram://direct-inbox</code> (jumps straight into your Chat Inbox, bypassing Home &amp; Reels feeds!).</li>
+                  <li>Action 3: <strong>Otherwise If</strong> result <em>contains</em> <code>blocked</code> &rarr; <strong>Go to Home Screen</strong>.</li>
+                </ul>
+              </li>
+              <li><strong>Safari / Browser No-Scroll Script:</strong> Install <a href="/ig-noscroll.user.js" target="_blank" style="color:var(--accent-lime);font-weight:700;">ig-noscroll.user.js</a> in Safari Userscripts / StayFree to lock vertical scrolling after 1 friend-sent Reel inside Instagram DMs.</li>
+            </ol>
+          </details>
+        </div>
+      </section>
+
       <!-- TAB 5: SETTINGS & IPHONE INSTALL -->
       <section id="view-settings" class="tab-view">
         <div class="section-hero">
@@ -847,6 +941,14 @@
           <span id="tab-active-dot" class="tab-active-dot hidden"></span>
         </div>
         <span class="tab-label">Workout</span>
+      </button>
+
+      <button class="nav-tab" data-tab="focus" onclick="switchTab('focus')">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <circle cx="12" cy="11" r="2.5"></circle>
+        </svg>
+        <span class="tab-label">Focus</span>
       </button>
 
       <button class="nav-tab" data-tab="history" onclick="switchTab('history')">
@@ -1056,15 +1158,16 @@
     <div class="scroll-lock-card">
       <div class="scroll-lock-emoji">&#128274;</div>
       <h2>Scroll time is up!</h2>
-      <p>No more Reels or Shorts. Do pull-ups, push-ups or planks to earn more.</p>
+      <p>Infinite Reels &amp; Shorts scrolling is locked. You can still open your Chat Inbox &amp; watch Reels sent by friends, or work out to earn scroll time.</p>
       <button class="primary-glow-btn full-width" onclick="closeScrollLock(); switchTab('routines'); startBlankWorkout();">Go earn it &#128170;</button>
+      <button class="secondary-btn full-width" style="margin-top:8px;" onclick="closeScrollLock(); switchTab('focus'); openInstagramInboxNoScroll();">&#128172; Open IG Chat Inbox Only (No-Scroll)</button>
       <button class="secondary-btn full-width" style="margin-top:8px;" onclick="closeScrollLock()">Dismiss</button>
     </div>
   </div>
 
-  <script src="app.js?v=23"></script>
-  <script src="camera.js?v=23"></script>
-  <script src="ranks.js?v=23"></script>
+  <script src="app.js?v=24"></script>
+  <script src="camera.js?v=24"></script>
+  <script src="ranks.js?v=24"></script>
 </body>
 </html>
 

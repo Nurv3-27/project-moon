@@ -162,7 +162,8 @@ function getInitialState() {
       defaultRest: 90,
       sound: true,
       haptics: true,
-      demoMode: false
+      demoMode: false,
+      dmOnlyMode: true
     },
     exercises: [...DEFAULT_EXERCISES],
     routines: [...DEFAULT_ROUTINES],
@@ -406,6 +407,7 @@ window.switchTab = function(tabName) {
 
   // Refresh tab content when selected
   if (tabName === 'routines') renderRoutines();
+  if (tabName === 'focus') renderScroll();
   if (tabName === 'history') renderHistory();
   if (tabName === 'prs') renderPRs();
   if (tabName === 'ranks') renderRanks();
@@ -1163,6 +1165,22 @@ function renderScroll() {
     sub.textContent = s.balance > 0 ? 'Banked time \u2013 spend it wisely' : 'Earn 2 min per pull-up, push-up & plank minute';
     card.classList.remove('scrolling');
   }
+
+  // Update Non-Scrolling Messenger Shield UI
+  const dmToggle = document.getElementById('setting-dm-only-mode');
+  const dmBadge  = document.getElementById('noscroll-status-badge');
+  const dmCard   = document.getElementById('noscroll-dm-card');
+  const dmEnabled = AppState.settings.dmOnlyMode !== false;
+  if (dmToggle) dmToggle.checked = dmEnabled;
+  if (dmBadge) {
+    dmBadge.innerHTML = dmEnabled
+      ? '&#128737;&#65039; NON-SCROLLING MODE ACTIVE'
+      : '&#128274; STRICT FULL BLOCK MODE';
+    dmBadge.classList.toggle('strict', !dmEnabled);
+  }
+  if (dmCard) {
+    dmCard.classList.toggle('dm-disabled', !dmEnabled);
+  }
 }
 
 function toggleScrollSession() {
@@ -1210,18 +1228,88 @@ window.closeScrollLock = function() {
   if (ov) ov.classList.add('hidden');
 };
 
-// Tell the PC server how much scroll time is live so the iOS Shortcut can block Reels/Shorts.
+// Tell the PC server how much scroll time is live so the iOS Shortcut can block Reels/Shorts while allowing DM Inbox.
 function syncScrollToServer() {
   const s = AppState.scroll;
   const remaining = s && s.sessionEndsAt ? scrollRemaining() : 0;
+  const dmOnly = AppState.settings && AppState.settings.dmOnlyMode !== false;
   try {
     fetch('/api/scroll', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ remainingSeconds: remaining })
+      body: JSON.stringify({ remainingSeconds: remaining, dmOnly })
     }).catch(() => {});
   } catch (e) {}
 }
+
+// Open Instagram Messenger / Direct Inbox directly without opening Home or Reels feeds
+function openInstagramInboxNoScroll() {
+  if (AppState.settings.dmOnlyMode === false && !AppState.scroll.sessionEndsAt) {
+    showToast('\uD83D\uDD12 Enable Non-Scrolling Mode or earn scroll time first!');
+    return;
+  }
+  showToast('\uD83D\uDCAC Opening Instagram Chat Inbox (No-Scroll Mode \u2014 Infinite Feeds Blocked)');
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = 'instagram://direct-inbox';
+    setTimeout(() => {
+      window.open('https://www.instagram.com/direct/inbox/', '_blank', 'noopener');
+    }, 650);
+  } else {
+    window.open('https://www.instagram.com/direct/inbox/', '_blank', 'noopener');
+  }
+}
+window.openInstagramInboxNoScroll = openInstagramInboxNoScroll;
+
+// Extract Instagram Reel / Post shortcode from a friend-sent Messenger URL
+function parseFriendReelShortcode(raw) {
+  const str = (raw || '').trim();
+  if (!str) return null;
+  const m = str.match(/instagram\.com\/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
+  if (m && m[1]) return m[1];
+  if (/^[A-Za-z0-9_-]{6,18}$/.test(str)) return str;
+  return null;
+}
+
+let swipeGuardTimeout = null;
+function flashFriendReelSwipeGuard() {
+  const guard = document.getElementById('friend-reel-swipe-guard');
+  if (!guard) return;
+  guard.classList.remove('hidden');
+  triggerHaptic([35]);
+  if (swipeGuardTimeout) clearTimeout(swipeGuardTimeout);
+  swipeGuardTimeout = setTimeout(() => {
+    guard.classList.add('hidden');
+  }, 1600);
+}
+
+function watchFriendSentReel(rawUrl) {
+  if (AppState.settings.dmOnlyMode === false && !AppState.scroll.sessionEndsAt) {
+    showToast('\uD83D\uDD12 Enable Non-Scrolling Mode to watch friend-sent Reels without banked time!');
+    return;
+  }
+  const code = parseFriendReelShortcode(rawUrl);
+  if (!code) {
+    showToast('\u26A0\uFE0F Paste a valid Instagram Reel link sent by your friend (e.g. instagram.com/reel/...)');
+    return;
+  }
+  const viewer = document.getElementById('friend-reel-viewer');
+  const iframe = document.getElementById('friend-reel-iframe');
+  if (!viewer || !iframe) return;
+
+  iframe.src = `https://www.instagram.com/reel/${encodeURIComponent(code)}/embed/captioned/`;
+  viewer.classList.remove('hidden');
+  showToast('\uD83C\uDFAC Playing friend-sent Reel in Scroll-Locked Mode (1 Reel max)');
+}
+window.watchFriendSentReel = watchFriendSentReel;
+
+function closeFriendSentReel() {
+  const viewer = document.getElementById('friend-reel-viewer');
+  const iframe = document.getElementById('friend-reel-iframe');
+  if (iframe) iframe.src = 'about:blank';
+  if (viewer) viewer.classList.add('hidden');
+}
+window.closeFriendSentReel = closeFriendSentReel;
 
 // Utility: Escape HTML
 function escapeHtml(str) {
@@ -1283,10 +1371,94 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Doomscroll bank
+  // Doomscroll bank & Non-Scrolling Messenger Shield
   document.getElementById('btn-scroll-toggle').addEventListener('click', toggleScrollSession);
   const su = document.getElementById('scroll-status-url');
   if (su) su.textContent = 'http://' + location.hostname + ':8080/api/scroll';
+
+  const dmModeCheckbox = document.getElementById('setting-dm-only-mode');
+  if (dmModeCheckbox) {
+    dmModeCheckbox.checked = AppState.settings.dmOnlyMode !== false;
+    dmModeCheckbox.addEventListener('change', (e) => {
+      AppState.settings.dmOnlyMode = Boolean(e.target.checked);
+      saveState();
+      renderScroll();
+      syncScrollToServer();
+      showToast(AppState.settings.dmOnlyMode
+        ? '\uD83D\uDEE1\uFE0F Non-Scrolling Mode ON: Chat Inboxes & Friend Reels allowed'
+        : '\uD83D\uDD12 Strict Full Block ON: Everything locked at 0:00');
+    });
+  }
+
+  const btnOpenInbox = document.getElementById('btn-open-ig-inbox');
+  if (btnOpenInbox) {
+    btnOpenInbox.addEventListener('click', openInstagramInboxNoScroll);
+  }
+
+  const reelInput = document.getElementById('friend-reel-url-input');
+  const btnPasteReel = document.getElementById('btn-paste-friend-reel');
+  const btnWatchReel = document.getElementById('btn-watch-friend-reel');
+  const btnCloseReel = document.getElementById('btn-close-friend-reel');
+  const btnReplyDm   = document.getElementById('btn-reply-ig-dm');
+  const reelWrap     = document.getElementById('friend-reel-frame-wrap');
+
+  if (btnPasteReel && reelInput) {
+    btnPasteReel.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          reelInput.value = text.trim();
+          watchFriendSentReel(reelInput.value);
+        } else {
+          showToast('Clipboard is empty \u2014 paste your friend\'s Reel link into the box');
+        }
+      } catch (e) {
+        reelInput.focus();
+        showToast('Long-press inside the box to paste your friend\'s Reel link');
+      }
+    });
+  }
+  if (btnWatchReel && reelInput) {
+    btnWatchReel.addEventListener('click', () => watchFriendSentReel(reelInput.value));
+    reelInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        watchFriendSentReel(reelInput.value);
+      }
+    });
+  }
+  if (btnCloseReel) {
+    btnCloseReel.addEventListener('click', closeFriendSentReel);
+  }
+  if (btnReplyDm) {
+    btnReplyDm.addEventListener('click', () => {
+      closeFriendSentReel();
+      openInstagramInboxNoScroll();
+    });
+  }
+  if (reelWrap) {
+    // Intercept vertical wheel/swipe gestures on the Friend Reel container so user cannot scroll to next Reel
+    reelWrap.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaY) > 12) {
+        e.preventDefault();
+        flashFriendReelSwipeGuard();
+      }
+    }, { passive: false });
+    let touchStartY = null;
+    reelWrap.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length === 1) touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    reelWrap.addEventListener('touchmove', (e) => {
+      if (touchStartY !== null && e.touches && e.touches.length === 1) {
+        const dy = Math.abs(e.touches[0].clientY - touchStartY);
+        if (dy > 24) {
+          e.preventDefault();
+          flashFriendReelSwipeGuard();
+        }
+      }
+    }, { passive: false });
+  }
+
   renderScroll();
   setInterval(scrollTick, 1000);
   syncScrollToServer();

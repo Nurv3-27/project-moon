@@ -233,6 +233,12 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                     return self._send(f.read(), ctype='application/javascript; charset=utf-8')
             except Exception:
                 return self._send(IG_NOSCROLL_USERSCRIPT, ctype='application/javascript; charset=utf-8')
+        if clean in ('/ig_webview_injection.js', '/api/ig_webview_injection.js'):
+            try:
+                with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ig_webview_injection.js'), 'r', encoding='utf-8') as f:
+                    return self._send(f.read(), ctype='application/javascript; charset=utf-8')
+            except Exception:
+                pass
         if clean in ('/apple-touch-icon.png', '/apple-touch-icon-precomposed.png'):
             self.path = '/apple-touch-icon.png'
         elif clean == '/favicon.ico':

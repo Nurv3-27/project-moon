@@ -2142,6 +2142,77 @@ function syncScrollToServer() {
 }
 
 // Open Instagram Messenger / Direct Inbox directly without opening Home or Reels feeds
+function openInAppInstagramWebView() {
+  ensureScrollState();
+  if (!AppState.scroll.antiScrollActive) {
+    AppState.scroll.antiScrollActive = true;
+    AppState.scroll.antiScrollStartedAt = Date.now();
+    saveState();
+    renderScroll();
+    syncScrollToServer();
+  }
+  if (AppState.settings.dmOnlyMode === false && !AppState.scroll.sessionEndsAt) {
+    showToast('\uD83D\uDD12 Strict Full Block is on \u2014 enable "Chat Inbox & Friend Reels Only" switch first!');
+    return;
+  }
+
+  const iframe = document.getElementById('ig-direct-webview-iframe');
+  if (iframe) {
+    if (!iframe.src || iframe.src === 'about:blank') {
+      iframe.src = 'https://www.instagram.com/direct/inbox/';
+    }
+  }
+
+  openModal('modal-ig-webview');
+  showToast('\uD83D\uDEE1\uFE0F In-App Instagram DM Client opened (Feeds & Reels Locked)');
+}
+
+function closeInAppInstagramWebView() {
+  closeModal('modal-ig-webview');
+}
+
+function refreshInAppInstagramWebView() {
+  const iframe = document.getElementById('ig-direct-webview-iframe');
+  if (iframe) {
+    iframe.src = 'https://www.instagram.com/direct/inbox/';
+    showToast('\uD83D\uDD04 Reloading Instagram Direct Inbox...');
+  }
+}
+
+function resetInAppInstagramToInbox() {
+  const iframe = document.getElementById('ig-direct-webview-iframe');
+  if (iframe) {
+    iframe.src = 'https://www.instagram.com/direct/inbox/';
+    showToast('\uD83D\uDCAC Returned to Direct Inbox');
+  }
+}
+
+function dismissIgGuardBanner() {
+  const banner = document.getElementById('ig-webview-guard-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+async function copyInjectionScriptUrl() {
+  const url = `${window.location.origin}/ig_webview_injection.js`;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      showToast(`\u2705 Injection JS URL copied: ${url}`);
+    } else {
+      prompt('Copy injection script URL:', url);
+    }
+  } catch (e) {
+    prompt('Copy injection script URL:', url);
+  }
+}
+
+window.openInAppInstagramWebView = openInAppInstagramWebView;
+window.closeInAppInstagramWebView = closeInAppInstagramWebView;
+window.refreshInAppInstagramWebView = refreshInAppInstagramWebView;
+window.resetInAppInstagramToInbox = resetInAppInstagramToInbox;
+window.dismissIgGuardBanner = dismissIgGuardBanner;
+window.copyInjectionScriptUrl = copyInjectionScriptUrl;
+
 async function openInstagramInboxNoScroll() {
   ensureScrollState();
   if (!AppState.scroll.antiScrollActive) {

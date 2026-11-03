@@ -42,3 +42,4 @@ class handler(BaseHTTPRequestHandler):
         except Exception:
             pass
         return self._send_text('dm_only')
+

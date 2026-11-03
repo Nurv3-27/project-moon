@@ -3136,4 +3136,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // --- Initial App Splash Screen Auto-Routing (2.5s duration) ---
+  initSplashScreenTimer();
+
 });
+
+// Splash Screen Lifecycle Controller
+let splashDismissed = false;
+
+function dismissSplashScreen() {
+  if (splashDismissed) return;
+  splashDismissed = true;
+
+  const splash = document.getElementById('app-splash-screen');
+  if (!splash) return;
+
+  splash.classList.add('fade-out');
+
+  try {
+    triggerHaptic([25]);
+  } catch (e) {}
+
+  setTimeout(() => {
+    splash.classList.add('hidden');
+    splash.style.display = 'none';
+  }, 700);
+}
+
+function initSplashScreenTimer() {
+  const splash = document.getElementById('app-splash-screen');
+  if (!splash) return;
+
+  // Auto-route user to main dashboard after exactly 2.5 seconds
+  setTimeout(dismissSplashScreen, 2500);
+}
+
+window.dismissSplashScreen = dismissSplashScreen;
+window.showSplashScreen = function() {
+  const splash = document.getElementById('app-splash-screen');
+  if (splash) {
+    splashDismissed = false;
+    splash.style.display = '';
+    splash.classList.remove('hidden', 'fade-out');
+    setTimeout(dismissSplashScreen, 2500);
+  }
+};

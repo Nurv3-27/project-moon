@@ -134,7 +134,160 @@ const DEFAULT_EXERCISES = [
   { id: 'ex_206', name: 'Bicycle Crunches', category: 'Core' },
   { id: 'ex_207', name: 'Dragon Flag', category: 'Core' },
   { id: 'ex_208', name: 'Deadbug', category: 'Core' },
-  { id: 'ex_209', name: 'Mountain Climbers', category: 'Core' }
+  { id: 'ex_209', name: 'Mountain Climbers', category: 'Core' },
+
+  // --- CHEST EXPANSION ---
+  { id: 'ex_210', name: 'Incline Dumbbell Press (Neutral Grip)', category: 'Chest' },
+  { id: 'ex_211', name: 'Landmine Chest Press (Single Arm)', category: 'Chest' },
+  { id: 'ex_212', name: 'Landmine Chest Press (Two Hands)', category: 'Chest' },
+  { id: 'ex_213', name: 'Svend Press (Plate/Dumbbell)', category: 'Chest' },
+  { id: 'ex_214', name: 'Spoto Press (Paused Bench)', category: 'Chest' },
+  { id: 'ex_215', name: 'Larsen Press (Feet-Up Bench)', category: 'Chest' },
+  { id: 'ex_216', name: 'Guillotine Press', category: 'Chest' },
+  { id: 'ex_217', name: 'Cable Crossover (Mid-Chest)', category: 'Chest' },
+  { id: 'ex_218', name: 'Single-Arm Cable Chest Press', category: 'Chest' },
+  { id: 'ex_219', name: 'Machine Incline Chest Fly', category: 'Chest' },
+  { id: 'ex_220', name: 'Deficit Push-Ups', category: 'Chest' },
+  { id: 'ex_221', name: 'Gymnastic Ring Dips', category: 'Chest' },
+  { id: 'ex_222', name: 'Archer Push-Ups', category: 'Chest' },
+  { id: 'ex_223', name: 'Pike-to-Cobra Push-Ups', category: 'Chest' },
+  { id: 'ex_224', name: 'Resistance Band Push-Ups', category: 'Chest' },
+  { id: 'ex_225', name: 'Machine-Assisted Chest Dips', category: 'Chest' },
+  { id: 'ex_226', name: 'Dumbbell Around the Worlds', category: 'Chest' },
+  { id: 'ex_227', name: 'Neutral-Grip Dumbbell Floor Press', category: 'Chest' },
+
+  // --- BACK EXPANSION ---
+  { id: 'ex_228', name: 'Deficit Barbell Deadlift', category: 'Back' },
+  { id: 'ex_229', name: 'Snatch-Grip Deadlift', category: 'Back' },
+  { id: 'ex_230', name: 'Trap Bar (Hex Bar) Deadlift', category: 'Back' },
+  { id: 'ex_231', name: 'Block Pulls (High Rack Pull)', category: 'Back' },
+  { id: 'ex_232', name: 'Seal Row (Barbell on Bench)', category: 'Back' },
+  { id: 'ex_233', name: 'Incline Bench Dumbbell Row', category: 'Back' },
+  { id: 'ex_234', name: 'Kroc Rows (Heavy Dumbbell)', category: 'Back' },
+  { id: 'ex_235', name: 'Yates Row (Underhand Barbell)', category: 'Back' },
+  { id: 'ex_236', name: 'Gorilla Row (Kettlebell/Dumbbell)', category: 'Back' },
+  { id: 'ex_237', name: 'Landmine T-Bar Row', category: 'Back' },
+  { id: 'ex_238', name: 'Wide-Grip Pull-Ups', category: 'Back' },
+  { id: 'ex_239', name: 'Neutral-Grip Pull-Ups', category: 'Back' },
+  { id: 'ex_240', name: 'Commando Pull-Ups', category: 'Back' },
+  { id: 'ex_241', name: 'Muscle-Up (Bar/Rings)', category: 'Back' },
+  { id: 'ex_242', name: 'Single-Arm Cable Lat Pulldown', category: 'Back' },
+  { id: 'ex_243', name: 'Kneeling Lat Pulldown', category: 'Back' },
+  { id: 'ex_244', name: 'Mag Grip Lat Pulldown', category: 'Back' },
+  { id: 'ex_245', name: 'Dumbbell Lat Pullover', category: 'Back' },
+  { id: 'ex_246', name: 'Reverse Hyper Extension', category: 'Back' },
+  { id: 'ex_247', name: 'Underhand Inverted Row', category: 'Back' },
+  { id: 'ex_248', name: 'Weighted 45° Back Extension', category: 'Back' },
+  { id: 'ex_249', name: 'Superman Hold (Arch Body)', category: 'Back' },
+
+  // --- SHOULDERS EXPANSION ---
+  { id: 'ex_250', name: 'Push Press (Barbell)', category: 'Shoulders' },
+  { id: 'ex_251', name: 'Behind-the-Neck Barbell Press', category: 'Shoulders' },
+  { id: 'ex_252', name: 'Landmine Overhead Press', category: 'Shoulders' },
+  { id: 'ex_253', name: 'Viking Press (Machine/Landmine)', category: 'Shoulders' },
+  { id: 'ex_254', name: 'Z-Press (Floor Barbell OHP)', category: 'Shoulders' },
+  { id: 'ex_255', name: 'See-Saw Dumbbell Press', category: 'Shoulders' },
+  { id: 'ex_256', name: 'High Incline Dumbbell Shoulder Press', category: 'Shoulders' },
+  { id: 'ex_257', name: 'Egyptian Cable Lateral Raise', category: 'Shoulders' },
+  { id: 'ex_258', name: 'Cross-Body Cable Lateral Raise', category: 'Shoulders' },
+  { id: 'ex_259', name: 'Incline Bench Dumbbell Y-Raise', category: 'Shoulders' },
+  { id: 'ex_260', name: 'Dumbbell W-Raise', category: 'Shoulders' },
+  { id: 'ex_261', name: 'Incline Dumbbell Rear Delt Fly', category: 'Shoulders' },
+  { id: 'ex_262', name: 'Overhead Cable Face Pull', category: 'Shoulders' },
+  { id: 'ex_263', name: 'Rear Delt Cable Pull-Apart', category: 'Shoulders' },
+  { id: 'ex_264', name: 'Resistance Band Pull-Aparts', category: 'Shoulders' },
+  { id: 'ex_265', name: 'Hex Bar (Trap Bar) Shrugs', category: 'Shoulders' },
+  { id: 'ex_266', name: 'Overhead Barbell Shrugs', category: 'Shoulders' },
+  { id: 'ex_267', name: 'Cable Shrugs', category: 'Shoulders' },
+  { id: 'ex_268', name: 'Dumbbell Upright Row', category: 'Shoulders' },
+  { id: 'ex_269', name: 'Plate Bus Drivers', category: 'Shoulders' },
+  { id: 'ex_270', name: 'Plate/Kettlebell Halos', category: 'Shoulders' },
+
+  // --- ARMS EXPANSION (BICEPS, TRICEPS, FOREARMS) ---
+  { id: 'ex_271', name: 'Drag Curl (Barbell/Smith)', category: 'Arms' },
+  { id: 'ex_272', name: 'Bayonian Cable Curl (Behind-the-Back)', category: 'Arms' },
+  { id: 'ex_273', name: 'Cable Preacher Curl', category: 'Arms' },
+  { id: 'ex_274', name: 'High Cable Bicep Curl (Hercules)', category: 'Arms' },
+  { id: 'ex_275', name: 'Dumbbell Waiter Curl', category: 'Arms' },
+  { id: 'ex_276', name: '21s Bicep Curl (Barbell/EZ-Bar)', category: 'Arms' },
+  { id: 'ex_277', name: 'Dumbbell Preacher Hammer Curl', category: 'Arms' },
+  { id: 'ex_278', name: 'Cross-Body Dumbbell Hammer Curl', category: 'Arms' },
+  { id: 'ex_279', name: 'Strict Barbell Curl (Wall-Supported)', category: 'Arms' },
+  { id: 'ex_280', name: 'Incline Bench Cable Curl', category: 'Arms' },
+  { id: 'ex_281', name: 'Reverse EZ-Bar Curl', category: 'Arms' },
+  { id: 'ex_282', name: 'Kettlebell Bicep Curl', category: 'Arms' },
+  { id: 'ex_283', name: 'Tate Press (Dumbbell)', category: 'Arms' },
+  { id: 'ex_284', name: 'Single-Arm Overhead Dumbbell Extension', category: 'Arms' },
+  { id: 'ex_285', name: 'Cross-Body Cable Tricep Extension', category: 'Arms' },
+  { id: 'ex_286', name: 'Katana Cable Tricep Extension', category: 'Arms' },
+  { id: 'ex_287', name: 'Gymnastic Ring Tricep Dips', category: 'Arms' },
+  { id: 'ex_288', name: 'Seated Dip Machine', category: 'Arms' },
+  { id: 'ex_289', name: 'California Press', category: 'Arms' },
+  { id: 'ex_290', name: 'Floor Skull Crushers (EZ-Bar)', category: 'Arms' },
+  { id: 'ex_291', name: 'Cable Tricep Kickback', category: 'Arms' },
+  { id: 'ex_292', name: 'French Press (Seated EZ-Bar)', category: 'Arms' },
+  { id: 'ex_293', name: 'Plate Pinch Hold (Forearms)', category: 'Arms' },
+  { id: 'ex_294', name: 'Dead Hang (Grip & Forearms)', category: 'Arms' },
+  { id: 'ex_295', name: 'Wrist Roller (Forearms)', category: 'Arms' },
+  { id: 'ex_296', name: 'Dumbbell Reverse Wrist Curls', category: 'Arms' },
+  { id: 'ex_297', name: 'Behind-the-Back Barbell Wrist Curls', category: 'Arms' },
+  { id: 'ex_298', name: 'Fat Grip Dumbbell Curls', category: 'Arms' },
+
+  // --- LEGS EXPANSION ---
+  { id: 'ex_299', name: 'Zercher Squat (Barbell)', category: 'Legs' },
+  { id: 'ex_300', name: 'Box Squat (Barbell)', category: 'Legs' },
+  { id: 'ex_301', name: 'Paused Back Squat', category: 'Legs' },
+  { id: 'ex_302', name: 'Pin Squat (Safety Rack)', category: 'Legs' },
+  { id: 'ex_303', name: 'Pistol Squat (Single Leg)', category: 'Legs' },
+  { id: 'ex_304', name: 'Cyclist Squat (Elevated Heels)', category: 'Legs' },
+  { id: 'ex_305', name: 'Spanish Squat (Band-Assisted)', category: 'Legs' },
+  { id: 'ex_306', name: 'Pendulum Squat Machine', category: 'Legs' },
+  { id: 'ex_307', name: 'Belt Squat Machine', category: 'Legs' },
+  { id: 'ex_308', name: 'Landmine Squat', category: 'Legs' },
+  { id: 'ex_309', name: 'Box Step-Ups (Dumbbell)', category: 'Legs' },
+  { id: 'ex_310', name: 'Curtsy Lunges', category: 'Legs' },
+  { id: 'ex_311', name: 'Deficit Reverse Lunges', category: 'Legs' },
+  { id: 'ex_312', name: 'Nordic Hamstring Curl', category: 'Legs' },
+  { id: 'ex_313', name: 'Glute-Ham Raise (GHR)', category: 'Legs' },
+  { id: 'ex_314', name: 'Single-Leg Romanian Deadlift', category: 'Legs' },
+  { id: 'ex_315', name: 'B-Stance Romanian Deadlift', category: 'Legs' },
+  { id: 'ex_316', name: 'Stability Ball Hamstring Curl', category: 'Legs' },
+  { id: 'ex_317', name: 'Slider Hamstring Curl', category: 'Legs' },
+  { id: 'ex_318', name: 'Banded Good Mornings', category: 'Legs' },
+  { id: 'ex_319', name: 'Cable Pull-Through (Glutes)', category: 'Legs' },
+  { id: 'ex_320', name: 'Sumo Squat (Dumbbell/Kettlebell)', category: 'Legs' },
+  { id: 'ex_321', name: 'Kas Glute Bridge (Smith/Barbell)', category: 'Legs' },
+  { id: 'ex_322', name: 'Frog Pumps (Dumbbell)', category: 'Legs' },
+  { id: 'ex_323', name: 'Cable Glute Kickbacks', category: 'Legs' },
+  { id: 'ex_324', name: 'Standing Cable Hip Abduction', category: 'Legs' },
+  { id: 'ex_325', name: 'Banded Monster Walks', category: 'Legs' },
+  { id: 'ex_326', name: 'Banded Clamshells', category: 'Legs' },
+  { id: 'ex_327', name: 'Single-Leg Standing Calf Raise', category: 'Legs' },
+  { id: 'ex_328', name: 'Leg Press Calf Raise', category: 'Legs' },
+  { id: 'ex_329', name: 'Smith Machine Standing Calf Raise', category: 'Legs' },
+  { id: 'ex_330', name: 'Tibialis Raise (Shin & Ankle)', category: 'Legs' },
+  { id: 'ex_331', name: 'Donkey Calf Raise', category: 'Legs' },
+
+  // --- CORE & OBLIQUES EXPANSION ---
+  { id: 'ex_332', name: "Captain's Chair Leg Raise", category: 'Core' },
+  { id: 'ex_333', name: 'Windshield Wipers (Bar/Floor)', category: 'Core' },
+  { id: 'ex_334', name: 'Toes-to-Bar', category: 'Core' },
+  { id: 'ex_335', name: 'Pallof Press (Cable/Band)', category: 'Core' },
+  { id: 'ex_336', name: 'Landmine 180 Rotations', category: 'Core' },
+  { id: 'ex_337', name: 'Low-to-High Cable Woodchopper', category: 'Core' },
+  { id: 'ex_338', name: 'Cable Side Bend', category: 'Core' },
+  { id: 'ex_339', name: 'Dumbbell Side Bend', category: 'Core' },
+  { id: 'ex_340', name: 'GHD Sit-Up', category: 'Core' },
+  { id: 'ex_341', name: 'V-Ups (Jackknife Crunches)', category: 'Core' },
+  { id: 'ex_342', name: 'Flutter Kicks', category: 'Core' },
+  { id: 'ex_343', name: 'Scissor Kicks', category: 'Core' },
+  { id: 'ex_344', name: 'L-Sit (Floor/Parallettes)', category: 'Core' },
+  { id: 'ex_345', name: 'Bird-Dog Hold', category: 'Core' },
+  { id: 'ex_346', name: 'Stomach Vacuum', category: 'Core' },
+  { id: 'ex_347', name: 'Copenhagen Plank (Adductors & Core)', category: 'Core' },
+  { id: 'ex_348', name: 'Bear Crawl', category: 'Core' },
+  { id: 'ex_349', name: 'Stir-the-Pot (Stability Ball Plank)', category: 'Core' },
+  { id: 'ex_350', name: 'Reverse Crunches', category: 'Core' }
 ];
 
 const DEFAULT_ROUTINES = [
@@ -161,6 +314,30 @@ const DEFAULT_ROUTINES = [
     name: 'Upper Body Pump',
     tag: 'Chest, Back, Arms',
     exerciseIds: ['ex_1', 'ex_9', 'ex_16', 'ex_20', 'ex_21']
+  },
+  {
+    id: 'routine_lower',
+    name: 'Lower Body & Posterior Chain',
+    tag: 'Quads, Hamstrings, Glutes',
+    exerciseIds: ['ex_11', 'ex_12', 'ex_182', 'ex_31', 'ex_15']
+  },
+  {
+    id: 'routine_arnold_chest_back',
+    name: 'Arnold Split: Chest & Back',
+    tag: 'Chest, Lats, Mid-Back',
+    exerciseIds: ['ex_1', 'ex_2', 'ex_8', 'ex_9', 'ex_3']
+  },
+  {
+    id: 'routine_arnold_arms_delts',
+    name: 'Arnold Split: Delts & Arms',
+    tag: 'Shoulders, Biceps, Triceps',
+    exerciseIds: ['ex_16', 'ex_17', 'ex_20', 'ex_23', 'ex_28', 'ex_21']
+  },
+  {
+    id: 'routine_calisthenics',
+    name: 'Calisthenics & Core Mastery',
+    tag: 'Bodyweight & Functional',
+    exerciseIds: ['ex_9', 'ex_4', 'ex_5', 'ex_24', 'ex_25']
   }
 ];
 
@@ -225,6 +402,13 @@ function syncDemoState(state) {
   DEFAULT_EXERCISES.forEach(def => {
     if (!existingNames.has(def.name.toLowerCase())) {
       state.exercises.push({ ...def });
+    }
+  });
+  state.routines = state.routines || [...DEFAULT_ROUTINES];
+  const existingRoutineIds = new Set(state.routines.map(r => r.id));
+  DEFAULT_ROUTINES.forEach(defR => {
+    if (!existingRoutineIds.has(defR.id)) {
+      state.routines.push({ ...defR });
     }
   });
   const demoOn = state.settings.demoMode === true;

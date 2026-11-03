@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v33';
+const CACHE_NAME = 'moon-v34';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
   './camera.js',
   './ranks.js',
   './ig_webview_injection.js',
+  './image_7.png',
   './manifest.json',
   './apple-touch-icon.png',
   './app_icon.png',

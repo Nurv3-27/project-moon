@@ -74,3 +74,4 @@ class handler(BaseHTTPRequestHandler):
         else:
             current_bank = float(state.get('scroll_bank', 0.0))
             return self._send_text(f"stopped: no active session, balance: {current_bank:.2f} min")
+

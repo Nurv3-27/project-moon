@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=31">
+  <link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
   <div id="app" class="app-root">
@@ -1414,14 +1414,59 @@
       </div>
 
       <!-- The In-App WebView Frame & Container -->
-      <div class="ig-webview-viewport">
-        <iframe
-          id="ig-direct-webview-iframe"
-          class="ig-direct-iframe"
-          src="about:blank"
-          allow="camera; microphone; fullscreen; clipboard-read; clipboard-write; autoplay"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-presentation"
-        ></iframe>
+      <div class="ig-webview-viewport" id="ig-webview-viewport">
+        <!-- LIVE COUNTDOWN OVERLAY READING FROM SCROLL BANK BALANCE -->
+        <div id="ig-webview-countdown-overlay" class="ig-webview-countdown-overlay">
+          <div class="ig-countdown-content">
+            <div class="ig-countdown-info">
+              <span class="ig-countdown-badge" id="ig-countdown-badge">
+                <span class="ig-pulse-dot"></span>
+                <span id="ig-countdown-status-text">SCROLL BANK LIVE</span>
+              </span>
+              <div class="ig-countdown-digits-wrap">
+                <span id="ig-countdown-digits" class="ig-countdown-digits">00:00.0</span>
+                <span class="ig-countdown-sub">remaining</span>
+              </div>
+            </div>
+
+            <!-- Progress Track -->
+            <div class="ig-countdown-bar-wrap">
+              <div id="ig-countdown-progress" class="ig-countdown-progress" style="width: 100%;"></div>
+            </div>
+
+            <!-- Pause & Bank remaining scroll time -->
+            <div class="ig-countdown-actions">
+              <button type="button" class="ig-countdown-bank-btn" onclick="pauseAndBankScrollWebView()" title="Pause and bank remaining time">
+                &#9208;&#65039; Save &amp; Bank Time
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Mount Target for Instagram WebView -->
+        <div id="ig-webview-mount-target" class="ig-webview-mount-target">
+          <!-- iframe is dynamically mounted here while scroll bank is positive, and UNMOUNTED at exact 00:00 -->
+        </div>
+
+        <!-- Lockout Screen (displayed the exact millisecond timer reaches 0) -->
+        <div id="ig-webview-lockout-placeholder" class="ig-webview-lockout-placeholder hidden">
+          <div class="ig-lockout-content">
+            <div class="ig-lockout-icon">&#9940;</div>
+            <h3>Scroll Bank Depleted!</h3>
+            <p>Your earned scroll time reached 00:00. The Instagram WebView has been <strong>immediately unmounted</strong> and locked down.</p>
+            <div class="ig-lockout-reward-info">
+              <span>&#9889; Earn <b>+2 min</b> per camera-verified push-up, pull-up, or plank minute.</span>
+            </div>
+            <div class="ig-lockout-actions">
+              <button type="button" class="primary-glow-btn full-width" onclick="closeInAppInstagramWebView(); switchTab('camera');">
+                &#128247; Camera Coach (Earn Time)
+              </button>
+              <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="closeInAppInstagramWebView();">
+                Close &amp; Exit
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- Native WebView Integration Bar / Guidance -->
         <div id="ig-webview-guard-banner" class="ig-webview-guard-banner">
@@ -1484,9 +1529,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=31"></script>
-  <script src="camera.js?v=31"></script>
-  <script src="ranks.js?v=31"></script>
+  <script src="app.js?v=32"></script>
+  <script src="camera.js?v=32"></script>
+  <script src="ranks.js?v=32"></script>
 </body>
 </html>
 

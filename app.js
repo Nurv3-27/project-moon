@@ -2101,21 +2101,7 @@ function scrollTick() {
   if (!AppState.scroll) return;
   const s = AppState.scroll;
   if (s.sessionEndsAt && Date.now() >= s.sessionEndsAt) {
-    s.sessionEndsAt = null;
-    s.balance = 0;
-    s.antiScrollActive = true;
-    s.antiScrollStartedAt = Date.now();
-    saveState();
-    syncScrollToServer();
-    playRestTimerChime();
-    triggerHaptic([300, 100, 300]);
-    try {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        navigator.serviceWorker.ready.then(reg => reg.showNotification('Scroll time is up!', { body: 'Reels & Shorts are locked. Go work out.', icon: 'app_icon_192.png' }));
-      }
-    } catch (e) {}
-    const ov = document.getElementById('scroll-lock-overlay');
-    if (ov) ov.classList.remove('hidden');
+    unmountInstagramWebView(true);
   }
   renderScroll();
 }
@@ -2141,41 +2127,248 @@ function syncScrollToServer() {
   } catch (e) {}
 }
 
-// Open Instagram Messenger / Direct Inbox directly without opening Home or Reels feeds
-function openInAppInstagramWebView() {
-  ensureScrollState();
-  if (!AppState.scroll.antiScrollActive) {
-    AppState.scroll.antiScrollActive = true;
-    AppState.scroll.antiScrollStartedAt = Date.now();
-    saveState();
-    renderScroll();
-    syncScrollToServer();
-  }
-  if (AppState.settings.dmOnlyMode === false && !AppState.scroll.sessionEndsAt) {
-    showToast('\uD83D\uDD12 Strict Full Block is on \u2014 enable "Chat Inbox & Friend Reels Only" switch first!');
+// --- In-App Instagram WebView with Strict Scroll Bank Countdown & Auto-Unmount ---
+let igCountdownRafId = null;
+let igCountdownIntervalId = null;
+let igSessionStartDurationMs = 0;
+
+function updateIgCountdownOverlay() {
+  const s = AppState.scroll;
+  if (!s) return;
+
+  const now = Date.now();
+  const remainingMs = s.sessionEndsAt ? (s.sessionEndsAt - now) : 0;
+
+  // The EXACT millisecond the timer reaches zero: unmount and lock down immediately
+  if (remainingMs <= 0) {
+    unmountInstagramWebView(true);
     return;
   }
 
-  const iframe = document.getElementById('ig-direct-webview-iframe');
-  if (iframe) {
-    if (!iframe.src || iframe.src === 'about:blank') {
-      iframe.src = 'https://www.instagram.com/direct/inbox/';
+  const digitsEl = document.getElementById('ig-countdown-digits');
+  const progressEl = document.getElementById('ig-countdown-progress');
+  const overlayEl = document.getElementById('ig-webview-countdown-overlay');
+  const statusEl = document.getElementById('ig-countdown-status-text');
+
+  const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
+  const tenths = Math.floor((remainingMs % 1000) / 100);
+  const mins = Math.floor(totalSec / 60);
+  const secs = totalSec % 60;
+  const formattedDigits = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0') + '.' + tenths;
+
+  if (digitsEl) digitsEl.textContent = formattedDigits;
+
+  if (progressEl && igSessionStartDurationMs > 0) {
+    const pct = Math.min(100, Math.max(0, (remainingMs / igSessionStartDurationMs) * 100));
+    progressEl.style.width = pct.toFixed(1) + '%';
+  }
+
+  if (overlayEl && statusEl) {
+    if (remainingMs <= 10000) {
+      overlayEl.classList.remove('warning');
+      overlayEl.classList.add('critical');
+      statusEl.textContent = 'CRITICAL \u2022 LOCKING IN <10S';
+    } else if (remainingMs <= 60000) {
+      overlayEl.classList.add('warning');
+      overlayEl.classList.remove('critical');
+      statusEl.textContent = 'BANK EXPIRING SOON';
+    } else {
+      overlayEl.classList.remove('warning', 'critical');
+      statusEl.textContent = 'SCROLL BANK LIVE';
     }
   }
 
-  openModal('modal-ig-webview');
-  showToast('\uD83D\uDEE1\uFE0F In-App Instagram DM Client opened (Feeds & Reels Locked)');
+  // Sync to iframe via postMessage if loaded
+  const iframe = document.getElementById('ig-direct-webview-iframe');
+  if (iframe && iframe.contentWindow) {
+    try {
+      iframe.contentWindow.postMessage({ type: 'MOON_SCROLL_BANK_TICK', remainingMs }, '*');
+    } catch (e) {}
+  }
 }
 
-function closeInAppInstagramWebView() {
+function startIgCountdownTicker() {
+  stopIgCountdownTicker();
+  updateIgCountdownOverlay();
+
+  // High-frequency ticker: RAF with 50ms fallback interval for background safety
+  function loop() {
+    updateIgCountdownOverlay();
+    if (AppState.scroll && AppState.scroll.sessionEndsAt && Date.now() < AppState.scroll.sessionEndsAt) {
+      igCountdownRafId = requestAnimationFrame(loop);
+    }
+  }
+  igCountdownRafId = requestAnimationFrame(loop);
+  igCountdownIntervalId = setInterval(updateIgCountdownOverlay, 50);
+}
+
+function stopIgCountdownTicker() {
+  if (igCountdownRafId) {
+    cancelAnimationFrame(igCountdownRafId);
+    igCountdownRafId = null;
+  }
+  if (igCountdownIntervalId) {
+    clearInterval(igCountdownIntervalId);
+    igCountdownIntervalId = null;
+  }
+}
+
+function unmountInstagramWebView(triggeredByExpiry = false) {
+  stopIgCountdownTicker();
+
+  const mount = document.getElementById('ig-webview-mount-target');
+  const iframe = document.getElementById('ig-direct-webview-iframe');
+  if (iframe) {
+    try {
+      if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'MOON_SCROLL_BANK_EXPIRED' }, '*');
+      }
+      iframe.src = 'about:blank';
+    } catch (e) {}
+  }
+  if (mount) {
+    mount.innerHTML = ''; // Physically unmount and purge WebView from DOM
+  }
+
+  const placeholder = document.getElementById('ig-webview-lockout-placeholder');
+  const overlayEl = document.getElementById('ig-webview-countdown-overlay');
+  const digitsEl = document.getElementById('ig-countdown-digits');
+  const progressEl = document.getElementById('ig-countdown-progress');
+  const statusEl = document.getElementById('ig-countdown-status-text');
+
+  if (digitsEl) digitsEl.textContent = '00:00.0';
+  if (progressEl) progressEl.style.width = '0%';
+  if (overlayEl) {
+    overlayEl.classList.remove('warning');
+    overlayEl.classList.add('critical');
+  }
+  if (statusEl) statusEl.textContent = 'LOCKED \u2022 TIME EXPIRED';
+
+  if (triggeredByExpiry) {
+    ensureScrollState();
+    const s = AppState.scroll;
+    s.sessionEndsAt = null;
+    s.balance = 0;
+    s.antiScrollActive = true;
+    s.antiScrollStartedAt = Date.now();
+    saveState();
+    renderScroll();
+    syncScrollToServer();
+
+    if (placeholder) placeholder.classList.remove('hidden');
+
+    playRestTimerChime();
+    triggerHaptic([400, 120, 400]);
+    showToast('\u26D4 Scroll Bank reached 00:00! Instagram WebView unmounted and locked.');
+
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then(reg => reg.showNotification('Scroll Bank Depleted (00:00)', {
+          body: 'Instagram has been unmounted. Complete push-ups, pull-ups or planks to earn time.',
+          icon: 'app_icon_192.png'
+        }));
+      }
+    } catch (e) {}
+
+    // Prompt lock overlay after 2 seconds to cement the restriction
+    setTimeout(() => {
+      const modal = document.getElementById('modal-ig-webview');
+      if (modal && !modal.classList.contains('hidden')) {
+        closeModal('modal-ig-webview');
+        openAntiScrollLockScreen();
+      }
+    }, 2200);
+  } else {
+    if (placeholder) placeholder.classList.add('hidden');
+  }
+}
+
+function openInAppInstagramWebView() {
+  ensureScrollState();
+  const s = AppState.scroll;
+
+  const hasActiveSession = Boolean(s.sessionEndsAt && Date.now() < s.sessionEndsAt);
+  const hasBankedTime = (s.balance > 0);
+
+  // Strictly enforce scroll bank: user CANNOT open WebView with 0:00 balance
+  if (!hasActiveSession && !hasBankedTime) {
+    openAntiScrollLockScreen();
+    showToast('\uD83D\uDD12 0:00 Scroll Bank! Earn scroll time with push-ups, pull-ups, or planks first.');
+    return;
+  }
+
+  // Activate scroll session if banked time is available and no session was currently ticking
+  if (!hasActiveSession && hasBankedTime) {
+    const durationMs = s.balance * 1000;
+    s.sessionEndsAt = Date.now() + durationMs;
+    igSessionStartDurationMs = durationMs;
+    s.balance = 0;
+    s.antiScrollActive = true;
+    saveState();
+    renderScroll();
+    syncScrollToServer();
+    requestNotifyPermission();
+  } else if (hasActiveSession) {
+    if (!igSessionStartDurationMs) {
+      igSessionStartDurationMs = Math.max(1000, s.sessionEndsAt - Date.now());
+    }
+  }
+
+  // Hide lockout placeholder & show mount
+  const placeholder = document.getElementById('ig-webview-lockout-placeholder');
+  if (placeholder) placeholder.classList.add('hidden');
+
+  // Mount clean WebView iframe into DOM
+  const mount = document.getElementById('ig-webview-mount-target');
+  if (mount) {
+    mount.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.id = 'ig-direct-webview-iframe';
+    iframe.className = 'ig-direct-iframe';
+    iframe.src = 'https://www.instagram.com/direct/inbox/';
+    iframe.allow = 'camera; microphone; fullscreen; clipboard-read; clipboard-write; autoplay';
+    iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-presentation';
+    mount.appendChild(iframe);
+  }
+
+  openModal('modal-ig-webview');
+  startIgCountdownTicker();
+  showToast('\uD83D\uDEE1\uFE0F In-App Instagram DM Client mounted (Scroll Bank Live)');
+}
+
+function pauseAndBankScrollWebView() {
+  ensureScrollState();
+  const s = AppState.scroll;
+  if (s.sessionEndsAt && Date.now() < s.sessionEndsAt) {
+    const remSec = Math.max(0, Math.floor((s.sessionEndsAt - Date.now()) / 1000));
+    s.balance = remSec;
+    s.sessionEndsAt = null;
+    s.antiScrollActive = true;
+    saveState();
+    renderScroll();
+    syncScrollToServer();
+    showToast(`\uD83D\uDCBE Saved ${fmtClock(s.balance)} back to your Scroll Bank!`);
+  }
+  unmountInstagramWebView(false);
   closeModal('modal-ig-webview');
 }
 
+function closeInAppInstagramWebView() {
+  pauseAndBankScrollWebView();
+}
+
 function refreshInAppInstagramWebView() {
-  const iframe = document.getElementById('ig-direct-webview-iframe');
-  if (iframe) {
+  const mount = document.getElementById('ig-webview-mount-target');
+  if (mount && AppState.scroll && AppState.scroll.sessionEndsAt && Date.now() < AppState.scroll.sessionEndsAt) {
+    mount.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.id = 'ig-direct-webview-iframe';
+    iframe.className = 'ig-direct-iframe';
     iframe.src = 'https://www.instagram.com/direct/inbox/';
-    showToast('\uD83D\uDD04 Reloading Instagram Direct Inbox...');
+    iframe.allow = 'camera; microphone; fullscreen; clipboard-read; clipboard-write; autoplay';
+    iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-presentation';
+    mount.appendChild(iframe);
+    showToast('\uD83D\uDD04 Reloaded Instagram Direct Client');
   }
 }
 
@@ -2208,6 +2401,8 @@ async function copyInjectionScriptUrl() {
 
 window.openInAppInstagramWebView = openInAppInstagramWebView;
 window.closeInAppInstagramWebView = closeInAppInstagramWebView;
+window.pauseAndBankScrollWebView = pauseAndBankScrollWebView;
+window.unmountInstagramWebView = unmountInstagramWebView;
 window.refreshInAppInstagramWebView = refreshInAppInstagramWebView;
 window.resetInAppInstagramToInbox = resetInAppInstagramToInbox;
 window.dismissIgGuardBanner = dismissIgGuardBanner;

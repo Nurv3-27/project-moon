@@ -281,19 +281,63 @@
   }, { passive: false, capture: true });
 
   // -------------------------------------------------------------------------
-  // 5. In-Client Security Badge
+  // 5. In-Client Security Badge & Live Scroll Bank Listener
   // -------------------------------------------------------------------------
+  let liveRemainingSec = null;
+
   function renderBadge() {
     if (!document.body || document.getElementById('moon-dm-client-badge')) return;
     const badge = document.createElement('div');
     badge.id = 'moon-dm-client-badge';
     badge.title = 'Moon Locked-Down DM Client: Feeds & Reels Blocked. Tap to return to Inbox.';
-    badge.innerHTML = `<span>\uD83D\uDEE1\uFE0F DMs Only</span>`;
+    badge.innerHTML = `<span>\uD83D\uDEE1\uFE0F ${liveRemainingSec !== null ? fmtTimer(liveRemainingSec) : 'DMs Only'}</span>`;
     badge.onclick = function () {
       window.location.replace(INBOX_URL);
     };
     document.body.appendChild(badge);
   }
+
+  function fmtTimer(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  // Listen for countdown timer updates and auto-lock command from parent window or native container
+  window.addEventListener('message', function (e) {
+    if (!e.data) return;
+    if (e.data.type === 'MOON_SCROLL_BANK_TICK') {
+      const remainingMs = Number(e.data.remainingMs) || 0;
+      liveRemainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+      const badge = document.getElementById('moon-dm-client-badge');
+      if (badge) {
+        badge.innerHTML = `<span>\u23F1\uFE0F ${fmtTimer(liveRemainingSec)}</span>`;
+        if (liveRemainingSec <= 10) {
+          badge.style.borderColor = '#ef4444';
+          badge.style.color = '#ff6b6b';
+          badge.style.background = 'rgba(30,10,10,0.95)';
+        } else if (liveRemainingSec <= 60) {
+          badge.style.borderColor = '#f59e0b';
+          badge.style.color = '#fcd34d';
+        }
+      }
+    } else if (e.data.type === 'MOON_SCROLL_BANK_EXPIRED') {
+      // Hard lockdown: clear DOM immediately
+      try {
+        window.stop();
+      } catch (err) {}
+      document.documentElement.innerHTML = `
+        <head><title>Scroll Bank Expired</title></head>
+        <body style="margin:0;background:#06080c;color:#fff;font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;box-sizing:border-box;">
+          <div>
+            <div style="font-size:3.5rem;margin-bottom:12px;">\u26D4</div>
+            <h2 style="font-size:1.4rem;color:#ff6b6b;margin:0 0 8px;">Scroll Bank Depleted (00:00)</h2>
+            <p style="color:#8e8e93;font-size:0.9rem;max-width:300px;margin:0 auto;">Instagram has been locked down. Complete push-ups, pull-ups, or planks to earn time.</p>
+          </div>
+        </body>
+      `;
+    }
+  });
 
   // -------------------------------------------------------------------------
   // 6. Initialization
@@ -322,3 +366,4 @@
     init();
   }
 })();
+

@@ -26,12 +26,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=39">
+  <link rel="stylesheet" href="style.css?v=40">
 </head>
 <body>
-  <!-- ANIMATED INITIAL APP SPLASH SCREEN (SOLID PITCH-BLACK + CUSTOM IMAGE_7.PNG) -->
-  <div id="app-splash-screen" class="splash-screen-overlay" aria-label="Loading Moon OS" onclick="dismissSplashScreen()">
-    <audio id="splash-audio" src="startup.mp3" preload="auto" autoplay playsinline webkit-playsinline></audio>
+  <!-- ANIMATED INITIAL APP SPLASH SCREEN (5-SECOND LOADING + SOLID PITCH-BLACK + CUSTOM IMAGE_7.PNG) -->
+  <div id="app-splash-screen" class="splash-screen-overlay" aria-label="Loading Moon OS">
+    <audio id="splash-audio" src="startup.mp3" preload="auto" playsinline webkit-playsinline></audio>
+
+    <!-- Subtle Skip Pill (Top-Right) -->
+    <button type="button" class="splash-skip-btn" onclick="dismissSplashScreen(event)" title="Skip to Dashboard">
+      Skip &rarr;
+    </button>
+
     <div class="splash-center-content">
       <!-- Central Custom Logo Asset: image_7.png (Maroon crescent moon with two figures & dumbbell) -->
       <div class="splash-logo-container">
@@ -48,6 +54,12 @@
       <div class="splash-quote-box">
         <p class="splash-quote-text">&ldquo;Are you ready to take it to the moon?&rdquo;</p>
       </div>
+
+      <!-- Live Audio Indicator & Direct Unmute Hook -->
+      <div id="splash-sound-status" class="splash-sound-status">
+        <span class="splash-sound-dot" id="splash-sound-dot"></span>
+        <span id="splash-sound-label">Audio starting...</span>
+      </div>
     </div>
 
     <!-- Bottom-Right Pinned Tribute: 'In the loving memory of 27' alongside Arabic 'من' -->
@@ -56,28 +68,6 @@
       <span class="splash-tribute-arabic">من</span>
     </div>
   </div>
-
-  <script>
-    // Immediate automated audio priming the exact millisecond splash screen mounts
-    (function() {
-      try {
-        var a = document.getElementById('splash-audio');
-        if (a) {
-          a.volume = 1.0;
-          var p = a.play();
-          if (p !== undefined) {
-            p.catch(function() {
-              a.muted = true;
-              a.play().then(function() {
-                a.muted = false;
-                a.volume = 1.0;
-              }).catch(function() {});
-            });
-          }
-        }
-      } catch(e) {}
-    })();
-  </script>
 
   <div id="app" class="app-root">
     
@@ -1579,9 +1569,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=39"></script>
-  <script src="camera.js?v=39"></script>
-  <script src="ranks.js?v=39"></script>
+  <script src="app.js?v=40"></script>
+  <script src="camera.js?v=40"></script>
+  <script src="ranks.js?v=40"></script>
 </body>
 </html>
 

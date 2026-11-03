@@ -3141,12 +3141,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// Splash Screen Lifecycle & Automated Startup Audio Controller
+// Splash Screen Lifecycle & Automated Startup Audio Controller (5-Second Extended Duration)
+const SPLASH_TOTAL_DURATION_MS = 5000;
+const SPLASH_FADE_START_MS = 4000;
+const SPLASH_FADE_DURATION_MS = 1000;
+
 let splashDismissed = false;
 let splashAudio = null;
 let splashAudioFadeInterval = null;
 let splashDismissTimer = null;
 let splashFadeTimer = null;
+
+function setSplashSoundStatus(state, message) {
+  const container = document.getElementById('splash-sound-status');
+  const label = document.getElementById('splash-sound-label');
+  if (!container || !label) return;
+
+  container.classList.remove('playing', 'blocked');
+  if (state) {
+    container.classList.add(state);
+  }
+  if (message) {
+    label.textContent = message;
+  }
+}
+
+function handleSplashUserInteraction(e) {
+  if (splashDismissed) return;
+  // Allow skip button to proceed with skip instead of absorbing tap
+  if (e && e.target && e.target.closest && e.target.closest('.splash-skip-btn')) {
+    return;
+  }
+
+  // Direct un-mute and playback inside synchronous user gesture (unlocks iOS/Safari/Chrome)
+  if (splashAudio) {
+    try {
+      splashAudio.muted = false;
+      splashAudio.volume = 1.0;
+      const p = splashAudio.play();
+      if (p !== undefined) {
+        p.then(() => {
+          setSplashSoundStatus('playing', 'Sound active 🔊');
+        }).catch((err) => {
+          console.warn('[Splash Audio] Tap play failed:', err);
+        });
+      } else {
+        setSplashSoundStatus('playing', 'Sound active 🔊');
+      }
+    } catch (err) {
+      console.warn('[Splash Audio] Tap error:', err);
+    }
+  }
+
+  try {
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+  } catch (err) {}
+}
 
 function stopSplashAudio() {
   if (splashAudioFadeInterval) {
@@ -3207,67 +3260,57 @@ function playSplashAudio() {
     splashAudio.currentTime = 0;
     splashAudio.muted = false;
 
+    setSplashSoundStatus('', 'Connecting audio...');
+
     // Direct automated unmuted playback attempt
     const p = splashAudio.play();
     if (p !== undefined) {
-      p.catch(() => {
-        // Fallback: muted prime followed by immediate un-mute
-        try {
-          splashAudio.muted = true;
-          splashAudio.play().then(() => {
-            splashAudio.muted = false;
-            splashAudio.volume = 1.0;
-          }).catch(() => {});
-        } catch (e) {}
+      p.then(() => {
+        setSplashSoundStatus('playing', 'Sound active 🔊');
+      }).catch((err) => {
+        console.warn('[Splash Audio] Autoplay blocked, awaiting tap:', err);
+        setSplashSoundStatus('blocked', 'Tap anywhere for sound 🔊');
 
-        // Resume AudioContext in parallel
+        // Resume AudioContext in parallel if available
         try {
           const ctx = getAudioContext();
           if (ctx && ctx.state === 'suspended') {
-            ctx.resume().then(() => {
-              if (splashAudio && !splashDismissed) {
-                splashAudio.muted = false;
-                splashAudio.volume = 1.0;
-                splashAudio.play().catch(() => {});
-              }
-            }).catch(() => {});
+            ctx.resume().catch(() => {});
           }
         } catch (e) {}
-
-        // Passive background gesture hook: any subtle touch on screen un-suspends sound
-        const passiveUnmute = () => {
-          if (!splashDismissed && splashAudio) {
-            try {
-              splashAudio.muted = false;
-              splashAudio.volume = 1.0;
-              splashAudio.play().catch(() => {});
-            } catch (e) {}
-          }
-          window.removeEventListener('pointerdown', passiveUnmute, { capture: true });
-          window.removeEventListener('touchstart', passiveUnmute, { capture: true });
-        };
-        window.addEventListener('pointerdown', passiveUnmute, { capture: true, once: true });
-        window.addEventListener('touchstart', passiveUnmute, { capture: true, once: true });
       });
+    } else {
+      setSplashSoundStatus('playing', 'Sound active 🔊');
     }
   } catch (e) {
-    console.warn('[Splash Audio] Automated playback error:', e);
+    console.warn('[Splash Audio] Initialization error:', e);
+    setSplashSoundStatus('blocked', 'Tap anywhere for sound 🔊');
   }
 
-  // Programmatically decrease volume during the last 1 second of the 2.5-second duration (at 1500ms)
+  // Attach tap handlers so touching anywhere on the screen immediately plays/unmutes audio
+  const splashEl = document.getElementById('app-splash-screen');
+  if (splashEl) {
+    splashEl.addEventListener('pointerdown', handleSplashUserInteraction, { passive: true });
+    splashEl.addEventListener('touchstart', handleSplashUserInteraction, { passive: true });
+  }
+
+  // Programmatically decrease volume during the last 1 second of the 5-second duration (at 4000ms)
   if (splashFadeTimer) clearTimeout(splashFadeTimer);
   splashFadeTimer = setTimeout(() => {
-    startSplashAudioFadeOut(1000);
-  }, 1500);
+    startSplashAudioFadeOut(SPLASH_FADE_DURATION_MS);
+  }, SPLASH_FADE_START_MS);
 
-  // Automatically route user to main dashboard after exactly 2.5 seconds
+  // Automatically route user to main dashboard after exactly 5 seconds
   if (splashDismissTimer) clearTimeout(splashDismissTimer);
   splashDismissTimer = setTimeout(() => {
     dismissSplashScreen();
-  }, 2500);
+  }, SPLASH_TOTAL_DURATION_MS);
 }
 
-function dismissSplashScreen() {
+function dismissSplashScreen(e) {
+  if (e && e.stopPropagation) {
+    e.stopPropagation();
+  }
   if (splashDismissed) return;
   splashDismissed = true;
 
@@ -3286,6 +3329,9 @@ function dismissSplashScreen() {
   const splash = document.getElementById('app-splash-screen');
   if (!splash) return;
 
+  splash.removeEventListener('pointerdown', handleSplashUserInteraction);
+  splash.removeEventListener('touchstart', handleSplashUserInteraction);
+
   splash.classList.add('fade-out');
 
   try {
@@ -3302,7 +3348,7 @@ function initSplashScreenTimer() {
   const splash = document.getElementById('app-splash-screen');
   if (!splash) return;
 
-  // Fully automated: play startup audio and start 2.5s timer immediately
+  // Fully automated: play startup audio and start 5.0s loading duration immediately
   playSplashAudio();
 }
 

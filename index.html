@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=50">
+  <link rel="stylesheet" href="style.css?v=51">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + CUSTOM IMAGE_7.PNG + FULL INTRO SOUND) -->
@@ -50,14 +50,14 @@
         <p class="splash-quote-text">&ldquo;Are you ready to take it to the moon?&rdquo;</p>
       </div>
 
-      <!-- Destination Choice: Routines vs Focus -->
+      <!-- Destination Choice: Workout Hub vs Focus -->
       <div class="splash-dest-picker" id="splash-dest-picker">
         <span class="splash-dest-heading">WHERE DO YOU WANT TO START?</span>
         <div class="splash-dest-grid">
-          <button type="button" class="splash-dest-btn dest-btn-routines" onclick="selectAppDestination('routines', event)">
+          <button type="button" class="splash-dest-btn dest-btn-routines" onclick="selectAppDestination('workout', event)">
             <span class="dest-btn-icon">&#127947;&#65039;</span>
             <div class="dest-btn-text">
-              <strong class="dest-btn-title">Workout Routines</strong>
+              <strong class="dest-btn-title">Workout Hub</strong>
               <span class="dest-btn-sub">Start workout &bull; Saved splits</span>
             </div>
             <span class="dest-btn-arrow">&rarr;</span>
@@ -95,23 +95,7 @@
         </div>
       </div>
       <div class="header-right">
-        <button type="button" id="header-stopwatch-btn" class="header-action-btn" onclick="openStopwatchModal()" title="Stopwatch & Timers">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="13" r="8"></circle>
-            <line x1="12" y1="9" x2="12" y2="13"></line>
-            <path d="M12 2v3M9 2h6"></path>
-          </svg>
-          <span class="btn-label" id="header-stopwatch-label">Stopwatch</span>
-        </button>
-        <button id="qr-btn" class="header-action-btn" title="Open on iPhone">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-          </svg>
-          <span class="btn-label">iPhone Link</span>
-        </button>
+        <!-- Header action buttons moved to Settings per user request -->
       </div>
     </header>
 
@@ -128,75 +112,79 @@
     <!-- MAIN VIEWS -->
     <main class="main-content">
       
-      <!-- TAB 1: ROUTINES -->
-      <section id="view-routines" class="tab-view active">
-        <div class="section-hero">
-          <div class="hero-text">
-            <span class="greeting-subtitle">READY TO CRUSH IT?</span>
-            <h1 class="hero-title">Start a Workout</h1>
+      <!-- TAB 1: WORKOUT (COMBINED ROUTINES & ACTIVE WORKOUT HUB) -->
+      <section id="view-workout" class="tab-view active">
+        <!-- Idle state if no workout is active: Hero, Streak, Stats & Custom Saved Routines -->
+        <div id="workout-idle-state" class="workout-idle-hub">
+          <div class="section-hero">
+            <div class="hero-text">
+              <span class="greeting-subtitle">READY TO CRUSH IT?</span>
+              <h1 class="hero-title">Start a Workout</h1>
+            </div>
+            <button id="btn-quick-workout" class="primary-glow-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+              <span>Quick Blank Workout</span>
+            </button>
           </div>
-          <button id="btn-quick-workout" class="primary-glow-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M12 5v14M5 12h14"></path>
-            </svg>
-            <span>Quick Blank Workout</span>
-          </button>
+
+          <!-- Weekly Streak & Stats Widget -->
+          <div class="stats-overview-bar">
+            <div class="stat-pill">
+              <span class="stat-num" id="stat-streak">0</span>
+              <span class="stat-label">DAY STREAK &#128293;</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num" id="stat-weekly-count">0</span>
+              <span class="stat-label">THIS WEEK &#127947;&#65039;</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num" id="stat-total-volume">0</span>
+              <span class="stat-label" id="stat-volume-unit">TOTAL KG &#9889;</span>
+            </div>
+          </div>
+
+          <!-- Routines List Header (Custom Saved Only) -->
+          <div class="section-header-row">
+            <h2 class="subheading">Saved Routines</h2>
+            <div style="display:flex; gap:8px;">
+              <button id="btn-create-routine" class="secondary-btn small-btn">+ New Routine</button>
+            </div>
+          </div>
+
+          <div id="routines-grid" class="cards-grid">
+            <!-- Dynamically populated custom routine cards -->
+          </div>
+
+          <!-- Compatibility anchor button for idle start blank -->
+          <button id="btn-idle-start-blank" style="display:none;" aria-hidden="true"></button>
         </div>
 
-        <!-- Weekly Streak & Stats Widget -->
-        <div class="stats-overview-bar">
-          <div class="stat-pill">
-            <span class="stat-num" id="stat-streak">0</span>
-            <span class="stat-label">DAY STREAK &#128293;</span>
-          </div>
-          <div class="stat-pill">
-            <span class="stat-num" id="stat-weekly-count">0</span>
-            <span class="stat-label">THIS WEEK &#127947;&#65039;</span>
-          </div>
-          <div class="stat-pill">
-            <span class="stat-num" id="stat-total-volume">0</span>
-            <span class="stat-label" id="stat-volume-unit">TOTAL KG &#9889;</span>
-          </div>
-        </div>
-
-        <!-- Routines List -->
-        <div class="section-header-row">
-          <h2 class="subheading">Saved Routines</h2>
-          <button id="btn-create-routine" class="secondary-btn small-btn">+ New Routine</button>
-        </div>
-
-        <!-- Routine Filter Tabs: All / Featured (Recommended) / My Routines -->
-        <div class="filter-chips-row" id="routine-filter-chips" role="tablist" aria-label="Routine filters">
-          <button type="button" class="chip active" data-filter="all" onclick="setRoutineFilter('all')">All Routines</button>
-          <button type="button" class="chip" data-filter="featured" onclick="setRoutineFilter('featured')">&#9733; Featured / Recommended</button>
-          <button type="button" class="chip" data-filter="custom" onclick="setRoutineFilter('custom')">My Routines</button>
-        </div>
-
-        <div id="routines-grid" class="cards-grid">
-          <!-- Dynamically populated routine cards -->
-        </div>
-      </section>
-
-      <!-- TAB 2: ACTIVE WORKOUT -->
-      <section id="view-workout" class="tab-view">
-        <!-- Idle state if no workout is active -->
-        <div id="workout-idle-state" class="idle-placeholder">
-          <div class="idle-icon-wrap">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"></path>
-            </svg>
-          </div>
-          <h2>No Active Workout</h2>
-          <p>Pick a template or start an empty session to begin logging sets, reps, and weights.</p>
-          <div class="idle-actions">
-            <button id="btn-idle-start-blank" class="primary-glow-btn">Start Blank Workout</button>
-            <button onclick="switchTab('routines')" class="secondary-btn">Browse Routines</button>
-            <button type="button" onclick="openStopwatchModal()" class="secondary-btn" title="Open Stopwatch">&#9201;&#65039; Stopwatch</button>
-          </div>
-        </div>
+        <!-- Hidden anchor for legacy references -->
+        <div id="view-routines" style="display:none;" aria-hidden="true"></div>
 
         <!-- Active state when workout running -->
         <div id="workout-active-state" class="active-workout-container hidden">
+          <!-- Active workout peek / switcher bar -->
+          <div class="workout-active-subbar">
+            <div class="active-live-badge-wrap">
+              <span class="live-pulse-dot"></span>
+              <span class="active-live-badge-text">ACTIVE SESSION</span>
+            </div>
+            <button type="button" class="workout-peek-routines-btn" id="btn-peek-routines" onclick="toggleActiveWorkoutRoutinesPeek()">
+              📁 Saved Routines
+            </button>
+          </div>
+
+          <!-- Collapsible peek of saved routines during an active workout -->
+          <div id="active-routines-peek-drawer" class="active-routines-peek-drawer hidden">
+            <div class="peek-drawer-header">
+              <span class="peek-drawer-title">Saved Routines</span>
+              <button type="button" class="peek-drawer-close" onclick="toggleActiveWorkoutRoutinesPeek()">&times;</button>
+            </div>
+            <div id="active-peek-routines-grid" class="cards-grid peek-grid"></div>
+          </div>
           <!-- Workout Header & Timer bar -->
           <div class="active-header-card">
             <div class="active-title-row">
@@ -364,44 +352,35 @@
         </div>
       </section>
 
-      <!-- TAB 4: PERSONAL RECORDS (PRs) -->
-      <section id="view-prs" class="tab-view">
-        <div class="section-hero">
-          <div class="hero-text">
-            <span class="greeting-subtitle">HALL OF GAINS</span>
-            <h1 class="hero-title">Personal Records</h1>
-          </div>
-        </div>
-
-        <!-- Muscle filter chips -->
-        <div class="filter-chips-row" id="pr-filter-chips">
-          <button class="chip active" data-filter="all">All</button>
-          <button class="chip" data-filter="Chest">Chest</button>
-          <button class="chip" data-filter="Back">Back</button>
-          <button class="chip" data-filter="Legs">Legs</button>
-          <button class="chip" data-filter="Shoulders">Shoulders</button>
-          <button class="chip" data-filter="Arms">Arms</button>
-        </div>
-
-        <div id="prs-grid" class="prs-grid">
-          <!-- PR items injected here -->
-        </div>
-      </section>
-
-      <!-- TAB: MUSCLE RANKS -->
+      <!-- TAB 4: RANKS & PRs (COMBINED MUSCLE ANATOMY & PERSONAL RECORDS) -->
       <section id="view-ranks" class="tab-view">
-        <div class="section-hero ranks-section-hero">
-          <div class="hero-text">
-            <span class="greeting-subtitle">BRONZE &rarr; TITAN</span>
-            <h1 class="hero-title">Muscle Ranks</h1>
-          </div>
-          <div class="anatomy-gender-toggle hero-gender-toggle" role="group" aria-label="Body Model Gender">
-            <button type="button" class="anatomy-gender-btn active" data-gender="male" title="Male Body Model">&#9794; Male</button>
-            <button type="button" class="anatomy-gender-btn" data-gender="female" title="Lady Body Model">&#9792; Lady</button>
-          </div>
+        <!-- Segmented Sub-Tab Switcher: Muscle Ranks vs Personal Records -->
+        <div class="modal-tab-switcher ranks-prs-segment" id="ranks-prs-tab-switcher" role="tablist">
+          <button type="button" class="modal-tab-btn active" id="btn-subtab-ranks" onclick="switchRanksSubTab('ranks')">
+            ⚔️ Muscle Ranks &amp; Anatomy
+          </button>
+          <button type="button" class="modal-tab-btn" id="btn-subtab-prs" onclick="switchRanksSubTab('prs')">
+            🏆 Personal Records (PRs)
+          </button>
         </div>
-        <div id="ranks-overall" class="ranks-overall"></div>
-        <div id="ranks-body" class="anatomy-card-frame">
+
+        <!-- Hidden anchor for legacy references -->
+        <div id="view-prs" style="display:none;" aria-hidden="true"></div>
+
+        <!-- Sub-View 1: Muscle Ranks & 3D Anatomy -->
+        <div id="subview-ranks-content">
+          <div class="section-hero ranks-section-hero">
+            <div class="hero-text">
+              <span class="greeting-subtitle">BRONZE &rarr; TITAN</span>
+              <h1 class="hero-title">Muscle Ranks</h1>
+            </div>
+            <div class="anatomy-gender-toggle hero-gender-toggle" role="group" aria-label="Body Model Gender">
+              <button type="button" class="anatomy-gender-btn active" data-gender="male" title="Male Body Model">&#9794; Male</button>
+              <button type="button" class="anatomy-gender-btn" data-gender="female" title="Lady Body Model">&#9792; Lady</button>
+            </div>
+          </div>
+          <div id="ranks-overall" class="ranks-overall"></div>
+          <div id="ranks-body" class="anatomy-card-frame">
           <!-- Top-Right Corner Male / Lady Body Option -->
           <div class="anatomy-gender-toggle card-gender-toggle" role="group" aria-label="Select Male or Lady Body">
             <button type="button" class="anatomy-gender-btn active" data-gender="male">&#9794; Male</button>
@@ -792,6 +771,31 @@
         <h3 class="subheading" style="margin-top:18px;">Tiers (points per muscle)</h3>
         <div id="ranks-legend" class="ranks-legend"></div>
         <p class="rank-next" style="margin-top:10px;">Points = sets &times; reps &times; load. Heavier lifts and harder bodyweight moves (pull-ups, dips) score more. Camera-verified reps count too.</p>
+        </div>
+
+        <!-- Sub-View 2: Personal Records (PRs) -->
+        <div id="subview-prs-content" class="hidden">
+          <div class="section-hero">
+            <div class="hero-text">
+              <span class="greeting-subtitle">HALL OF GAINS</span>
+              <h1 class="hero-title">Personal Records</h1>
+            </div>
+          </div>
+
+          <!-- Muscle filter chips -->
+          <div class="filter-chips-row" id="pr-filter-chips">
+            <button type="button" class="chip active" data-filter="all">All</button>
+            <button type="button" class="chip" data-filter="Chest">Chest</button>
+            <button type="button" class="chip" data-filter="Back">Back</button>
+            <button type="button" class="chip" data-filter="Legs">Legs</button>
+            <button type="button" class="chip" data-filter="Shoulders">Shoulders</button>
+            <button type="button" class="chip" data-filter="Arms">Arms</button>
+          </div>
+
+          <div id="prs-grid" class="prs-grid">
+            <!-- PR items injected here -->
+          </div>
+        </div>
       </section>
 
       <!-- TAB: FOCUS & DOOMSCROLL BANK -->
@@ -976,37 +980,18 @@
           </div>
         </div>
 
-        <!-- iOS Install Highlight Card -->
+        <!-- iOS Install & iPhone QR Link Card -->
         <div class="ios-install-hero-card">
           <div class="ios-install-badge">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.62-.75 1.04-1.8 0.93-2.84-.9.04-1.99.6-2.64 1.35-.58.65-1.08 1.72-.94 2.74 1.01.08 2.03-.5 2.65-1.25z"/>
             </svg>
-            <span>iPhone Standalone App</span>
+            <span>iPhone &amp; iPad Link</span>
           </div>
-          <h3>Install on your iPhone Home Screen</h3>
-          <p>Get full-screen immersion without browser bars, offline access at the gym, and lightning-fast launch.</p>
-          
-          <div class="ios-steps-container">
-            <div class="ios-step">
-              <div class="step-circle">1</div>
-              <div class="step-text">Open this page in <strong>Safari</strong> on your iPhone.</div>
-            </div>
-            <div class="ios-step">
-              <div class="step-circle">2</div>
-              <div class="step-text">Tap the <strong>Share</strong> icon (square with arrow up) at the bottom.</div>
-            </div>
-            <div class="ios-step">
-              <div class="step-circle">3</div>
-              <div class="step-text">Scroll down and tap <strong>"Add to Home Screen"</strong>.</div>
-            </div>
-            <div class="ios-step">
-              <div class="step-circle">4</div>
-              <div class="step-text">Tap <strong>"Add"</strong> in the top right. Done!</div>
-            </div>
-          </div>
+          <h3>Open on iPhone &amp; Add to Home Screen</h3>
+          <p>Scan the Wi-Fi QR code with your iPhone camera to instantly launch MOON FITNESS OS on Safari, then add to Home Screen for fullscreen gym tracking.</p>
 
-          <button id="btn-show-qr-settings" class="primary-glow-btn full-width">
+          <button id="btn-show-qr-settings" class="primary-glow-btn full-width" style="margin: 12px 0 16px 0;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="7" height="7"></rect>
               <rect x="14" y="3" width="7" height="7"></rect>
@@ -1015,6 +1000,25 @@
             </svg>
             <span>Show iPhone Wi-Fi QR Code</span>
           </button>
+          
+          <div class="ios-steps-container">
+            <div class="ios-step">
+              <div class="step-circle">1</div>
+              <div class="step-text">Tap <strong>"Show iPhone Wi-Fi QR Code"</strong> above and scan with your iPhone camera.</div>
+            </div>
+            <div class="ios-step">
+              <div class="step-circle">2</div>
+              <div class="step-text">Open the link in <strong>Safari</strong> on your iPhone.</div>
+            </div>
+            <div class="ios-step">
+              <div class="step-circle">3</div>
+              <div class="step-text">Tap the <strong>Share</strong> icon (square with arrow up) &rarr; tap <strong>"Add to Home Screen"</strong>.</div>
+            </div>
+            <div class="ios-step">
+              <div class="step-circle">4</div>
+              <div class="step-text">Tap <strong>"Add"</strong> in the top right. Done!</div>
+            </div>
+          </div>
         </div>
 
         <!-- Appearance -->
@@ -1056,6 +1060,14 @@
               <option value="120">2 minutes</option>
               <option value="180">3 minutes</option>
             </select>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label-col">
+              <span class="setting-name">Stopwatch &amp; Timers</span>
+              <span class="setting-desc">Precision lap stopwatch and rest interval tool</span>
+            </div>
+            <button type="button" class="secondary-btn small-btn" onclick="openStopwatchModal()">&#9201;&#65039; Open Stopwatch</button>
           </div>
 
           <div class="setting-item">
@@ -1144,20 +1156,9 @@
       </div>
     </div>
 
-    <!-- BOTTOM TAB NAVIGATION (iOS HIG STYLE) -->
+    <!-- BOTTOM TAB NAVIGATION (5 CONSOLIDATED TABS) -->
     <nav class="bottom-tab-bar">
-      <button class="nav-tab active" data-tab="routines" onclick="switchTab('routines')">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="10" x2="16" y2="10"></line>
-          <line x1="8" y1="14" x2="12" y2="14"></line>
-        </svg>
-        <span class="tab-label">Routines</span>
-      </button>
-
-      <button class="nav-tab" data-tab="workout" onclick="switchTab('workout')">
+      <button class="nav-tab active" data-tab="workout" onclick="switchTab('workout')">
         <div class="workout-tab-badge-wrap">
           <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"></path>
@@ -1183,24 +1184,12 @@
         <span class="tab-label">History</span>
       </button>
 
-      <button class="nav-tab" data-tab="prs" onclick="switchTab('prs')">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-          <path d="M4 22h16"></path>
-          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
-        </svg>
-        <span class="tab-label">PRs</span>
-      </button>
-
       <button class="nav-tab" data-tab="ranks" onclick="switchTab('ranks')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="5" r="2.5"></circle>
           <path d="M12 8v7M8 10l4-1 4 1M9 21l3-6 3 6"></path>
         </svg>
-        <span class="tab-label">Ranks</span>
+        <span class="tab-label">Ranks &amp; PRs</span>
       </button>
 
       <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">
@@ -1619,9 +1608,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=50"></script>
-  <script src="camera.js?v=50"></script>
-  <script src="ranks.js?v=50"></script>
+  <script src="app.js?v=51"></script>
+  <script src="camera.js?v=51"></script>
+  <script src="ranks.js?v=51"></script>
 </body>
 </html>
 

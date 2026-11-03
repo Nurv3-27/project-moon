@@ -414,23 +414,11 @@ function syncDemoState(state) {
   });
 
   state.deletedRoutineIds = state.deletedRoutineIds || [];
-  const deletedRoutineSet = new Set(state.deletedRoutineIds);
-
-  state.routines = state.routines || [...DEFAULT_ROUTINES];
-  const existingRoutineIds = new Set(state.routines.map(r => r.id));
-  DEFAULT_ROUTINES.forEach(defR => {
-    if (!existingRoutineIds.has(defR.id) && !deletedRoutineSet.has(defR.id)) {
-      state.routines.push({ ...defR, isFeatured: true });
-    }
-  });
-
-  // Ensure default routines in existing state are marked isFeatured: true
+  
+  // Filter out default/featured routines from Saved Routines per user request.
+  // Featured routines now live in the + New Routine -> Featured Templates builder tab.
   const defaultIdSet = new Set(DEFAULT_ROUTINES.map(d => d.id));
-  state.routines.forEach(r => {
-    if (defaultIdSet.has(r.id)) {
-      r.isFeatured = true;
-    }
-  });
+  state.routines = (state.routines || []).filter(r => !r.isFeatured && !defaultIdSet.has(r.id));
 
   const demoOn = state.settings.demoMode === true;
   const realHistory = (state.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
@@ -461,7 +449,7 @@ function getInitialState() {
       dmOnlyMode: true
     },
     exercises: [...DEFAULT_EXERCISES],
-    routines: [...DEFAULT_ROUTINES],
+    routines: [], // Custom saved routines only (featured ones are in template library)
     deletedRoutineIds: [],
     history: [],
     prs: {},
@@ -1380,12 +1368,21 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // --- Tab Switching Navigation ---
+let activeRanksSubTab = 'ranks';
+
 window.switchTab = function(tabName) {
+  let targetTab = tabName;
+  if (tabName === 'routines') {
+    targetTab = 'workout';
+  } else if (tabName === 'prs') {
+    targetTab = 'ranks';
+  }
+
   const tabs = document.querySelectorAll('.nav-tab');
   const views = document.querySelectorAll('.tab-view');
 
   tabs.forEach(tab => {
-    if (tab.dataset.tab === tabName) {
+    if (tab.dataset.tab === targetTab) {
       tab.classList.add('active');
     } else {
       tab.classList.remove('active');
@@ -1393,7 +1390,7 @@ window.switchTab = function(tabName) {
   });
 
   views.forEach(view => {
-    if (view.id === `view-${tabName}`) {
+    if (view.id === `view-${targetTab}`) {
       view.classList.add('active');
     } else {
       view.classList.remove('active');
@@ -1402,29 +1399,129 @@ window.switchTab = function(tabName) {
 
   // Floating active workout banner management
   const banner = document.getElementById('floating-active-banner');
-  if (AppState.activeWorkout && tabName !== 'workout') {
-    banner.classList.remove('hidden');
-    const nameEl = document.getElementById('banner-workout-name');
-    if (nameEl) nameEl.textContent = AppState.activeWorkout.title || 'Workout Session';
-  } else {
-    banner.classList.add('hidden');
+  if (banner) {
+    if (AppState.activeWorkout && targetTab !== 'workout') {
+      banner.classList.remove('hidden');
+      const nameEl = document.getElementById('banner-workout-name');
+      if (nameEl) nameEl.textContent = AppState.activeWorkout.title || 'Workout Session';
+    } else {
+      banner.classList.add('hidden');
+    }
   }
 
   // Refresh tab content when selected
-  if (tabName === 'routines') renderRoutines();
-  if (tabName === 'focus') renderScroll();
-  if (tabName === 'history') renderHistory();
-  if (tabName === 'prs') renderPRs();
-  if (tabName === 'ranks') renderRanks();
-  if (tabName === 'workout') renderActiveWorkout();
+  if (targetTab === 'workout') {
+    renderActiveWorkout();
+    renderRoutines();
+    updateOverviewStats();
+  }
+  if (targetTab === 'focus') renderScroll();
+  if (targetTab === 'history') renderHistory();
+  if (targetTab === 'ranks') {
+    if (tabName === 'prs') {
+      switchRanksSubTab('prs');
+    } else {
+      if (activeRanksSubTab === 'prs') {
+        renderPRs();
+      } else {
+        renderRanks();
+      }
+    }
+  }
 
   updateAntiScrollUI();
 
   window.scrollTo(0, 0);
 };
 
+window.switchRanksSubTab = function(subTab) {
+  activeRanksSubTab = subTab;
+  const ranksContent = document.getElementById('subview-ranks-content');
+  const prsContent = document.getElementById('subview-prs-content');
+  const btnRanks = document.getElementById('btn-subtab-ranks');
+  const btnPrs = document.getElementById('btn-subtab-prs');
+
+  if (subTab === 'prs') {
+    if (ranksContent) ranksContent.classList.add('hidden');
+    if (prsContent) prsContent.classList.remove('hidden');
+    if (btnRanks) btnRanks.classList.remove('active');
+    if (btnPrs) btnPrs.classList.add('active');
+    renderPRs();
+  } else {
+    if (ranksContent) ranksContent.classList.remove('hidden');
+    if (prsContent) prsContent.classList.add('hidden');
+    if (btnRanks) btnRanks.classList.add('active');
+    if (btnPrs) btnPrs.classList.remove('active');
+    renderRanks();
+  }
+  triggerHaptic([30]);
+};
+
+window.toggleActiveWorkoutRoutinesPeek = function() {
+  const drawer = document.getElementById('active-routines-peek-drawer');
+  if (!drawer) return;
+  const isHidden = drawer.classList.contains('hidden');
+  if (isHidden) {
+    drawer.classList.remove('hidden');
+    renderActivePeekRoutines();
+  } else {
+    drawer.classList.add('hidden');
+  }
+  triggerHaptic([30]);
+};
+
+function renderActivePeekRoutines() {
+  const container = document.getElementById('active-peek-routines-grid');
+  if (!container) return;
+  const defaultIdSet = new Set(DEFAULT_ROUTINES.map(d => d.id));
+  const customRoutines = (AppState.routines || []).filter(r => !r.isFeatured && !defaultIdSet.has(r.id));
+  if (customRoutines.length === 0) {
+    container.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem; padding:8px;">No custom routines saved yet.</p>`;
+    return;
+  }
+  container.innerHTML = customRoutines.map(r => `
+    <div class="peek-routine-row" style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:rgba(255,255,255,0.03); border-radius:10px; margin-bottom:6px;">
+      <div>
+        <strong style="font-size:0.85rem; color:var(--text-main);">${escapeHtml(r.name)}</strong>
+        <span style="font-size:0.72rem; color:var(--text-muted); display:block;">${r.exerciseIds.length} exercises</span>
+      </div>
+      <button type="button" class="small-btn secondary-btn" onclick="addExercisesFromRoutineToActive('${r.id}')">+ Add to Session</button>
+    </div>
+  `).join('');
+}
+
+window.addExercisesFromRoutineToActive = function(routineId) {
+  const routine = (AppState.routines || []).find(r => r.id === routineId);
+  if (!routine || !AppState.activeWorkout) return;
+  routine.exerciseIds.forEach(exId => {
+    const ex = AppState.exercises.find(e => e.id === exId);
+    if (!ex) return;
+    const pr = AppState.prs[ex.name];
+    AppState.activeWorkout.exercises.push({
+      exerciseId: ex.id,
+      notes: '',
+      sets: [
+        { type: 'N', weight: pr ? pr.weight : 40, reps: pr ? pr.reps : 10, completed: false, rpe: 8 }
+      ]
+    });
+  });
+  saveState();
+  renderActiveWorkout();
+  const drawer = document.getElementById('active-routines-peek-drawer');
+  if (drawer) drawer.classList.add('hidden');
+  showToast(`Added exercises from "${routine.name}"`);
+  triggerHaptic([40, 50]);
+};
+
+window.openCreateRoutineWithFeatured = function() {
+  openModal('modal-create-routine');
+  if (typeof switchCreateRoutineTab === 'function') {
+    switchCreateRoutineTab('featured');
+  }
+};
+
 // --- Routines Management ---
-let routineCategoryFilter = 'all'; // 'all', 'featured', 'custom'
+let routineCategoryFilter = 'all';
 
 window.setRoutineFilter = function(filter) {
   routineCategoryFilter = filter;
@@ -1464,18 +1561,7 @@ window.deleteRoutine = function(routineId, event) {
 };
 
 window.restoreDefaultRoutines = function() {
-  if (!confirm('Restore all default recommended routines?')) return;
-  AppState.deletedRoutineIds = [];
-  const existingRoutineIds = new Set((AppState.routines || []).map(r => r.id));
-  DEFAULT_ROUTINES.forEach(defR => {
-    if (!existingRoutineIds.has(defR.id)) {
-      AppState.routines.push({ ...defR, isFeatured: true });
-    }
-  });
-  saveState();
-  renderRoutines();
-  triggerHaptic([60]);
-  showToast('Restored default recommended routines');
+  showToast('Featured workouts are in + New Routine -> Featured Templates.');
 };
 
 function renderRoutines() {
@@ -1485,61 +1571,28 @@ function renderRoutines() {
   const defaultIdSet = new Set(DEFAULT_ROUTINES.map(d => d.id));
   const allRoutines = AppState.routines || [];
 
-  // Update filter chips counts
-  const totalCount = allRoutines.length;
-  const featuredCount = allRoutines.filter(r => r.isFeatured || defaultIdSet.has(r.id)).length;
-  const customCount = allRoutines.filter(r => !r.isFeatured && !defaultIdSet.has(r.id)).length;
+  // Saved Routines strictly contains user's custom created/saved routines
+  const customRoutines = allRoutines.filter(r => !r.isFeatured && !defaultIdSet.has(r.id));
 
-  const chipAll = document.querySelector('#routine-filter-chips [data-filter="all"]');
-  const chipFeatured = document.querySelector('#routine-filter-chips [data-filter="featured"]');
-  const chipCustom = document.querySelector('#routine-filter-chips [data-filter="custom"]');
-  if (chipAll) chipAll.textContent = `All Routines (${totalCount})`;
-  if (chipFeatured) chipFeatured.textContent = `★ Featured / Recommended (${featuredCount})`;
-  if (chipCustom) chipCustom.textContent = `My Routines (${customCount})`;
-
-  // Filter routines based on active category filter
-  const filteredRoutines = allRoutines.filter(r => {
-    const isFeat = r.isFeatured || defaultIdSet.has(r.id);
-    if (routineCategoryFilter === 'featured') return isFeat;
-    if (routineCategoryFilter === 'custom') return !isFeat;
-    return true; // 'all'
-  });
-
-  if (filteredRoutines.length === 0) {
-    if (routineCategoryFilter === 'custom') {
-      container.innerHTML = `
-        <div class="idle-placeholder" style="grid-column: 1 / -1; padding: 28px 16px;">
-          <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px;">No custom routines created yet.</p>
-          <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 16px;">Create your own custom split by combining any of our 260 gym exercises.</p>
-          <button type="button" class="primary-glow-btn small-btn" onclick="openModal('modal-create-routine')">+ Create Routine</button>
+  if (customRoutines.length === 0) {
+    container.innerHTML = `
+      <div class="idle-placeholder" style="grid-column: 1 / -1; padding: 32px 16px; text-align: center;">
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">📋</div>
+        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 6px;">No Custom Routines Saved</h3>
+        <p style="color: var(--text-muted); font-size: 0.82rem; max-width: 320px; margin: 0 auto 16px;">
+          Build your own custom split or load one from our recommended featured workouts.
+        </p>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button type="button" class="primary-glow-btn small-btn" onclick="openModal('modal-create-routine')">+ New Routine</button>
+          <button type="button" class="secondary-btn small-btn" onclick="openCreateRoutineWithFeatured()">★ Featured Templates</button>
         </div>
-      `;
-    } else if (routineCategoryFilter === 'featured') {
-      container.innerHTML = `
-        <div class="idle-placeholder" style="grid-column: 1 / -1; padding: 28px 16px;">
-          <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px;">No featured routines remaining.</p>
-          <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 16px;">You can restore the default recommended workouts anytime.</p>
-          <button type="button" class="secondary-btn small-btn" onclick="restoreDefaultRoutines()">&#9218; Restore Featured Routines</button>
-        </div>
-      `;
-    } else {
-      container.innerHTML = `
-        <div class="idle-placeholder" style="grid-column: 1 / -1; padding: 28px 16px;">
-          <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px;">No routines saved.</p>
-          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
-            <button type="button" class="primary-glow-btn small-btn" onclick="openModal('modal-create-routine')">+ Create Routine</button>
-            <button type="button" class="secondary-btn small-btn" onclick="restoreDefaultRoutines()">&#9218; Restore Default Routines</button>
-          </div>
-        </div>
-      `;
-    }
+      </div>
+    `;
     updateOverviewStats();
     return;
   }
 
-  container.innerHTML = filteredRoutines.map(routine => {
-    const isFeatured = routine.isFeatured || defaultIdSet.has(routine.id);
-
+  container.innerHTML = customRoutines.map(routine => {
     // Resolve exercises
     const exNames = routine.exerciseIds
       .map(id => {
@@ -1549,14 +1602,13 @@ function renderRoutines() {
       .filter(Boolean);
 
     return `
-      <div class="routine-card ${isFeatured ? 'routine-card-featured' : ''}" data-routine-id="${routine.id}">
+      <div class="routine-card" data-routine-id="${routine.id}">
         <div class="routine-card-header">
           <div class="routine-header-info">
             <div class="routine-title-row">
               <h3 class="routine-card-title">${escapeHtml(routine.name)}</h3>
             </div>
             <div class="routine-tags-row">
-              ${isFeatured ? '<span class="routine-featured-pill">&#9733; FEATURED</span>' : ''}
               <span class="routine-tag-pill">${escapeHtml(routine.tag || 'Workout')}</span>
             </div>
           </div>
@@ -1693,15 +1745,17 @@ function renderActiveWorkout() {
   const dot = document.getElementById('tab-active-dot');
 
   if (!AppState.activeWorkout) {
-    idleState.classList.remove('hidden');
-    activeState.classList.add('hidden');
-    dot.classList.add('hidden');
+    if (idleState) idleState.classList.remove('hidden');
+    if (activeState) activeState.classList.add('hidden');
+    if (dot) dot.classList.add('hidden');
+    renderRoutines();
+    updateOverviewStats();
     return;
   }
 
-  idleState.classList.add('hidden');
-  activeState.classList.remove('hidden');
-  dot.classList.remove('hidden');
+  if (idleState) idleState.classList.add('hidden');
+  if (activeState) activeState.classList.remove('hidden');
+  if (dot) dot.classList.remove('hidden');
 
   const restSel = document.getElementById('active-rest-select');
   if (restSel) restSel.value = String(AppState.activeWorkout.restSeconds || AppState.settings.defaultRest || 90);
@@ -3428,19 +3482,28 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(scrollTick, 1000);
   syncScrollToServer();
 
-  // Header QR buttons
-  document.getElementById('qr-btn').addEventListener('click', openQRModal);
-  document.getElementById('btn-show-qr-settings').addEventListener('click', openQRModal);
-  document.getElementById('btn-copy-url').addEventListener('click', () => {
-    const input = document.getElementById('lan-url-input');
-    input.select();
-    navigator.clipboard.writeText(input.value);
-    alert('URL copied to clipboard! Open Safari on your iPhone and paste it.');
-  });
+  // Header & Settings QR buttons
+  const qrBtn = document.getElementById('qr-btn');
+  if (qrBtn) qrBtn.addEventListener('click', openQRModal);
+  const settingsQrBtn = document.getElementById('btn-show-qr-settings');
+  if (settingsQrBtn) settingsQrBtn.addEventListener('click', openQRModal);
+  const copyUrlBtn = document.getElementById('btn-copy-url');
+  if (copyUrlBtn) {
+    copyUrlBtn.addEventListener('click', () => {
+      const input = document.getElementById('lan-url-input');
+      if (input) {
+        input.select();
+        navigator.clipboard.writeText(input.value);
+        alert('URL copied to clipboard! Open Safari on your iPhone and paste it.');
+      }
+    });
+  }
 
   // Routine Buttons
-  document.getElementById('btn-quick-workout').addEventListener('click', () => startBlankWorkout());
-  document.getElementById('btn-idle-start-blank').addEventListener('click', () => startBlankWorkout());
+  const quickWoBtn = document.getElementById('btn-quick-workout');
+  if (quickWoBtn) quickWoBtn.addEventListener('click', () => startBlankWorkout());
+  const idleWoBtn = document.getElementById('btn-idle-start-blank');
+  if (idleWoBtn) idleWoBtn.addEventListener('click', () => startBlankWorkout());
 
   // Active Workout Actions
   document.getElementById('btn-finish-workout').addEventListener('click', () => finishActiveWorkout());
@@ -3841,7 +3904,7 @@ window.selectAppDestination = function(destination, e) {
   if (destination === 'focus') {
     switchTab('focus');
   } else {
-    switchTab('routines');
+    switchTab('workout');
   }
 
   // Stop audio and dismiss splash

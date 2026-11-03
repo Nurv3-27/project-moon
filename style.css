@@ -4603,3 +4603,115 @@ header + #antiscroll-live-banner,
     font-size: 0.95rem;
   }
 }
+
+/* ---------- 5 Consolidated Tabs & Peek Subbar (v51) ---------- */
+.workout-active-subbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  margin-bottom: 14px;
+}
+
+.active-live-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.active-live-badge-text {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--accent-lime);
+  text-transform: uppercase;
+}
+
+.workout-peek-routines-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.workout-peek-routines-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.active-routines-peek-drawer {
+  background: rgba(22, 20, 26, 0.96);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+}
+
+.peek-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+.peek-drawer-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.peek-drawer-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 2px 8px;
+  line-height: 1;
+}
+
+/* Ranks & PRs Segmented Switcher */
+.ranks-prs-segment {
+  margin: 0 auto 18px auto;
+  max-width: 460px;
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 4px;
+  gap: 6px;
+}
+
+.ranks-prs-segment .modal-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ranks-prs-segment .modal-tab-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}

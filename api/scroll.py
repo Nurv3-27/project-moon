@@ -1,9 +1,35 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import time
+import os
+import urllib.parse
+import tempfile
 
-# In-memory state for warm serverless instances
-SCROLL = {'until': 0.0, 'dm_only': True, 'active': True}
+STATE_FILE = os.path.join(tempfile.gettempdir(), 'moon_scroll_bank.json')
+
+def load_state():
+    defaults = {
+        'scroll_bank': 0.0,
+        'start_time': None,
+        'last_elapsed_minutes': 0.0,
+        'last_updated': time.time()
+    }
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                defaults.update(data)
+        except Exception:
+            pass
+    return defaults
+
+def save_state(state):
+    try:
+        state['last_updated'] = time.time()
+        with open(STATE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(state, f)
+    except Exception:
+        pass
 
 
 class handler(BaseHTTPRequestHandler):
@@ -25,21 +51,64 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        # Forced to return exact plain-text 'dm_only' for iOS Shortcut verification
-        return self._send_text('dm_only')
+        state = load_state()
+
+        # Allow query parameters for quick testing/setting (e.g. /api/scroll?set=10 or /api/scroll?reset=0)
+        try:
+            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if 'set' in qs:
+                state['scroll_bank'] = float(qs['set'][0])
+                save_state(state)
+            elif 'bank' in qs:
+                state['scroll_bank'] = float(qs['bank'][0])
+                save_state(state)
+            elif 'reset' in qs:
+                state['scroll_bank'] = 0.0
+                state['start_time'] = None
+                save_state(state)
+        except Exception:
+            pass
+
+        # Calculate effective balance if an active session is currently running
+        current_bank = float(state.get('scroll_bank', 0.0))
+        start_time = state.get('start_time')
+        if start_time:
+            elapsed_minutes = max(0.0, time.time() - float(start_time)) / 60.0
+            effective_balance = current_bank - elapsed_minutes
+        else:
+            effective_balance = current_bank
+
+        # Requirement 3: if scroll_bank balance > 0 -> 'allowed', if <= 0 -> 'dm_only'
+        if effective_balance > 0:
+            return self._send_text('allowed')
+        else:
+            return self._send_text('dm_only')
 
     def do_POST(self):
+        state = load_state()
         try:
             length = int(self.headers.get('Content-Length', '0'))
             raw = self.rfile.read(length) if length > 0 else b'{}'
             body = json.loads(raw.decode('utf-8') or '{}')
-            if 'until' in body:
-                SCROLL['until'] = float(body.get('until') or 0) / 1000.0
-            if 'dmOnly' in body:
-                SCROLL['dm_only'] = bool(body.get('dmOnly'))
-            if 'antiScrollActive' in body:
-                SCROLL['active'] = bool(body.get('antiScrollActive'))
+
+            # Sync from frontend app or API client
+            if 'remainingSeconds' in body:
+                # App sends remainingSeconds from its workout tracker
+                state['scroll_bank'] = round(float(body['remainingSeconds']) / 60.0, 2)
+            elif 'scroll_bank' in body:
+                state['scroll_bank'] = float(body['scroll_bank'])
+            elif 'bank' in body:
+                state['scroll_bank'] = float(body['bank'])
+
+            if 'start_time' in body:
+                state['start_time'] = body['start_time']
+
+            save_state(state)
         except Exception:
             pass
-        return self._send_text('dm_only')
 
+        # Return status based on updated scroll bank
+        if float(state.get('scroll_bank', 0.0)) > 0:
+            return self._send_text('allowed')
+        else:
+            return self._send_text('dm_only')

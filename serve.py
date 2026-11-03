@@ -15,8 +15,35 @@ import time
 import re
 import urllib.parse
 import urllib.request
+import tempfile
 
-# Doomscroll state pushed by the app. 'until' is a server-clock timestamp.
+# Doomscroll state pushed by the app.
+STATE_FILE = os.path.join(tempfile.gettempdir(), 'moon_scroll_bank.json')
+
+def load_state():
+    defaults = {
+        'scroll_bank': 0.0,
+        'start_time': None,
+        'last_elapsed_minutes': 0.0,
+        'last_updated': time.time()
+    }
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                defaults.update(data)
+        except Exception:
+            pass
+    return defaults
+
+def save_state(state):
+    try:
+        state['last_updated'] = time.time()
+        with open(STATE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(state, f)
+    except Exception:
+        pass
+
 SCROLL = {'until': 0.0, 'dm_only': True, 'active': True}
 
 IG_NOSCROLL_USERSCRIPT = """// ==UserScript==
@@ -170,8 +197,63 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         clean = self.path.split('?')[0]
         if clean == '/api/scroll':
-            # Temporarily forced to return raw plain text 'dm_only' for iOS Shortcut verification
-            return self._send('dm_only', ctype='text/plain; charset=utf-8')
+            state = load_state()
+            try:
+                qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                if 'set' in qs:
+                    state['scroll_bank'] = float(qs['set'][0])
+                    save_state(state)
+                elif 'bank' in qs:
+                    state['scroll_bank'] = float(qs['bank'][0])
+                    save_state(state)
+                elif 'reset' in qs:
+                    state['scroll_bank'] = 0.0
+                    state['start_time'] = None
+                    save_state(state)
+            except Exception:
+                pass
+
+            bank = float(state.get('scroll_bank', 0.0))
+            if state.get('start_time'):
+                elapsed = max(0.0, time.time() - float(state['start_time'])) / 60.0
+                effective_balance = bank - elapsed
+            else:
+                effective_balance = bank
+
+            resp = 'allowed' if effective_balance > 0 else 'dm_only'
+            return self._send(resp, ctype='text/plain; charset=utf-8')
+
+        if clean in ('/api/timer/start', '/api/timer-start'):
+            state = load_state()
+            state['start_time'] = time.time()
+            try:
+                qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                if 'bank' in qs:
+                    state['scroll_bank'] = float(qs['bank'][0])
+                elif 'set' in qs:
+                    state['scroll_bank'] = float(qs['set'][0])
+            except Exception:
+                pass
+            save_state(state)
+            return self._send('started', ctype='text/plain; charset=utf-8')
+
+        if clean in ('/api/timer/stop', '/api/timer-stop'):
+            state = load_state()
+            now = time.time()
+            start = state.get('start_time')
+            if start:
+                elapsed_min = max(0.0, now - float(start)) / 60.0
+                curr_bank = float(state.get('scroll_bank', 0.0))
+                new_bank = max(0.0, curr_bank - elapsed_min)
+                state['scroll_bank'] = round(new_bank, 2)
+                state['start_time'] = None
+                state['last_elapsed_minutes'] = round(elapsed_min, 2)
+                save_state(state)
+                msg = f"stopped: deducted {elapsed_min:.2f} min, balance: {new_bank:.2f} min"
+            else:
+                curr_bank = float(state.get('scroll_bank', 0.0))
+                msg = f"stopped: no active session, balance: {curr_bank:.2f} min"
+            return self._send(msg, ctype='text/plain; charset=utf-8')
         if clean == '/api/lan-info':
             ip = get_lan_ip()
             return self._send(json.dumps({
@@ -246,19 +328,62 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self):
-        if self.path.split('?')[0] == '/api/scroll':
+        clean = self.path.split('?')[0]
+        if clean in ('/api/timer/start', '/api/timer-start'):
+            state = load_state()
+            state['start_time'] = time.time()
+            try:
+                n = int(self.headers.get('Content-Length', 0))
+                if n > 0:
+                    body = json.loads(self.rfile.read(n) or b'{}')
+                    if 'bank' in body:
+                        state['scroll_bank'] = float(body['bank'])
+                    elif 'scroll_bank' in body:
+                        state['scroll_bank'] = float(body['scroll_bank'])
+            except Exception:
+                pass
+            save_state(state)
+            return self._send('started', ctype='text/plain; charset=utf-8')
+
+        if clean in ('/api/timer/stop', '/api/timer-stop'):
+            state = load_state()
+            now = time.time()
+            start = state.get('start_time')
+            if start:
+                elapsed_min = max(0.0, now - float(start)) / 60.0
+                curr_bank = float(state.get('scroll_bank', 0.0))
+                new_bank = max(0.0, curr_bank - elapsed_min)
+                state['scroll_bank'] = round(new_bank, 2)
+                state['start_time'] = None
+                state['last_elapsed_minutes'] = round(elapsed_min, 2)
+                save_state(state)
+                msg = f"stopped: deducted {elapsed_min:.2f} min, balance: {new_bank:.2f} min"
+            else:
+                curr_bank = float(state.get('scroll_bank', 0.0))
+                msg = f"stopped: no active session, balance: {curr_bank:.2f} min"
+            return self._send(msg, ctype='text/plain; charset=utf-8')
+
+        if clean == '/api/scroll':
+            state = load_state()
             try:
                 n = int(self.headers.get('Content-Length', 0))
                 body = json.loads(self.rfile.read(n) or b'{}')
-                remaining = float(body.get('remainingSeconds', 0))
-                if 'dmOnly' in body:
-                    SCROLL['dm_only'] = bool(body.get('dmOnly'))
-                if 'antiScrollActive' in body:
-                    SCROLL['active'] = bool(body.get('antiScrollActive'))
+                if 'remainingSeconds' in body:
+                    state['scroll_bank'] = round(float(body['remainingSeconds']) / 60.0, 2)
+                elif 'scroll_bank' in body:
+                    state['scroll_bank'] = float(body['scroll_bank'])
+                elif 'bank' in body:
+                    state['scroll_bank'] = float(body['bank'])
+
+                if 'start_time' in body:
+                    state['start_time'] = body['start_time']
+                save_state(state)
             except Exception:
-                remaining = 0
-            SCROLL['until'] = time.time() + max(0, remaining)
-            return self._send('ok')
+                pass
+
+            bank = float(state.get('scroll_bank', 0.0))
+            resp = 'allowed' if bank > 0 else 'dm_only'
+            return self._send(resp, ctype='text/plain; charset=utf-8')
         self._send('not found', code=404)
 
 HTTPS_PORT = 8443

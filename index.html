@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=42">
+  <link rel="stylesheet" href="style.css?v=43">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (5-SECOND LOADING + SOLID PITCH-BLACK + CUSTOM IMAGE_7.PNG) -->
@@ -84,10 +84,6 @@
             <path d="M12 2v3M9 2h6"></path>
           </svg>
           <span class="btn-label" id="header-stopwatch-label">Stopwatch</span>
-        </button>
-        <button type="button" id="header-antiscroll-btn" class="header-antiscroll-btn" onclick="toggleAntiScrollMode(true)" title="1-Tap Anti-Doomscroll Shield (Allow Chat Inbox & Friend Reels Only)">
-          <span class="antiscroll-dot"></span>
-          <span id="header-antiscroll-label">&#9889; Activate Anti-Scroll</span>
         </button>
         <button id="qr-btn" class="header-action-btn" title="Open on iPhone">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1233,6 +1229,13 @@
         <div id="exercise-list-container" class="exercise-picker-list">
           <!-- Exercise item buttons -->
         </div>
+
+        <!-- Sticky Bottom Done Bar for Multi-Select in Routine Builder -->
+        <div id="exercise-picker-bottom-bar" class="exercise-picker-bottom-bar hidden">
+          <button type="button" class="primary-glow-btn full-width" onclick="closeModal('modal-add-exercise')">
+            Done Adding Exercises (<span id="picker-done-count">0</span>)
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1563,9 +1566,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=42"></script>
-  <script src="camera.js?v=42"></script>
-  <script src="ranks.js?v=42"></script>
+  <script src="app.js?v=43"></script>
+  <script src="camera.js?v=43"></script>
+  <script src="ranks.js?v=43"></script>
 </body>
 </html>
 

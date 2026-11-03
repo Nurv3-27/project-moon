@@ -3,48 +3,138 @@
  * Full offline PWA support, Web Audio synthesized sounds, Haptic feedback
  */
 
-// --- Default Exercise Database ---
+// --- Comprehensive Gym Exercise Database ---
 const DEFAULT_EXERCISES = [
-  // Chest
+  // CHEST
   { id: 'ex_1', name: 'Barbell Bench Press', category: 'Chest' },
   { id: 'ex_2', name: 'Incline Dumbbell Press', category: 'Chest' },
   { id: 'ex_3', name: 'Cable Chest Fly', category: 'Chest' },
   { id: 'ex_4', name: 'Chest Dips', category: 'Chest' },
   { id: 'ex_5', name: 'Push-Ups', category: 'Chest' },
-  // Back
+  { id: 'ex_101', name: 'Incline Barbell Bench Press', category: 'Chest' },
+  { id: 'ex_102', name: 'Decline Barbell Bench Press', category: 'Chest' },
+  { id: 'ex_103', name: 'Flat Dumbbell Press', category: 'Chest' },
+  { id: 'ex_104', name: 'Decline Dumbbell Press', category: 'Chest' },
+  { id: 'ex_105', name: 'Dumbbell Chest Fly', category: 'Chest' },
+  { id: 'ex_106', name: 'Incline Dumbbell Fly', category: 'Chest' },
+  { id: 'ex_107', name: 'Pec Deck Fly (Machine)', category: 'Chest' },
+  { id: 'ex_108', name: 'Chest Press Machine', category: 'Chest' },
+  { id: 'ex_109', name: 'Incline Chest Press Machine', category: 'Chest' },
+  { id: 'ex_110', name: 'Low-to-High Cable Fly', category: 'Chest' },
+  { id: 'ex_111', name: 'High-to-Low Cable Fly', category: 'Chest' },
+  { id: 'ex_112', name: 'Diamond Push-Ups', category: 'Chest' },
+  { id: 'ex_113', name: 'Decline Push-Ups', category: 'Chest' },
+  { id: 'ex_114', name: 'Dumbbell Pullover', category: 'Chest' },
+  { id: 'ex_115', name: 'Smith Machine Bench Press', category: 'Chest' },
+  { id: 'ex_116', name: 'Floor Press (Barbell/Dumbbell)', category: 'Chest' },
+
+  // BACK
   { id: 'ex_6', name: 'Barbell Deadlift', category: 'Back' },
   { id: 'ex_7', name: 'Lat Pulldown', category: 'Back' },
   { id: 'ex_8', name: 'Barbell Bent-Over Row', category: 'Back' },
   { id: 'ex_9', name: 'Pull-Ups', category: 'Back' },
   { id: 'ex_10', name: 'Seated Cable Row', category: 'Back' },
-  // Legs
-  { id: 'ex_11', name: 'Barbell Back Squat', category: 'Legs' },
-  { id: 'ex_12', name: 'Romanian Deadlift', category: 'Legs' },
-  { id: 'ex_13', name: 'Leg Press', category: 'Legs' },
-  { id: 'ex_14', name: 'Walking Lunges', category: 'Legs' },
-  { id: 'ex_15', name: 'Standing Calf Raise', category: 'Legs' },
-  //Shoulders & Traps / Neck
+  { id: 'ex_29', name: "Farmer's Walk", category: 'Back' },
+  { id: 'ex_30', name: 'Hyperextension (Back Extension)', category: 'Back' },
+  { id: 'ex_120', name: 'Sumo Deadlift', category: 'Back' },
+  { id: 'ex_121', name: 'Chin-Ups (Underhand)', category: 'Back' },
+  { id: 'ex_122', name: 'Single-Arm Dumbbell Row', category: 'Back' },
+  { id: 'ex_123', name: 'Chest-Supported T-Bar Row', category: 'Back' },
+  { id: 'ex_124', name: 'Close-Grip Lat Pulldown (V-Bar)', category: 'Back' },
+  { id: 'ex_125', name: 'Straight-Arm Cable Pulldown', category: 'Back' },
+  { id: 'ex_126', name: 'Pendlay Row', category: 'Back' },
+  { id: 'ex_127', name: 'Meadows Row', category: 'Back' },
+  { id: 'ex_128', name: 'Seated Machine Row', category: 'Back' },
+  { id: 'ex_129', name: 'Rack Pulls', category: 'Back' },
+  { id: 'ex_130', name: 'Good Mornings (Barbell)', category: 'Back' },
+  { id: 'ex_131', name: 'Inverted Row', category: 'Back' },
+  { id: 'ex_132', name: 'Neutral-Grip Lat Pulldown', category: 'Back' },
+  { id: 'ex_133', name: 'Wide-Grip Seated Cable Row', category: 'Back' },
+
+  // SHOULDERS
   { id: 'ex_16', name: 'Overhead Shoulder Press', category: 'Shoulders' },
   { id: 'ex_17', name: 'Dumbbell Lateral Raise', category: 'Shoulders' },
   { id: 'ex_18', name: 'Face Pull', category: 'Shoulders' },
   { id: 'ex_19', name: 'Rear Delt Fly', category: 'Shoulders' },
   { id: 'ex_26', name: 'Barbell Shrugs', category: 'Shoulders' },
   { id: 'ex_27', name: 'Neck Curl & Extension', category: 'Shoulders' },
-  // Arms & Forearms
+  { id: 'ex_140', name: 'Seated Dumbbell Shoulder Press', category: 'Shoulders' },
+  { id: 'ex_141', name: 'Arnold Press', category: 'Shoulders' },
+  { id: 'ex_142', name: 'Cable Lateral Raise', category: 'Shoulders' },
+  { id: 'ex_143', name: 'Machine Lateral Raise', category: 'Shoulders' },
+  { id: 'ex_144', name: 'Front Dumbbell Raise', category: 'Shoulders' },
+  { id: 'ex_145', name: 'Front Plate Raise', category: 'Shoulders' },
+  { id: 'ex_146', name: 'Reverse Pec Deck (Machine Rear Delt)', category: 'Shoulders' },
+  { id: 'ex_147', name: 'Cable Rear Delt Fly', category: 'Shoulders' },
+  { id: 'ex_148', name: 'Upright Row (Barbell/EZ-Bar)', category: 'Shoulders' },
+  { id: 'ex_149', name: 'Cable Upright Row', category: 'Shoulders' },
+  { id: 'ex_150', name: 'Dumbbell Shrugs', category: 'Shoulders' },
+  { id: 'ex_151', name: 'Lu Lateral Raises', category: 'Shoulders' },
+  { id: 'ex_152', name: 'Smith Machine Shoulder Press', category: 'Shoulders' },
+
+  // ARMS
   { id: 'ex_20', name: 'Barbell Bicep Curl', category: 'Arms' },
   { id: 'ex_21', name: 'Tricep Rope Pushdown', category: 'Arms' },
   { id: 'ex_22', name: 'Incline Dumbbell Curl', category: 'Arms' },
   { id: 'ex_23', name: 'Skull Crushers', category: 'Arms' },
   { id: 'ex_28', name: 'Hammer Curls & Wrist Curl', category: 'Arms' },
-  // Core & Obliques
+  { id: 'ex_160', name: 'EZ-Bar Bicep Curl', category: 'Arms' },
+  { id: 'ex_161', name: 'Alternating Dumbbell Curl', category: 'Arms' },
+  { id: 'ex_162', name: 'Dumbbell Hammer Curl', category: 'Arms' },
+  { id: 'ex_163', name: 'Preacher Curl (EZ-Bar/Dumbbell)', category: 'Arms' },
+  { id: 'ex_164', name: 'Cable Bicep Curl', category: 'Arms' },
+  { id: 'ex_165', name: 'Concentration Curl', category: 'Arms' },
+  { id: 'ex_166', name: 'Spider Curl', category: 'Arms' },
+  { id: 'ex_167', name: 'Reverse Barbell Curl (Forearms)', category: 'Arms' },
+  { id: 'ex_168', name: 'Zottman Curl', category: 'Arms' },
+  { id: 'ex_169', name: 'Straight Bar Tricep Pushdown', category: 'Arms' },
+  { id: 'ex_170', name: 'Overhead Tricep Extension (Dumbbell)', category: 'Arms' },
+  { id: 'ex_171', name: 'Overhead Cable Rope Extension', category: 'Arms' },
+  { id: 'ex_172', name: 'Tricep Dips (Parallel Bar)', category: 'Arms' },
+  { id: 'ex_173', name: 'Bench Dips', category: 'Arms' },
+  { id: 'ex_174', name: 'Close-Grip Barbell Bench Press', category: 'Arms' },
+  { id: 'ex_175', name: 'Single-Arm Cable Tricep Pushdown', category: 'Arms' },
+  { id: 'ex_176', name: 'Dumbbell Tricep Kickback', category: 'Arms' },
+  { id: 'ex_177', name: 'JM Press', category: 'Arms' },
+  { id: 'ex_178', name: 'Barbell Wrist Curls (Forearms)', category: 'Arms' },
+
+  // LEGS
+  { id: 'ex_11', name: 'Barbell Back Squat', category: 'Legs' },
+  { id: 'ex_12', name: 'Romanian Deadlift', category: 'Legs' },
+  { id: 'ex_13', name: 'Leg Press', category: 'Legs' },
+  { id: 'ex_14', name: 'Walking Lunges', category: 'Legs' },
+  { id: 'ex_15', name: 'Standing Calf Raise', category: 'Legs' },
+  { id: 'ex_31', name: 'Barbell Hip Thrust', category: 'Legs' },
+  { id: 'ex_32', name: 'Hip Adduction & Abduction', category: 'Legs' },
+  { id: 'ex_180', name: 'Barbell Front Squat', category: 'Legs' },
+  { id: 'ex_181', name: 'Goblet Squat (Dumbbell)', category: 'Legs' },
+  { id: 'ex_182', name: 'Hack Squat (Machine)', category: 'Legs' },
+  { id: 'ex_183', name: 'Bulgarian Split Squat', category: 'Legs' },
+  { id: 'ex_184', name: 'Dumbbell Romanian Deadlift', category: 'Legs' },
+  { id: 'ex_185', name: 'Leg Extension (Machine)', category: 'Legs' },
+  { id: 'ex_186', name: 'Lying Leg Curl (Hamstring)', category: 'Legs' },
+  { id: 'ex_187', name: 'Seated Leg Curl', category: 'Legs' },
+  { id: 'ex_188', name: 'Seated Calf Raise (Machine)', category: 'Legs' },
+  { id: 'ex_189', name: 'Dumbbell Step-Ups', category: 'Legs' },
+  { id: 'ex_190', name: 'Glute Bridge', category: 'Legs' },
+  { id: 'ex_191', name: 'Hip Abduction Machine (Glutes)', category: 'Legs' },
+  { id: 'ex_192', name: 'Hip Adduction Machine (Inner Thigh)', category: 'Legs' },
+  { id: 'ex_193', name: 'Sissy Squat', category: 'Legs' },
+
+  // CORE
   { id: 'ex_24', name: 'Hanging Leg Raise', category: 'Core' },
   { id: 'ex_25', name: 'Plank', category: 'Core' },
   { id: 'ex_33', name: 'Russian Twists & Woodchoppers', category: 'Core' },
-  // Posterior Chain, Forearms & Hips
-  { id: 'ex_29', name: "Farmer's Walk", category: 'Back' },
-  { id: 'ex_30', name: 'Hyperextension (Back Extension)', category: 'Back' },
-  { id: 'ex_31', name: 'Barbell Hip Thrust', category: 'Legs' },
-  { id: 'ex_32', name: 'Hip Adduction & Abduction', category: 'Legs' }
+  { id: 'ex_200', name: 'Cable Kneeling Crunch', category: 'Core' },
+  { id: 'ex_201', name: 'Ab Wheel Rollout', category: 'Core' },
+  { id: 'ex_202', name: 'Hanging Knee Raise', category: 'Core' },
+  { id: 'ex_203', name: 'Decline Weighted Sit-Ups', category: 'Core' },
+  { id: 'ex_204', name: 'Side Plank', category: 'Core' },
+  { id: 'ex_205', name: 'Cable Woodchopper', category: 'Core' },
+  { id: 'ex_206', name: 'Bicycle Crunches', category: 'Core' },
+  { id: 'ex_207', name: 'Dragon Flag', category: 'Core' },
+  { id: 'ex_208', name: 'Deadbug', category: 'Core' },
+  { id: 'ex_209', name: 'Mountain Climbers', category: 'Core' }
 ];
 
 const DEFAULT_ROUTINES = [
@@ -1635,6 +1725,10 @@ let newRoutineSelectedExerciseIds = [];
 
 function openExercisePicker(target = 'workout') {
   activePickerTarget = target;
+  const bottomBar = document.getElementById('exercise-picker-bottom-bar');
+  if (bottomBar) {
+    bottomBar.classList.toggle('hidden', target !== 'routine_builder');
+  }
   renderExercisePickerList();
   openModal('modal-add-exercise');
 }
@@ -1650,12 +1744,22 @@ function renderExercisePickerList() {
     return matchesCat && matchesQuery;
   });
 
-  container.innerHTML = filtered.map(ex => `
-    <div class="ex-picker-item" onclick="selectExercise('${ex.id}')">
-      <span class="ex-picker-name">${escapeHtml(ex.name)}</span>
-      <span class="ex-picker-cat">${escapeHtml(ex.category)}</span>
-    </div>
-  `).join('');
+  const isRoutine = activePickerTarget === 'routine_builder';
+  const doneCount = document.getElementById('picker-done-count');
+  if (doneCount) doneCount.textContent = newRoutineSelectedExerciseIds.length;
+
+  container.innerHTML = filtered.map(ex => {
+    const isSelected = isRoutine && newRoutineSelectedExerciseIds.includes(ex.id);
+    return `
+      <div class="ex-picker-item ${isSelected ? 'selected' : ''}" onclick="selectExercise('${ex.id}')">
+        <span class="ex-picker-name">${escapeHtml(ex.name)}</span>
+        <div class="ex-picker-right">
+          <span class="ex-picker-cat">${escapeHtml(ex.category)}</span>
+          ${isSelected ? '<span class="ex-picker-check">&#10003; Added</span>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 window.selectExercise = function(exId) {
@@ -1688,11 +1792,15 @@ window.selectExercise = function(exId) {
     renderActiveWorkout();
     triggerHaptic([40]);
   } else if (activePickerTarget === 'routine_builder') {
+    // 1-Tap toggle: add or remove from routine
     if (!newRoutineSelectedExerciseIds.includes(ex.id)) {
       newRoutineSelectedExerciseIds.push(ex.id);
+    } else {
+      newRoutineSelectedExerciseIds = newRoutineSelectedExerciseIds.filter(id => id !== ex.id);
     }
     renderRoutineBuilderExercises();
-    closeModal('modal-add-exercise');
+    renderExercisePickerList();
+    triggerHaptic([25]);
   }
 };
 

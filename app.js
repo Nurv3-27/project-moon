@@ -456,8 +456,9 @@ function closeRestTimer() {
   if (bar) bar.classList.add('hidden');
 }
 
-// --- High-Precision Stopwatch Engine ---
+// --- High-Precision Stopwatch & Countdown Timer Engine ---
 const StopwatchState = {
+  activeToolMode: 'stopwatch', // 'stopwatch' | 'timer'
   running: false,
   startTime: 0,
   elapsed: 0,
@@ -465,6 +466,16 @@ const StopwatchState = {
   targetSeconds: 0,
   targetFired: false,
   minimizedDismissed: false,
+  _rafId: null,
+  _bgInterval: null
+};
+
+const CountdownTimerState = {
+  running: false,
+  durationMs: 60000, // 60s default
+  remainingMs: 60000,
+  endsAt: 0,
+  completed: false,
   _rafId: null,
   _bgInterval: null
 };
@@ -491,6 +502,175 @@ function playStopwatchTargetSound() {
   playTone(1174.66, 'sine', 0.5, 0.25);
 }
 
+function switchClockToolMode(mode) {
+  StopwatchState.activeToolMode = mode === 'timer' ? 'timer' : 'stopwatch';
+  const isTimer = StopwatchState.activeToolMode === 'timer';
+
+  document.querySelectorAll('.sw-mode-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.swMode === StopwatchState.activeToolMode);
+  });
+
+  const inlineSwChips = document.getElementById('inline-sw-chips');
+  const inlineTimerChips = document.getElementById('inline-timer-chips');
+  if (inlineSwChips) inlineSwChips.classList.toggle('hidden', isTimer);
+  if (inlineTimerChips) inlineTimerChips.classList.toggle('hidden', !isTimer);
+
+  const modalSwTargets = document.getElementById('modal-sw-target-row');
+  const modalTimerConfig = document.getElementById('modal-timer-config-row');
+  const modalLapsWrap = document.getElementById('sw-modal-laps-wrap');
+  if (modalSwTargets) modalSwTargets.classList.toggle('hidden', isTimer);
+  if (modalTimerConfig) modalTimerConfig.classList.toggle('hidden', !isTimer);
+  if (modalLapsWrap) modalLapsWrap.classList.toggle('hidden', isTimer);
+
+  const inlineHeaderIcon = document.getElementById('inline-sw-header-icon');
+  const modalIcon = document.getElementById('sw-modal-icon');
+  if (inlineHeaderIcon) inlineHeaderIcon.textContent = isTimer ? '\u23F3' : '\u23F1\uFE0F';
+  if (modalIcon) modalIcon.textContent = isTimer ? '\u23F3' : '\u23F1\uFE0F';
+
+  triggerHaptic([20]);
+  renderStopwatchUI();
+}
+
+// --- Countdown Timer Functions ---
+function syncCustomTimerInputs(totalSec) {
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  const iMin = document.getElementById('inline-timer-min');
+  const iSec = document.getElementById('inline-timer-sec');
+  const mMin = document.getElementById('modal-timer-min');
+  const mSec = document.getElementById('modal-timer-sec');
+  if (iMin) iMin.value = m;
+  if (iSec) iSec.value = s;
+  if (mMin) mMin.value = m;
+  if (mSec) mSec.value = s;
+
+  document.querySelectorAll('.timer-preset-chip').forEach(chip => {
+    chip.classList.toggle('active', Number(chip.dataset.tsec) === totalSec);
+  });
+}
+
+function setCountdownTimerDuration(seconds) {
+  const sec = Math.max(1, Number(seconds) || 60);
+  CountdownTimerState.durationMs = sec * 1000;
+  CountdownTimerState.remainingMs = CountdownTimerState.durationMs;
+  CountdownTimerState.completed = false;
+  if (CountdownTimerState.running) {
+    CountdownTimerState.endsAt = performance.now() + CountdownTimerState.remainingMs;
+  }
+  syncCustomTimerInputs(sec);
+  triggerHaptic([20]);
+  renderStopwatchUI();
+}
+
+function applyCustomTimerInputs(source) {
+  const minEl = document.getElementById(source === 'inline' ? 'inline-timer-min' : 'modal-timer-min');
+  const secEl = document.getElementById(source === 'inline' ? 'inline-timer-sec' : 'modal-timer-sec');
+  const m = Math.max(0, Math.min(99, parseInt(minEl ? minEl.value : '1', 10) || 0));
+  const s = Math.max(0, Math.min(59, parseInt(secEl ? secEl.value : '0', 10) || 0));
+  const totalSec = Math.max(1, m * 60 + s);
+  setCountdownTimerDuration(totalSec);
+}
+
+function adjustCountdownTimer(deltaSec) {
+  const deltaMs = (Number(deltaSec) || 0) * 1000;
+  if (CountdownTimerState.running) {
+    CountdownTimerState.remainingMs = Math.max(1000, CountdownTimerState.remainingMs + deltaMs);
+    CountdownTimerState.endsAt = performance.now() + CountdownTimerState.remainingMs;
+    if (CountdownTimerState.remainingMs > CountdownTimerState.durationMs) {
+      CountdownTimerState.durationMs = CountdownTimerState.remainingMs;
+    }
+  } else {
+    const newDur = Math.max(5000, CountdownTimerState.durationMs + deltaMs);
+    CountdownTimerState.durationMs = newDur;
+    CountdownTimerState.remainingMs = newDur;
+    CountdownTimerState.completed = false;
+    syncCustomTimerInputs(Math.round(newDur / 1000));
+  }
+  triggerHaptic([25]);
+  renderStopwatchUI();
+}
+
+function startCountdownTimer() {
+  if (CountdownTimerState.running) return;
+  if (CountdownTimerState.remainingMs <= 0 || CountdownTimerState.completed) {
+    CountdownTimerState.remainingMs = CountdownTimerState.durationMs;
+  }
+  CountdownTimerState.running = true;
+  CountdownTimerState.completed = false;
+  CountdownTimerState.endsAt = performance.now() + CountdownTimerState.remainingMs;
+  StopwatchState.minimizedDismissed = false;
+
+  playStopwatchTickSound();
+  triggerHaptic([40]);
+  renderStopwatchUI();
+
+  if (CountdownTimerState._rafId) cancelAnimationFrame(CountdownTimerState._rafId);
+  function loop() {
+    if (!CountdownTimerState.running) return;
+    tickCountdownTimer();
+    CountdownTimerState._rafId = requestAnimationFrame(loop);
+  }
+  CountdownTimerState._rafId = requestAnimationFrame(loop);
+
+  if (CountdownTimerState._bgInterval) clearInterval(CountdownTimerState._bgInterval);
+  CountdownTimerState._bgInterval = setInterval(tickCountdownTimer, 200);
+}
+
+function pauseCountdownTimer() {
+  if (!CountdownTimerState.running) return;
+  CountdownTimerState.running = false;
+  CountdownTimerState.remainingMs = Math.max(0, CountdownTimerState.endsAt - performance.now());
+  if (CountdownTimerState._rafId) cancelAnimationFrame(CountdownTimerState._rafId);
+  if (CountdownTimerState._bgInterval) clearInterval(CountdownTimerState._bgInterval);
+  triggerHaptic([30]);
+  renderStopwatchUI();
+}
+
+function toggleCountdownTimer() {
+  if (CountdownTimerState.running) {
+    pauseCountdownTimer();
+  } else {
+    startCountdownTimer();
+  }
+}
+
+function resetCountdownTimer() {
+  CountdownTimerState.running = false;
+  CountdownTimerState.remainingMs = CountdownTimerState.durationMs;
+  CountdownTimerState.completed = false;
+  if (CountdownTimerState._rafId) cancelAnimationFrame(CountdownTimerState._rafId);
+  if (CountdownTimerState._bgInterval) clearInterval(CountdownTimerState._bgInterval);
+  triggerHaptic([20, 30]);
+  renderStopwatchUI();
+}
+
+function tickCountdownTimer() {
+  if (!CountdownTimerState.running) return;
+  CountdownTimerState.remainingMs = Math.max(0, CountdownTimerState.endsAt - performance.now());
+
+  if (CountdownTimerState.remainingMs <= 0) {
+    CountdownTimerState.running = false;
+    CountdownTimerState.remainingMs = 0;
+    CountdownTimerState.completed = true;
+    if (CountdownTimerState._rafId) cancelAnimationFrame(CountdownTimerState._rafId);
+    if (CountdownTimerState._bgInterval) clearInterval(CountdownTimerState._bgInterval);
+
+    playRestTimerChime();
+    triggerHaptic([140, 70, 140, 70, 260]);
+    notifyRestOver();
+    showToast('\u23F3 Timer finished!');
+    renderStopwatchUI();
+    return;
+  }
+
+  if (StopwatchState.activeToolMode === 'timer') {
+    updateClockDisplayValues();
+  } else {
+    updateFloatingAndHeaderClockUI();
+  }
+}
+
+// --- Stopwatch Functions ---
 function startStopwatch() {
   if (StopwatchState.running) return;
   StopwatchState.running = true;
@@ -564,12 +744,41 @@ function recordStopwatchLap() {
   renderStopwatchUI();
 }
 
-function handleStopwatchSecondaryAction() {
-  if (StopwatchState.running) {
-    recordStopwatchLap();
+function toggleActiveClockTool() {
+  if (StopwatchState.activeToolMode === 'timer') {
+    toggleCountdownTimer();
+  } else {
+    toggleStopwatch();
+  }
+}
+
+function resetActiveClockTool() {
+  if (StopwatchState.activeToolMode === 'timer') {
+    resetCountdownTimer();
   } else {
     resetStopwatch();
   }
+}
+
+function secondaryActiveClockAction() {
+  if (StopwatchState.activeToolMode === 'timer') {
+    if (CountdownTimerState.running) {
+      adjustCountdownTimer(15);
+      showToast('\u23F3 +15s added to timer');
+    } else {
+      resetCountdownTimer();
+    }
+  } else {
+    if (StopwatchState.running) {
+      recordStopwatchLap();
+    } else {
+      resetStopwatch();
+    }
+  }
+}
+
+function handleStopwatchSecondaryAction() {
+  secondaryActiveClockAction();
 }
 
 function clearStopwatchLaps() {
@@ -610,71 +819,47 @@ function tickStopwatch() {
     }
   }
 
-  updateStopwatchDisplayValues(time);
+  if (StopwatchState.activeToolMode === 'stopwatch') {
+    updateClockDisplayValues();
+  } else {
+    updateFloatingAndHeaderClockUI();
+  }
 }
 
-function updateStopwatchDisplayValues(time) {
-  const running = StopwatchState.running;
-  const elapsed = StopwatchState.elapsed;
+function updateFloatingAndHeaderClockUI() {
+  // Prefer whichever clock is actively running, or the activeToolMode
+  let useTimer = StopwatchState.activeToolMode === 'timer';
+  if (CountdownTimerState.running && !StopwatchState.running) useTimer = true;
+  if (StopwatchState.running && !CountdownTimerState.running) useTimer = false;
 
-  // 1. Modal displays
-  const modalDigits = document.getElementById('sw-modal-digits');
-  const modalCentis = document.getElementById('sw-modal-centis');
-  const modalStatus = document.getElementById('sw-modal-status');
-  const sweepCircle = document.getElementById('sw-dial-sweep');
-  if (modalDigits) modalDigits.textContent = time.minSec;
-  if (modalCentis) modalCentis.textContent = time.cs;
-  if (modalStatus) {
-    modalStatus.textContent = running ? 'RUNNING' : (elapsed > 0 ? 'PAUSED' : 'READY');
-    modalStatus.className = 'sw-state-tag ' + (running ? 'running' : (elapsed > 0 ? 'paused' : 'ready'));
-  }
-  if (sweepCircle) {
-    const sweepCircumference = 603.18; // 2 * PI * 96
-    const secProgress = (time.totalMs % 60000) / 60000;
-    sweepCircle.style.strokeDashoffset = sweepCircumference * (1 - secProgress);
-  }
+  const running = useTimer ? CountdownTimerState.running : StopwatchState.running;
+  const ms = useTimer ? CountdownTimerState.remainingMs : StopwatchState.elapsed;
+  const hasProgress = useTimer
+    ? (CountdownTimerState.running || CountdownTimerState.remainingMs < CountdownTimerState.durationMs)
+    : (StopwatchState.running || StopwatchState.elapsed > 0);
+  const time = formatStopwatchTime(ms);
 
-  // 2. Inline Workout Widget displays
-  const inlineDigits = document.getElementById('inline-sw-digits');
-  const inlineCentis = document.getElementById('inline-sw-centis');
-  const inlineState = document.getElementById('inline-sw-state');
-  const inlineToggleLabel = document.getElementById('inline-sw-toggle-label');
-  const inlineToggleIcon = document.getElementById('inline-sw-toggle-icon');
-  const inlineToggleBtn = document.getElementById('inline-sw-toggle-btn');
-  if (inlineDigits) inlineDigits.textContent = time.minSec;
-  if (inlineCentis) inlineCentis.textContent = time.cs;
-  if (inlineState) {
-    inlineState.textContent = running ? 'RUNNING' : (elapsed > 0 ? 'PAUSED' : 'READY');
-    inlineState.className = 'sw-badge-state ' + (running ? 'running' : (elapsed > 0 ? 'paused' : 'ready'));
-  }
-  if (inlineToggleLabel) inlineToggleLabel.textContent = running ? 'Stop' : (elapsed > 0 ? 'Resume' : 'Start');
-  if (inlineToggleIcon) inlineToggleIcon.textContent = running ? '\u23F8' : '\u25B6';
-  if (inlineToggleBtn) {
-    inlineToggleBtn.className = 'sw-action-btn sw-btn-primary ' + (running ? 'stop' : 'start');
-  }
-
-  // 3. Floating Pill displays
   const pillDigits = document.getElementById('sw-pill-digits');
   const pillPlayBtn = document.getElementById('sw-pill-play-btn');
+  const pillIcon = document.getElementById('sw-pill-icon');
   if (pillDigits) {
     const tenths = Math.floor(parseInt(time.cs.slice(1)) / 10);
     pillDigits.textContent = `${time.minSec}.${tenths}`;
   }
   if (pillPlayBtn) pillPlayBtn.textContent = running ? '\u23F8' : '\u25B6';
+  if (pillIcon) pillIcon.textContent = useTimer ? '\u23F3' : '\u23F1\uFE0F';
 
-  // Floating pill visibility: show if elapsed > 0 and stopwatch modal is not open
   const pillEl = document.getElementById('floating-stopwatch-pill');
   const modalEl = document.getElementById('modal-stopwatch');
   const isModalOpen = modalEl && !modalEl.classList.contains('hidden');
   if (pillEl) {
-    if ((running || elapsed > 0) && !isModalOpen && !StopwatchState.minimizedDismissed) {
+    if (hasProgress && !isModalOpen && !StopwatchState.minimizedDismissed) {
       pillEl.classList.remove('hidden');
     } else {
       pillEl.classList.add('hidden');
     }
   }
 
-  // 4. Header action button label
   const headerLabel = document.getElementById('header-stopwatch-label');
   const headerBtn = document.getElementById('header-stopwatch-btn');
   if (headerLabel && headerBtn) {
@@ -682,7 +867,7 @@ function updateStopwatchDisplayValues(time) {
       headerLabel.textContent = time.minSec;
       headerBtn.classList.add('active-running');
       headerBtn.classList.remove('active-paused');
-    } else if (elapsed > 0) {
+    } else if (hasProgress) {
       headerLabel.textContent = `${time.minSec} \u23F8`;
       headerBtn.classList.add('active-paused');
       headerBtn.classList.remove('active-running');
@@ -693,9 +878,72 @@ function updateStopwatchDisplayValues(time) {
   }
 }
 
+function updateClockDisplayValues() {
+  const isTimer = StopwatchState.activeToolMode === 'timer';
+  const running = isTimer ? CountdownTimerState.running : StopwatchState.running;
+  const curMs = isTimer ? CountdownTimerState.remainingMs : StopwatchState.elapsed;
+  const time = formatStopwatchTime(curMs);
+  const isPaused = isTimer
+    ? (!running && CountdownTimerState.remainingMs < CountdownTimerState.durationMs && CountdownTimerState.remainingMs > 0)
+    : (!running && StopwatchState.elapsed > 0);
+  const statusText = running
+    ? (isTimer ? 'COUNTDOWN' : 'RUNNING')
+    : (CountdownTimerState.completed && isTimer ? "TIME'S UP!" : (isPaused ? 'PAUSED' : 'READY'));
+  const statusClass = running ? 'running' : (isPaused ? 'paused' : 'ready');
+
+  // 1. Modal displays
+  const modalDigits = document.getElementById('sw-modal-digits');
+  const modalCentis = document.getElementById('sw-modal-centis');
+  const modalStatus = document.getElementById('sw-modal-status');
+  const sweepCircle = document.getElementById('sw-dial-sweep');
+  if (modalDigits) modalDigits.textContent = time.minSec;
+  if (modalCentis) modalCentis.textContent = time.cs;
+  if (modalStatus) {
+    modalStatus.textContent = statusText;
+    modalStatus.className = 'sw-state-tag ' + statusClass;
+  }
+  if (sweepCircle) {
+    const sweepCircumference = 603.18; // 2 * PI * 96
+    const secProgress = isTimer
+      ? Math.max(0, Math.min(1, CountdownTimerState.remainingMs / Math.max(1000, CountdownTimerState.durationMs)))
+      : (time.totalMs % 60000) / 60000;
+    sweepCircle.style.strokeDashoffset = sweepCircumference * (1 - secProgress);
+  }
+
+  // 2. Inline Workout Widget displays
+  const inlineDigits = document.getElementById('inline-sw-digits');
+  const inlineCentis = document.getElementById('inline-sw-centis');
+  const inlineState = document.getElementById('inline-sw-state');
+  const inlineToggleLabel = document.getElementById('inline-sw-toggle-label');
+  const inlineToggleIcon = document.getElementById('inline-sw-toggle-icon');
+  const inlineToggleBtn = document.getElementById('inline-sw-toggle-btn');
+  const inlineLapBtn = document.getElementById('inline-sw-lap-btn');
+  if (inlineDigits) inlineDigits.textContent = time.minSec;
+  if (inlineCentis) inlineCentis.textContent = time.cs;
+  if (inlineState) {
+    inlineState.textContent = statusText;
+    inlineState.className = 'sw-badge-state ' + statusClass;
+  }
+  if (inlineToggleLabel) inlineToggleLabel.textContent = running ? 'Pause' : (isPaused ? 'Resume' : 'Start');
+  if (inlineToggleIcon) inlineToggleIcon.textContent = running ? '\u23F8' : '\u25B6';
+  if (inlineToggleBtn) {
+    inlineToggleBtn.className = 'sw-action-btn sw-btn-primary ' + (running ? 'stop' : 'start');
+  }
+  if (inlineLapBtn) {
+    inlineLapBtn.textContent = isTimer ? '+15s' : 'Lap';
+  }
+
+  updateFloatingAndHeaderClockUI();
+}
+
 function renderStopwatchUI() {
-  const time = formatStopwatchTime(StopwatchState.elapsed);
-  updateStopwatchDisplayValues(time);
+  updateClockDisplayValues();
+
+  const isTimer = StopwatchState.activeToolMode === 'timer';
+  const running = isTimer ? CountdownTimerState.running : StopwatchState.running;
+  const isPaused = isTimer
+    ? (!running && CountdownTimerState.remainingMs < CountdownTimerState.durationMs && CountdownTimerState.remainingMs > 0)
+    : (!running && StopwatchState.elapsed > 0);
 
   // Modal primary/secondary button states
   const primaryBtn = document.getElementById('sw-modal-primary-btn');
@@ -703,21 +951,26 @@ function renderStopwatchUI() {
   const secondaryBtn = document.getElementById('sw-modal-secondary-btn');
   const secondaryLabel = document.getElementById('sw-modal-secondary-label');
   if (primaryBtn && primaryLabel) {
-    if (StopwatchState.running) {
+    if (running) {
       primaryBtn.className = 'sw-circle-btn primary-circle stop-state';
-      primaryLabel.textContent = 'Stop';
+      primaryLabel.textContent = isTimer ? 'Pause' : 'Stop';
     } else {
       primaryBtn.className = 'sw-circle-btn primary-circle start-state';
-      primaryLabel.textContent = StopwatchState.elapsed > 0 ? 'Resume' : 'Start';
+      primaryLabel.textContent = isPaused ? 'Resume' : 'Start';
     }
   }
   if (secondaryBtn && secondaryLabel) {
-    if (StopwatchState.running) {
-      secondaryLabel.textContent = 'Lap';
-      secondaryBtn.disabled = false;
+    if (isTimer) {
+      secondaryLabel.textContent = running ? '+15s' : 'Reset';
+      secondaryBtn.disabled = !running && CountdownTimerState.remainingMs === CountdownTimerState.durationMs;
     } else {
-      secondaryLabel.textContent = 'Reset';
-      secondaryBtn.disabled = (StopwatchState.elapsed === 0 && StopwatchState.laps.length === 0);
+      if (running) {
+        secondaryLabel.textContent = 'Lap';
+        secondaryBtn.disabled = false;
+      } else {
+        secondaryLabel.textContent = 'Reset';
+        secondaryBtn.disabled = (StopwatchState.elapsed === 0 && StopwatchState.laps.length === 0);
+      }
     }
   }
 
@@ -730,8 +983,8 @@ function renderStopwatchLaps() {
   const inlineLapsList = document.getElementById('inline-sw-laps-list');
 
   const laps = StopwatchState.laps;
-  if (!laps || laps.length === 0) {
-    if (modalLapsList) {
+  if (!laps || laps.length === 0 || StopwatchState.activeToolMode === 'timer') {
+    if (modalLapsList && (!laps || laps.length === 0)) {
       modalLapsList.innerHTML = '<div class="sw-laps-empty">No laps recorded yet. Tap <strong>Lap</strong> while running to mark splits.</div>';
     }
     if (inlineLapsBox) inlineLapsBox.classList.add('hidden');
@@ -774,8 +1027,11 @@ function renderStopwatchLaps() {
   }
 }
 
-function openStopwatchModal() {
+function openStopwatchModal(mode) {
   StopwatchState.minimizedDismissed = false;
+  if (mode === 'timer' || mode === 'stopwatch') {
+    switchClockToolMode(mode);
+  }
   openModal('modal-stopwatch');
   renderStopwatchUI();
   const pillEl = document.getElementById('floating-stopwatch-pill');
@@ -791,7 +1047,7 @@ function dockStopwatch() {
   closeModal('modal-stopwatch');
   StopwatchState.minimizedDismissed = false;
   renderStopwatchUI();
-  showToast('\u23F1\uFE0F Stopwatch docked to floating pill');
+  showToast('\u23F1\uFE0F Clock docked to floating pill');
 }
 
 function closeFloatingStopwatchPill() {
@@ -804,9 +1060,16 @@ function closeFloatingStopwatchPill() {
 window.openStopwatchModal = openStopwatchModal;
 window.closeStopwatchModal = closeStopwatchModal;
 window.dockStopwatch = dockStopwatch;
+window.switchClockToolMode = switchClockToolMode;
 window.toggleStopwatch = toggleStopwatch;
 window.resetStopwatch = resetStopwatch;
 window.recordStopwatchLap = recordStopwatchLap;
+window.toggleActiveClockTool = toggleActiveClockTool;
+window.resetActiveClockTool = resetActiveClockTool;
+window.secondaryActiveClockAction = secondaryActiveClockAction;
+window.setCountdownTimerDuration = setCountdownTimerDuration;
+window.applyCustomTimerInputs = applyCustomTimerInputs;
+window.adjustCountdownTimer = adjustCountdownTimer;
 window.handleStopwatchSecondaryAction = handleStopwatchSecondaryAction;
 window.clearStopwatchLaps = clearStopwatchLaps;
 window.setStopwatchTarget = setStopwatchTarget;
@@ -816,6 +1079,7 @@ window.closeFloatingStopwatchPill = closeFloatingStopwatchPill;
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && restTimerInterval) tickRestTimer();
   if (!document.hidden && StopwatchState.running) tickStopwatch();
+  if (!document.hidden && CountdownTimerState.running) tickCountdownTimer();
   if (!document.hidden) scrollTick();
 });
 

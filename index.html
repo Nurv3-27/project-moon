@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="style.css?v=30">
 </head>
 <body>
   <div id="app" class="app-root">
@@ -214,30 +214,33 @@
             </div>
           </div>
 
-          <!-- Interactive Workout Stopwatch Card -->
+          <!-- Interactive Workout Stopwatch & Timer Card -->
           <div class="workout-stopwatch-card" id="workout-stopwatch-widget">
             <div class="stopwatch-card-header">
               <div class="stopwatch-title-group">
-                <span class="stopwatch-icon-pulse">&#9201;&#65039;</span>
+                <span class="stopwatch-icon-pulse" id="inline-sw-header-icon">&#9201;&#65039;</span>
                 <div>
-                  <span class="stopwatch-heading">WORKOUT STOPWATCH</span>
-                  <span class="stopwatch-subheading">Time sets, holds &amp; rest intervals</span>
+                  <span class="stopwatch-heading" id="inline-sw-heading">STOPWATCH &amp; TIMER</span>
+                  <span class="stopwatch-subheading" id="inline-sw-subheading">Count up or set a countdown timer</span>
                 </div>
               </div>
               <div class="stopwatch-card-actions">
-                <button type="button" class="stopwatch-expand-btn" onclick="openStopwatchModal()" title="Fullscreen &amp; Laps">
+                <div class="sw-mode-tabs" role="tablist">
+                  <button type="button" class="sw-mode-tab active" data-sw-mode="stopwatch" onclick="switchClockToolMode('stopwatch')">&#9201;&#65039; Stopwatch</button>
+                  <button type="button" class="sw-mode-tab" data-sw-mode="timer" onclick="switchClockToolMode('timer')">&#9203; Timer</button>
+                </div>
+                <button type="button" class="stopwatch-expand-btn" onclick="openStopwatchModal()" title="Fullscreen">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="15 3 21 3 21 9"></polyline>
                     <polyline points="9 21 3 21 3 15"></polyline>
                     <line x1="21" y1="3" x2="14" y2="10"></line>
                     <line x1="3" y1="21" x2="10" y2="14"></line>
                   </svg>
-                  <span>Fullscreen</span>
                 </button>
               </div>
             </div>
 
-            <!-- Target Quick Chips -->
+            <!-- Stopwatch Preset Chips (shown in Stopwatch mode) -->
             <div class="stopwatch-preset-chips" id="inline-sw-chips">
               <button type="button" class="sw-chip active" data-sec="0" onclick="setInlineStopwatchTarget(0)">Free</button>
               <button type="button" class="sw-chip" data-sec="30" onclick="setInlineStopwatchTarget(30)">30s Hold</button>
@@ -246,8 +249,25 @@
               <button type="button" class="sw-chip" data-sec="90" onclick="setInlineStopwatchTarget(90)">90s Rest</button>
             </div>
 
+            <!-- Countdown Timer Preset & Custom Duration Row (shown in Timer mode) -->
+            <div class="stopwatch-preset-chips hidden" id="inline-timer-chips">
+              <button type="button" class="sw-chip timer-preset-chip" data-tsec="30" onclick="setCountdownTimerDuration(30)">30s</button>
+              <button type="button" class="sw-chip timer-preset-chip" data-tsec="45" onclick="setCountdownTimerDuration(45)">45s</button>
+              <button type="button" class="sw-chip timer-preset-chip active" data-tsec="60" onclick="setCountdownTimerDuration(60)">1m</button>
+              <button type="button" class="sw-chip timer-preset-chip" data-tsec="90" onclick="setCountdownTimerDuration(90)">1:30</button>
+              <button type="button" class="sw-chip timer-preset-chip" data-tsec="120" onclick="setCountdownTimerDuration(120)">2m</button>
+              <button type="button" class="sw-chip timer-preset-chip" data-tsec="180" onclick="setCountdownTimerDuration(180)">3m</button>
+              <button type="button" class="sw-chip timer-preset-chip" data-tsec="300" onclick="setCountdownTimerDuration(300)">5m</button>
+              <div class="custom-timer-inline-inputs">
+                <input type="number" id="inline-timer-min" class="timer-num-input" min="0" max="99" value="1" title="Minutes" onchange="applyCustomTimerInputs('inline')">
+                <span>m</span>
+                <input type="number" id="inline-timer-sec" class="timer-num-input" min="0" max="59" value="0" title="Seconds" onchange="applyCustomTimerInputs('inline')">
+                <span>s</span>
+              </div>
+            </div>
+
             <div class="stopwatch-card-main">
-              <div class="stopwatch-big-display" onclick="toggleStopwatch()" title="Tap to Start/Pause">
+              <div class="stopwatch-big-display" onclick="toggleActiveClockTool()" title="Tap to Start/Pause">
                 <div class="sw-digits-wrap">
                   <span class="sw-digits mono" id="inline-sw-digits">00:00</span>
                   <span class="sw-centis mono" id="inline-sw-centis">.00</span>
@@ -255,9 +275,9 @@
                 <span class="sw-badge-state ready" id="inline-sw-state">READY</span>
               </div>
               <div class="stopwatch-actions-inline">
-                <button type="button" id="inline-sw-reset-btn" class="sw-action-btn sw-btn-reset" onclick="resetStopwatch()" title="Reset to 0">Reset</button>
-                <button type="button" id="inline-sw-lap-btn" class="sw-action-btn sw-btn-lap" onclick="recordStopwatchLap()" title="Record Lap">Lap</button>
-                <button type="button" id="inline-sw-toggle-btn" class="sw-action-btn sw-btn-primary start" onclick="toggleStopwatch()">
+                <button type="button" id="inline-sw-reset-btn" class="sw-action-btn sw-btn-reset" onclick="resetActiveClockTool()" title="Reset">Reset</button>
+                <button type="button" id="inline-sw-lap-btn" class="sw-action-btn sw-btn-lap" onclick="secondaryActiveClockAction()" title="Record Lap or Add +15s">Lap</button>
+                <button type="button" id="inline-sw-toggle-btn" class="sw-action-btn sw-btn-primary start" onclick="toggleActiveClockTool()">
                   <span id="inline-sw-toggle-icon">&#9654;</span>
                   <span id="inline-sw-toggle-label">Start</span>
                 </button>
@@ -1055,13 +1075,13 @@
       </div>
     </div>
 
-    <!-- FLOATING MINI STOPWATCH PILL (Appears when stopwatch active & minimized) -->
-    <div id="floating-stopwatch-pill" class="floating-stopwatch-pill hidden" onclick="openStopwatchModal()" title="Tap to expand stopwatch">
+    <!-- FLOATING MINI STOPWATCH & TIMER PILL (Appears when stopwatch/timer active & minimized) -->
+    <div id="floating-stopwatch-pill" class="floating-stopwatch-pill hidden" onclick="openStopwatchModal()" title="Tap to expand Stopwatch & Timer">
       <span class="sw-pill-dot"></span>
-      <span class="sw-pill-icon">&#9201;&#65039;</span>
+      <span class="sw-pill-icon" id="sw-pill-icon">&#9201;&#65039;</span>
       <span class="sw-pill-digits mono" id="sw-pill-digits">00:00.0</span>
       <div class="sw-pill-actions" onclick="event.stopPropagation()">
-        <button type="button" class="sw-pill-mini-btn" id="sw-pill-play-btn" onclick="toggleStopwatch()" title="Start/Pause">&#9654;</button>
+        <button type="button" class="sw-pill-mini-btn" id="sw-pill-play-btn" onclick="toggleActiveClockTool()" title="Start/Pause">&#9654;</button>
         <button type="button" class="sw-pill-mini-btn close" onclick="closeFloatingStopwatchPill()" title="Dismiss mini view">&times;</button>
       </div>
     </div>
@@ -1270,15 +1290,15 @@
 
   </div>
 
-  <!-- DEDICATED STOPWATCH MODAL -->
+  <!-- DEDICATED STOPWATCH & TIMER MODAL -->
   <div id="modal-stopwatch" class="modal-overlay hidden">
     <div class="modal-card stopwatch-modal-card">
       <div class="modal-header">
         <div class="sw-modal-title">
-          <span class="sw-modal-icon">&#9201;&#65039;</span>
+          <span class="sw-modal-icon" id="sw-modal-icon">&#9201;&#65039;</span>
           <div>
-            <h3>Stopwatch</h3>
-            <span class="sw-modal-subtitle">Workout &amp; Rest Precision Timer</span>
+            <h3 id="sw-modal-heading">Stopwatch &amp; Timer</h3>
+            <span class="sw-modal-subtitle" id="sw-modal-subtitle">Workout &amp; Rest Precision Clock</span>
           </div>
         </div>
         <div class="sw-modal-header-actions">
@@ -1293,6 +1313,12 @@
         </div>
       </div>
 
+      <!-- Modal Mode Segmented Switcher -->
+      <div class="sw-modal-mode-bar" role="tablist">
+        <button type="button" class="sw-mode-tab modal-tab active" data-sw-mode="stopwatch" onclick="switchClockToolMode('stopwatch')">&#9201;&#65039; Stopwatch</button>
+        <button type="button" class="sw-mode-tab modal-tab" data-sw-mode="timer" onclick="switchClockToolMode('timer')">&#9203; Countdown Timer</button>
+      </div>
+
       <!-- Dial & Big Display -->
       <div class="sw-modal-display-container">
         <div class="sw-dial-circle">
@@ -1300,7 +1326,7 @@
             <circle class="sw-dial-bg" cx="110" cy="110" r="96" fill="transparent" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
             <circle id="sw-dial-sweep" class="sw-dial-sweep" cx="110" cy="110" r="96" fill="transparent" stroke="var(--accent-lime)" stroke-width="6" stroke-dasharray="603.18" stroke-dashoffset="603.18" stroke-linecap="round"/>
           </svg>
-          <div class="sw-display-text" onclick="toggleStopwatch()">
+          <div class="sw-display-text" onclick="toggleActiveClockTool()">
             <div class="sw-time-main mono" id="sw-modal-digits">00:00</div>
             <div class="sw-time-sub mono" id="sw-modal-centis">.00</div>
             <div class="sw-state-tag ready" id="sw-modal-status">READY</div>
@@ -1308,8 +1334,8 @@
         </div>
       </div>
 
-      <!-- Quick Target Chimes (Plank, Rest, Sprint) -->
-      <div class="sw-target-chips-row">
+      <!-- Quick Target Chimes (Shown in Stopwatch Mode) -->
+      <div class="sw-target-chips-row" id="modal-sw-target-row">
         <span class="sw-target-label">Target chime:</span>
         <button type="button" class="chip sw-target-chip active" data-sec="0" onclick="setStopwatchTarget(0)">None</button>
         <button type="button" class="chip sw-target-chip" data-sec="30" onclick="setStopwatchTarget(30)">30s</button>
@@ -1319,17 +1345,40 @@
         <button type="button" class="chip sw-target-chip" data-sec="120" onclick="setStopwatchTarget(120)">2m</button>
       </div>
 
+      <!-- Countdown Timer Presets & Custom Duration (Shown in Timer Mode) -->
+      <div class="sw-timer-controls-panel hidden" id="modal-timer-config-row">
+        <div class="sw-target-chips-row" style="margin-bottom:10px;">
+          <button type="button" class="chip timer-preset-chip" data-tsec="30" onclick="setCountdownTimerDuration(30)">30s</button>
+          <button type="button" class="chip timer-preset-chip" data-tsec="45" onclick="setCountdownTimerDuration(45)">45s</button>
+          <button type="button" class="chip timer-preset-chip active" data-tsec="60" onclick="setCountdownTimerDuration(60)">1m</button>
+          <button type="button" class="chip timer-preset-chip" data-tsec="90" onclick="setCountdownTimerDuration(90)">1:30</button>
+          <button type="button" class="chip timer-preset-chip" data-tsec="120" onclick="setCountdownTimerDuration(120)">2m</button>
+          <button type="button" class="chip timer-preset-chip" data-tsec="180" onclick="setCountdownTimerDuration(180)">3m</button>
+          <button type="button" class="chip timer-preset-chip" data-tsec="300" onclick="setCountdownTimerDuration(300)">5m</button>
+        </div>
+        <div class="sw-custom-timer-bar">
+          <button type="button" class="timer-nudge-btn" onclick="adjustCountdownTimer(-15)">-15s</button>
+          <div class="custom-timer-inline-inputs modal-inputs">
+            <input type="number" id="modal-timer-min" class="timer-num-input" min="0" max="99" value="1" title="Minutes" onchange="applyCustomTimerInputs('modal')">
+            <span>min</span>
+            <input type="number" id="modal-timer-sec" class="timer-num-input" min="0" max="59" value="0" title="Seconds" onchange="applyCustomTimerInputs('modal')">
+            <span>sec</span>
+          </div>
+          <button type="button" class="timer-nudge-btn" onclick="adjustCountdownTimer(30)">+30s</button>
+        </div>
+      </div>
+
       <!-- Big Action Buttons (iOS Style Left/Right) -->
       <div class="sw-modal-actions-row">
-        <button type="button" id="sw-modal-secondary-btn" class="sw-circle-btn secondary-circle" onclick="handleStopwatchSecondaryAction()">
+        <button type="button" id="sw-modal-secondary-btn" class="sw-circle-btn secondary-circle" onclick="secondaryActiveClockAction()">
           <span id="sw-modal-secondary-label">Lap</span>
         </button>
-        <button type="button" id="sw-modal-primary-btn" class="sw-circle-btn primary-circle start-state" onclick="toggleStopwatch()">
+        <button type="button" id="sw-modal-primary-btn" class="sw-circle-btn primary-circle start-state" onclick="toggleActiveClockTool()">
           <span id="sw-modal-primary-label">Start</span>
         </button>
       </div>
 
-      <!-- Laps List -->
+      <!-- Laps List (Shown in Stopwatch Mode) -->
       <div class="sw-laps-container" id="sw-modal-laps-wrap">
         <div class="sw-laps-header">
           <span>Lap</span>
@@ -1389,9 +1438,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=29"></script>
-  <script src="camera.js?v=29"></script>
-  <script src="ranks.js?v=29"></script>
+  <script src="app.js?v=30"></script>
+  <script src="camera.js?v=30"></script>
+  <script src="ranks.js?v=30"></script>
 </body>
 </html>
 

@@ -3390,3 +3390,122 @@ input:checked + .slider:before {
   color: var(--accent-crimson);
   border: 1px solid rgba(255, 59, 48, 0.4);
 }
+
+/* --------------------------------------------------------------------------
+   Stopwatch + Countdown Timer Mode Switcher & Custom Duration Controls
+   -------------------------------------------------------------------------- */
+.stopwatch-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sw-mode-tabs {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.sw-mode-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.sw-mode-tab:hover {
+  color: #fff;
+}
+
+.sw-mode-tab.active {
+  background: linear-gradient(135deg, var(--accent-grad-a) 0%, var(--accent-grad-b) 100%);
+  color: var(--on-accent);
+  box-shadow: 0 2px 10px var(--accent-lime-glow);
+}
+
+.sw-modal-mode-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.sw-mode-tab.modal-tab {
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  border-radius: 9px;
+}
+
+.custom-timer-inline-inputs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.custom-timer-inline-inputs.modal-inputs {
+  padding: 5px 12px;
+  font-size: 0.82rem;
+}
+
+.timer-num-input {
+  width: 34px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+}
+
+.timer-num-input:focus {
+  color: var(--accent-lime);
+}
+
+.sw-timer-controls-panel {
+  margin-bottom: 14px;
+}
+
+.sw-custom-timer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.timer-nudge-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.timer-nudge-btn:hover {
+  background: rgba(var(--accent-rgb), 0.22);
+  border-color: var(--accent-lime);
+}

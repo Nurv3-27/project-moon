@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=47">
+  <link rel="stylesheet" href="style.css?v=48">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (5-SECOND LOADING + SOLID PITCH-BLACK + CUSTOM IMAGE_7.PNG) -->
@@ -145,6 +145,13 @@
         <div class="section-header-row">
           <h2 class="subheading">Saved Routines</h2>
           <button id="btn-create-routine" class="secondary-btn small-btn">+ New Routine</button>
+        </div>
+
+        <!-- Routine Filter Tabs: All / Featured (Recommended) / My Routines -->
+        <div class="filter-chips-row" id="routine-filter-chips" role="tablist" aria-label="Routine filters">
+          <button type="button" class="chip active" data-filter="all" onclick="setRoutineFilter('all')">All Routines</button>
+          <button type="button" class="chip" data-filter="featured" onclick="setRoutineFilter('featured')">&#9733; Featured</button>
+          <button type="button" class="chip" data-filter="custom" onclick="setRoutineFilter('custom')">My Routines</button>
         </div>
 
         <div id="routines-grid" class="cards-grid">
@@ -1265,6 +1272,13 @@
           <button id="btn-builder-add-exercise" class="secondary-btn full-width" style="margin-top:8px;">+ Pick Exercises</button>
         </div>
 
+        <div class="form-group" style="margin-top:12px;">
+          <label class="routine-featured-toggle-label" style="display:flex; align-items:center; gap:10px; font-size:0.84rem; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="new-routine-is-featured" style="width:16px; height:16px; accent-color:var(--accent-lime); cursor:pointer;">
+            <span>Mark as Featured Routine (&#9733; Featured)</span>
+          </label>
+        </div>
+
         <button id="btn-save-new-routine" class="primary-glow-btn full-width" style="margin-top:16px;">Save Routine</button>
       </div>
     </div>
@@ -1566,9 +1580,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=47"></script>
-  <script src="camera.js?v=47"></script>
-  <script src="ranks.js?v=47"></script>
+  <script src="app.js?v=48"></script>
+  <script src="camera.js?v=48"></script>
+  <script src="ranks.js?v=48"></script>
 </body>
 </html>
 

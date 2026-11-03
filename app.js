@@ -295,49 +295,57 @@ const DEFAULT_ROUTINES = [
     id: 'routine_push',
     name: 'Push Power (Chest & Shoulders)',
     tag: 'Chest, Delts, Triceps',
-    exerciseIds: ['ex_1', 'ex_2', 'ex_17', 'ex_21']
+    exerciseIds: ['ex_1', 'ex_2', 'ex_17', 'ex_21'],
+    isFeatured: true
   },
   {
     id: 'routine_pull',
     name: 'Pull Strength (Back & Biceps)',
     tag: 'Back, Lats, Biceps',
-    exerciseIds: ['ex_6', 'ex_7', 'ex_8', 'ex_20']
+    exerciseIds: ['ex_6', 'ex_7', 'ex_8', 'ex_20'],
+    isFeatured: true
   },
   {
     id: 'routine_legs',
     name: 'Leg Day & Core Hypertrophy',
     tag: 'Quads, Hamstrings, Abs',
-    exerciseIds: ['ex_11', 'ex_12', 'ex_13', 'ex_24']
+    exerciseIds: ['ex_11', 'ex_12', 'ex_13', 'ex_24'],
+    isFeatured: true
   },
   {
     id: 'routine_upper',
     name: 'Upper Body Pump',
     tag: 'Chest, Back, Arms',
-    exerciseIds: ['ex_1', 'ex_9', 'ex_16', 'ex_20', 'ex_21']
+    exerciseIds: ['ex_1', 'ex_9', 'ex_16', 'ex_20', 'ex_21'],
+    isFeatured: true
   },
   {
     id: 'routine_lower',
     name: 'Lower Body & Posterior Chain',
     tag: 'Quads, Hamstrings, Glutes',
-    exerciseIds: ['ex_11', 'ex_12', 'ex_182', 'ex_31', 'ex_15']
+    exerciseIds: ['ex_11', 'ex_12', 'ex_182', 'ex_31', 'ex_15'],
+    isFeatured: true
   },
   {
     id: 'routine_arnold_chest_back',
     name: 'Arnold Split: Chest & Back',
     tag: 'Chest, Lats, Mid-Back',
-    exerciseIds: ['ex_1', 'ex_2', 'ex_8', 'ex_9', 'ex_3']
+    exerciseIds: ['ex_1', 'ex_2', 'ex_8', 'ex_9', 'ex_3'],
+    isFeatured: true
   },
   {
     id: 'routine_arnold_arms_delts',
     name: 'Arnold Split: Delts & Arms',
     tag: 'Shoulders, Biceps, Triceps',
-    exerciseIds: ['ex_16', 'ex_17', 'ex_20', 'ex_23', 'ex_28', 'ex_21']
+    exerciseIds: ['ex_16', 'ex_17', 'ex_20', 'ex_23', 'ex_28', 'ex_21'],
+    isFeatured: true
   },
   {
     id: 'routine_calisthenics',
     name: 'Calisthenics & Core Mastery',
     tag: 'Bodyweight & Functional',
-    exerciseIds: ['ex_9', 'ex_4', 'ex_5', 'ex_24', 'ex_25']
+    exerciseIds: ['ex_9', 'ex_4', 'ex_5', 'ex_24', 'ex_25'],
+    isFeatured: true
   }
 ];
 
@@ -404,13 +412,26 @@ function syncDemoState(state) {
       state.exercises.push({ ...def });
     }
   });
+
+  state.deletedRoutineIds = state.deletedRoutineIds || [];
+  const deletedRoutineSet = new Set(state.deletedRoutineIds);
+
   state.routines = state.routines || [...DEFAULT_ROUTINES];
   const existingRoutineIds = new Set(state.routines.map(r => r.id));
   DEFAULT_ROUTINES.forEach(defR => {
-    if (!existingRoutineIds.has(defR.id)) {
-      state.routines.push({ ...defR });
+    if (!existingRoutineIds.has(defR.id) && !deletedRoutineSet.has(defR.id)) {
+      state.routines.push({ ...defR, isFeatured: true });
     }
   });
+
+  // Ensure default routines in existing state are marked isFeatured: true
+  const defaultIdSet = new Set(DEFAULT_ROUTINES.map(d => d.id));
+  state.routines.forEach(r => {
+    if (defaultIdSet.has(r.id)) {
+      r.isFeatured = true;
+    }
+  });
+
   const demoOn = state.settings.demoMode === true;
   const realHistory = (state.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
   state.history = demoOn ? [...realHistory, ...DEMO_HISTORY] : realHistory;
@@ -441,6 +462,7 @@ function getInitialState() {
     },
     exercises: [...DEFAULT_EXERCISES],
     routines: [...DEFAULT_ROUTINES],
+    deletedRoutineIds: [],
     history: [],
     prs: {},
     activeWorkout: null
@@ -1402,11 +1424,122 @@ window.switchTab = function(tabName) {
 };
 
 // --- Routines Management ---
+let routineCategoryFilter = 'all'; // 'all', 'featured', 'custom'
+
+window.setRoutineFilter = function(filter) {
+  routineCategoryFilter = filter;
+  document.querySelectorAll('#routine-filter-chips .chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.filter === filter);
+  });
+  renderRoutines();
+  triggerHaptic([30]);
+};
+
+window.deleteRoutine = function(routineId, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const routine = (AppState.routines || []).find(r => r.id === routineId);
+  if (!routine) return;
+
+  const routineName = routine.name || 'this routine';
+  if (!confirm(`Are you sure you want to delete "${routineName}"?`)) {
+    return;
+  }
+
+  // Record into deletedRoutineIds to prevent auto-sync resurrection
+  AppState.deletedRoutineIds = AppState.deletedRoutineIds || [];
+  if (!AppState.deletedRoutineIds.includes(routineId)) {
+    AppState.deletedRoutineIds.push(routineId);
+  }
+
+  // Remove from state.routines
+  AppState.routines = AppState.routines.filter(r => r.id !== routineId);
+  saveState();
+  renderRoutines();
+  triggerHaptic([40, 50]);
+  showToast(`Deleted "${routineName}"`);
+};
+
+window.restoreDefaultRoutines = function() {
+  if (!confirm('Restore all default recommended routines?')) return;
+  AppState.deletedRoutineIds = [];
+  const existingRoutineIds = new Set((AppState.routines || []).map(r => r.id));
+  DEFAULT_ROUTINES.forEach(defR => {
+    if (!existingRoutineIds.has(defR.id)) {
+      AppState.routines.push({ ...defR, isFeatured: true });
+    }
+  });
+  saveState();
+  renderRoutines();
+  triggerHaptic([60]);
+  showToast('Restored default recommended routines');
+};
+
 function renderRoutines() {
   const container = document.getElementById('routines-grid');
   if (!container) return;
 
-  container.innerHTML = AppState.routines.map(routine => {
+  const defaultIdSet = new Set(DEFAULT_ROUTINES.map(d => d.id));
+  const allRoutines = AppState.routines || [];
+
+  // Update filter chips counts
+  const totalCount = allRoutines.length;
+  const featuredCount = allRoutines.filter(r => r.isFeatured || defaultIdSet.has(r.id)).length;
+  const customCount = allRoutines.filter(r => !r.isFeatured && !defaultIdSet.has(r.id)).length;
+
+  const chipAll = document.querySelector('#routine-filter-chips [data-filter="all"]');
+  const chipFeatured = document.querySelector('#routine-filter-chips [data-filter="featured"]');
+  const chipCustom = document.querySelector('#routine-filter-chips [data-filter="custom"]');
+  if (chipAll) chipAll.textContent = `All Routines (${totalCount})`;
+  if (chipFeatured) chipFeatured.textContent = `★ Featured (${featuredCount})`;
+  if (chipCustom) chipCustom.textContent = `My Routines (${customCount})`;
+
+  // Filter routines based on active category filter
+  const filteredRoutines = allRoutines.filter(r => {
+    const isFeat = r.isFeatured || defaultIdSet.has(r.id);
+    if (routineCategoryFilter === 'featured') return isFeat;
+    if (routineCategoryFilter === 'custom') return !isFeat;
+    return true; // 'all'
+  });
+
+  if (filteredRoutines.length === 0) {
+    if (routineCategoryFilter === 'custom') {
+      container.innerHTML = `
+        <div class="idle-placeholder" style="grid-column: 1 / -1; padding: 28px 16px;">
+          <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px;">No custom routines created yet.</p>
+          <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 16px;">Create your own custom split by combining any of our 260 gym exercises.</p>
+          <button type="button" class="primary-glow-btn small-btn" onclick="openModal('modal-create-routine')">+ Create Routine</button>
+        </div>
+      `;
+    } else if (routineCategoryFilter === 'featured') {
+      container.innerHTML = `
+        <div class="idle-placeholder" style="grid-column: 1 / -1; padding: 28px 16px;">
+          <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px;">No featured routines remaining.</p>
+          <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 16px;">You can restore the default recommended workouts anytime.</p>
+          <button type="button" class="secondary-btn small-btn" onclick="restoreDefaultRoutines()">&#9218; Restore Featured Routines</button>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="idle-placeholder" style="grid-column: 1 / -1; padding: 28px 16px;">
+          <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px;">No routines saved.</p>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+            <button type="button" class="primary-glow-btn small-btn" onclick="openModal('modal-create-routine')">+ Create Routine</button>
+            <button type="button" class="secondary-btn small-btn" onclick="restoreDefaultRoutines()">&#9218; Restore Default Routines</button>
+          </div>
+        </div>
+      `;
+    }
+    updateOverviewStats();
+    return;
+  }
+
+  container.innerHTML = filteredRoutines.map(routine => {
+    const isFeatured = routine.isFeatured || defaultIdSet.has(routine.id);
+
     // Resolve exercises
     const exNames = routine.exerciseIds
       .map(id => {
@@ -1416,13 +1549,28 @@ function renderRoutines() {
       .filter(Boolean);
 
     return `
-      <div class="routine-card">
+      <div class="routine-card ${isFeatured ? 'routine-card-featured' : ''}" data-routine-id="${routine.id}">
         <div class="routine-card-header">
-          <div>
-            <h3 class="routine-card-title">${escapeHtml(routine.name)}</h3>
-            <span class="routine-tag-pill">${escapeHtml(routine.tag || 'Workout')}</span>
+          <div class="routine-header-info">
+            <div class="routine-title-row">
+              <h3 class="routine-card-title">${escapeHtml(routine.name)}</h3>
+            </div>
+            <div class="routine-tags-row">
+              ${isFeatured ? '<span class="routine-featured-pill">&#9733; FEATURED</span>' : ''}
+              <span class="routine-tag-pill">${escapeHtml(routine.tag || 'Workout')}</span>
+            </div>
           </div>
-          <button class="start-routine-btn" onclick="startWorkoutFromRoutine('${routine.id}')">Start &rarr;</button>
+          <div class="routine-card-actions">
+            <button type="button" class="routine-delete-btn" onclick="deleteRoutine('${routine.id}', event)" title="Delete Routine" aria-label="Delete routine ${escapeHtml(routine.name)}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </button>
+            <button class="start-routine-btn" onclick="startWorkoutFromRoutine('${routine.id}')">Start &rarr;</button>
+          </div>
         </div>
         <p class="routine-exercises-preview">${escapeHtml(exNames.join(' • '))}</p>
         <div class="routine-card-footer">
@@ -1432,6 +1580,18 @@ function renderRoutines() {
       </div>
     `;
   }).join('');
+
+  // If some default routines have been deleted, render a subtle restore option at bottom
+  if (AppState.deletedRoutineIds && AppState.deletedRoutineIds.length > 0) {
+    const restoreRow = document.createElement('div');
+    restoreRow.className = 'routines-restore-footer';
+    restoreRow.innerHTML = `
+      <button type="button" class="restore-defaults-btn" onclick="restoreDefaultRoutines()">
+        <span>&#9218; Restore ${AppState.deletedRoutineIds.length} deleted default routine(s)</span>
+      </button>
+    `;
+    container.appendChild(restoreRow);
+  }
 
   // Update hero stats overview
   updateOverviewStats();
@@ -3313,6 +3473,8 @@ document.addEventListener('DOMContentLoaded', () => {
     newRoutineSelectedExerciseIds = [];
     document.getElementById('new-routine-name').value = '';
     document.getElementById('new-routine-tag').value = '';
+    const isFeaturedCheck = document.getElementById('new-routine-is-featured');
+    if (isFeaturedCheck) isFeaturedCheck.checked = false;
     renderRoutineBuilderExercises();
     openModal('modal-create-routine');
   });
@@ -3324,6 +3486,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-save-new-routine').addEventListener('click', () => {
     const name = document.getElementById('new-routine-name').value.trim();
     const tag = document.getElementById('new-routine-tag').value.trim();
+    const isFeaturedCheck = document.getElementById('new-routine-is-featured');
+    const isFeatured = isFeaturedCheck ? isFeaturedCheck.checked : false;
 
     if (!name) {
       alert('Please enter a routine name.');
@@ -3337,15 +3501,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const newRoutine = {
       id: 'routine_' + Date.now(),
       name: name,
-      tag: tag || 'Custom Routine',
-      exerciseIds: [...newRoutineSelectedExerciseIds]
+      tag: tag || (isFeatured ? 'Featured Split' : 'Custom Routine'),
+      exerciseIds: [...newRoutineSelectedExerciseIds],
+      isFeatured: isFeatured
     };
 
     AppState.routines.push(newRoutine);
     saveState();
     closeModal('modal-create-routine');
+    if (isFeaturedCheck) isFeaturedCheck.checked = false;
     renderRoutines();
     triggerHaptic([60]);
+    showToast(`Saved routine "${name}"`);
   });
 
   // Settings: Unit Toggle

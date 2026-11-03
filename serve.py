@@ -19,6 +19,8 @@ import tempfile
 
 # Doomscroll state pushed by the app.
 STATE_FILE = os.path.join(tempfile.gettempdir(), 'moon_scroll_bank.json')
+USERS_FILE = os.path.join(tempfile.gettempdir(), 'moon_users_db.json')
+ANNOUNCEMENT_FILE = os.path.join(tempfile.gettempdir(), 'moon_announcement.json')
 
 def load_state():
     defaults = {
@@ -254,6 +256,24 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                 curr_bank = float(state.get('scroll_bank', 0.0))
                 msg = f"stopped: no active session, balance: {curr_bank:.2f} min"
             return self._send(msg, ctype='text/plain; charset=utf-8')
+        if clean == '/api/users':
+            if os.path.exists(USERS_FILE):
+                try:
+                    with open(USERS_FILE, 'r', encoding='utf-8') as f:
+                        return self._send(f.read(), ctype='application/json; charset=utf-8')
+                except Exception:
+                    pass
+            return self._send('[]', ctype='application/json; charset=utf-8')
+
+        if clean == '/api/announcement':
+            if os.path.exists(ANNOUNCEMENT_FILE):
+                try:
+                    with open(ANNOUNCEMENT_FILE, 'r', encoding='utf-8') as f:
+                        return self._send(f.read(), ctype='application/json; charset=utf-8')
+                except Exception:
+                    pass
+            return self._send('{"message":""}', ctype='application/json; charset=utf-8')
+
         if clean == '/api/lan-info':
             ip = get_lan_ip()
             return self._send(json.dumps({
@@ -400,6 +420,27 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
             bank = float(state.get('scroll_bank', 0.0))
             resp = 'allowed' if bank > 0 else 'dm_only'
             return self._send(resp, ctype='text/plain; charset=utf-8')
+
+        if clean == '/api/users':
+            try:
+                n = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(n)
+                with open(USERS_FILE, 'wb') as f:
+                    f.write(body)
+                return self._send('{"status":"ok"}', ctype='application/json; charset=utf-8')
+            except Exception as e:
+                return self._send(f'{{"error":"{e}"}}', code=500, ctype='application/json; charset=utf-8')
+
+        if clean == '/api/announcement':
+            try:
+                n = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(n)
+                with open(ANNOUNCEMENT_FILE, 'wb') as f:
+                    f.write(body)
+                return self._send('{"status":"ok"}', ctype='application/json; charset=utf-8')
+            except Exception as e:
+                return self._send(f'{{"error":"{e}"}}', code=500, ctype='application/json; charset=utf-8')
+
         self._send('not found', code=404)
 
 HTTPS_PORT = 8443

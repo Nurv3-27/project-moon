@@ -1438,20 +1438,36 @@ window.switchRanksSubTab = function(subTab) {
   activeRanksSubTab = subTab;
   const ranksContent = document.getElementById('subview-ranks-content');
   const prsContent = document.getElementById('subview-prs-content');
+  const lbContent = document.getElementById('subview-leaderboard-content');
   const btnRanks = document.getElementById('btn-subtab-ranks');
   const btnPrs = document.getElementById('btn-subtab-prs');
+  const btnLb = document.getElementById('btn-subtab-leaderboard');
 
-  if (subTab === 'prs') {
+  if (subTab === 'leaderboard') {
+    if (ranksContent) ranksContent.classList.add('hidden');
+    if (prsContent) prsContent.classList.add('hidden');
+    if (lbContent) lbContent.classList.remove('hidden');
+    if (btnRanks) btnRanks.classList.remove('active');
+    if (btnPrs) btnPrs.classList.remove('active');
+    if (btnLb) btnLb.classList.add('active');
+    if (window.AuthSystem && typeof window.AuthSystem.updateLeaderboardViews === 'function') {
+      window.AuthSystem.updateLeaderboardViews();
+    }
+  } else if (subTab === 'prs') {
     if (ranksContent) ranksContent.classList.add('hidden');
     if (prsContent) prsContent.classList.remove('hidden');
+    if (lbContent) lbContent.classList.add('hidden');
     if (btnRanks) btnRanks.classList.remove('active');
     if (btnPrs) btnPrs.classList.add('active');
+    if (btnLb) btnLb.classList.remove('active');
     renderPRs();
   } else {
     if (ranksContent) ranksContent.classList.remove('hidden');
     if (prsContent) prsContent.classList.add('hidden');
+    if (lbContent) lbContent.classList.add('hidden');
     if (btnRanks) btnRanks.classList.add('active');
     if (btnPrs) btnPrs.classList.remove('active');
+    if (btnLb) btnLb.classList.remove('active');
     renderRanks();
   }
   triggerHaptic([30]);
@@ -3970,4 +3986,157 @@ window.showSplashScreen = function() {
     if (picker) picker.classList.remove('pulse-ready');
     initSplashScreenTimer();
   }
+};
+
+// ==================== AUTHENTICATION & AI COACH GLUE ====================
+window.openAuthModal = function() {
+  window.openModal('modal-auth');
+};
+
+window.openAICoachModal = function() {
+  if (window.AuthSystem && typeof window.AuthSystem.updateCoachModalUI === 'function') {
+    window.AuthSystem.updateCoachModalUI();
+  }
+  window.openModal('modal-ai-coach');
+};
+
+window.switchAuthTab = function(mode) {
+  const btnSignIn = document.getElementById('btn-auth-tab-signin');
+  const btnSignUp = document.getElementById('btn-auth-tab-signup');
+  const formSignIn = document.getElementById('form-auth-signin');
+  const formSignUp = document.getElementById('form-auth-signup');
+
+  if (mode === 'signup') {
+    if (btnSignIn) btnSignIn.classList.remove('active');
+    if (btnSignUp) btnSignUp.classList.add('active');
+    if (formSignIn) formSignIn.classList.add('hidden');
+    if (formSignUp) formSignUp.classList.remove('hidden');
+  } else {
+    if (btnSignIn) btnSignIn.classList.add('active');
+    if (btnSignUp) btnSignUp.classList.remove('active');
+    if (formSignIn) formSignIn.classList.remove('hidden');
+    if (formSignUp) formSignUp.classList.add('hidden');
+  }
+  triggerHaptic([20]);
+};
+
+window.selectSignupGender = function(gender) {
+  const maleCard = document.getElementById('card-gender-male');
+  const femCard = document.getElementById('card-gender-female');
+  const input = document.getElementById('signup-gender');
+
+  if (gender === 'female') {
+    if (maleCard) maleCard.classList.remove('active');
+    if (femCard) femCard.classList.add('active');
+    if (input) input.value = 'female';
+  } else {
+    if (maleCard) maleCard.classList.add('active');
+    if (femCard) femCard.classList.remove('active');
+    if (input) input.value = 'male';
+  }
+  triggerHaptic([30]);
+};
+
+window.handleAuthSignIn = function(e) {
+  if (e) e.preventDefault();
+  const idInput = document.getElementById('signin-identifier');
+  const passInput = document.getElementById('signin-password');
+  if (!idInput || !passInput) return;
+
+  try {
+    if (window.AuthSystem) {
+      window.AuthSystem.login(idInput.value, passInput.value);
+    }
+  } catch (err) {
+    if (typeof showToast === 'function') {
+      showToast('⚠️ ' + err.message);
+    } else {
+      alert(err.message);
+    }
+  }
+};
+
+window.handleAuthSignUp = function(e) {
+  if (e) e.preventDefault();
+  const nameInput = document.getElementById('signup-name');
+  const userEl = document.getElementById('signup-username');
+  const passEl = document.getElementById('signup-password');
+  const genderEl = document.getElementById('signup-gender');
+  const adminKeyEl = document.getElementById('signup-adminkey');
+
+  const displayName = nameInput ? nameInput.value.trim() : '';
+  const username = userEl ? userEl.value.trim() : '';
+  const password = passEl ? passEl.value : '';
+  const gender = genderEl ? genderEl.value : 'male';
+  const adminSecret = adminKeyEl ? adminKeyEl.value.trim() : '';
+
+  try {
+    if (window.AuthSystem) {
+      window.AuthSystem.signUp({
+        displayName,
+        username,
+        password,
+        gender,
+        adminSecret
+      });
+    }
+  } catch (err) {
+    if (typeof showToast === 'function') {
+      showToast('⚠️ ' + err.message);
+    } else {
+      alert(err.message);
+    }
+  }
+};
+
+window.toggleCoachVoice = function() {
+  if (window.AuthSystem) {
+    window.AuthSystem.voiceEnabled = !window.AuthSystem.voiceEnabled;
+    const v = window.AuthSystem.voiceEnabled;
+    const voiceLabel = document.getElementById('coach-voice-label');
+    const voiceIcon = document.getElementById('coach-voice-icon');
+    if (voiceLabel) voiceLabel.textContent = v ? 'Voice: ON' : 'Voice: OFF';
+    if (voiceIcon) voiceIcon.textContent = v ? '🔊' : '🔇';
+    if (typeof showToast === 'function') {
+      showToast(`Coach voice audio: ${v ? 'ENABLED' : 'MUTED'}`);
+    }
+  }
+};
+
+window.askCoachPrompt = function(promptText) {
+  const stream = document.getElementById('coach-chat-stream');
+  if (!stream || !window.AuthSystem) return;
+
+  const coach = window.AuthSystem.getCoach ? window.AuthSystem.getCoach() : { sigilText: 'N', accentColor: '#E0506A' };
+
+  // Append user message
+  const userMsgDiv = document.createElement('div');
+  userMsgDiv.className = 'coach-msg user';
+  userMsgDiv.innerHTML = `
+    <div class="coach-msg-bubble">${escapeHtml(promptText)}</div>
+  `;
+  stream.appendChild(userMsgDiv);
+
+  // Get AI reply
+  const reply = window.AuthSystem.askCoach(promptText);
+
+  // Append Coach reply
+  const coachMsgDiv = document.createElement('div');
+  coachMsgDiv.className = 'coach-msg assistant';
+  coachMsgDiv.innerHTML = `
+    <div class="coach-msg-avatar" style="background:${coach.accentColor || '#E0506A'}">${coach.sigilText || 'N'}</div>
+    <div class="coach-msg-bubble">${escapeHtml(reply)}</div>
+  `;
+  stream.appendChild(coachMsgDiv);
+  stream.scrollTop = stream.scrollHeight;
+  triggerHaptic([30]);
+};
+
+window.handleCoachChatSubmit = function(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('coach-chat-input');
+  if (!input || !input.value.trim()) return;
+  const query = input.value.trim();
+  input.value = '';
+  window.askCoachPrompt(query);
 };

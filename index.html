@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=51">
+  <link rel="stylesheet" href="style.css?v=52">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + CUSTOM IMAGE_7.PNG + FULL INTRO SOUND) -->
@@ -95,7 +95,25 @@
         </div>
       </div>
       <div class="header-right">
-        <!-- Header action buttons moved to Settings per user request -->
+        <!-- AI Coach Status Pill (Coach N for Male / Coach M for Female) -->
+        <button type="button" id="header-ai-coach-pill" class="header-coach-pill" onclick="openAICoachModal()" title="Talk to your AI Coach">
+          <span class="coach-pulse-dot"></span>
+          <span class="coach-pill-icon" id="header-coach-icon">⚡</span>
+          <span class="coach-pill-label" id="header-coach-label">Coach N</span>
+        </button>
+
+        <!-- Admin Quick Access (Visible only if Admin) -->
+        <button type="button" class="header-admin-pill admin-only-feature" onclick="window.AuthSystem.openAdminDashboard()" title="Open Admin Control Center" style="display:none;">
+          <span>👑</span>
+          <span class="btn-label">Admin</span>
+        </button>
+
+        <!-- User Profile Pill -->
+        <button type="button" id="header-user-btn" class="header-user-pill" onclick="openAuthModal()" title="Athlete Account & Switcher">
+          <span class="user-avatar-badge" id="header-user-avatar">♂</span>
+          <span class="user-name-text" id="header-user-name">Athlete</span>
+          <span class="user-role-badge standard" id="header-user-role">STANDARD</span>
+        </button>
       </div>
     </header>
 
@@ -354,13 +372,16 @@
 
       <!-- TAB 4: RANKS & PRs (COMBINED MUSCLE ANATOMY & PERSONAL RECORDS) -->
       <section id="view-ranks" class="tab-view">
-        <!-- Segmented Sub-Tab Switcher: Muscle Ranks vs Personal Records -->
+        <!-- Segmented Sub-Tab Switcher: Muscle Ranks vs Personal Records vs Division Leaderboard -->
         <div class="modal-tab-switcher ranks-prs-segment" id="ranks-prs-tab-switcher" role="tablist">
           <button type="button" class="modal-tab-btn active" id="btn-subtab-ranks" onclick="switchRanksSubTab('ranks')">
-            ⚔️ Muscle Ranks &amp; Anatomy
+            ⚔️ Muscle Ranks
           </button>
           <button type="button" class="modal-tab-btn" id="btn-subtab-prs" onclick="switchRanksSubTab('prs')">
-            🏆 Personal Records (PRs)
+            🏆 Personal Records
+          </button>
+          <button type="button" class="modal-tab-btn" id="btn-subtab-leaderboard" onclick="switchRanksSubTab('leaderboard')">
+            🥇 Leaderboard
           </button>
         </div>
 
@@ -796,6 +817,13 @@
             <!-- PR items injected here -->
           </div>
         </div>
+
+        <!-- Sub-View 3: Division Leaderboard (Auto-Filtered by Gender Bracket) -->
+        <div id="subview-leaderboard-content" class="hidden">
+          <div id="division-leaderboard-container">
+            <!-- Dynamically populated by AuthSystem.updateLeaderboardViews() -->
+          </div>
+        </div>
       </section>
 
       <!-- TAB: FOCUS & DOOMSCROLL BANK -->
@@ -978,6 +1006,41 @@
             <span class="greeting-subtitle">PREFERENCES & SETUP</span>
             <h1 class="hero-title">Settings</h1>
           </div>
+        </div>
+
+        <!-- Athlete Profile & Role Card -->
+        <div class="athlete-profile-card">
+          <div class="athlete-profile-top">
+            <div class="athlete-avatar-wrap">
+              <span class="athlete-big-avatar" id="settings-user-avatar">♂</span>
+            </div>
+            <div class="athlete-profile-meta">
+              <div class="athlete-title-row">
+                <h3 class="athlete-display-name" id="settings-user-name">Athlete</h3>
+                <span class="user-role-badge standard" id="settings-user-role">STANDARD</span>
+              </div>
+              <span class="athlete-handle" id="settings-user-handle">@athlete</span>
+              <div class="athlete-tags-row">
+                <span class="athlete-gender-pill" id="settings-user-gender">♂ Male Athlete</span>
+                <span class="athlete-coach-pill" id="settings-user-coach">⚡ Assigned AI: Coach N</span>
+              </div>
+            </div>
+          </div>
+          <div class="athlete-profile-actions">
+            <button type="button" class="secondary-btn small-btn" onclick="openAICoachModal()">🤖 Talk to Coach</button>
+            <button type="button" class="secondary-btn small-btn" onclick="openAuthModal()">Switch / Sign In</button>
+            <button type="button" class="danger-ghost-btn small-btn" onclick="window.AuthSystem.logout()">Log Out</button>
+          </div>
+        </div>
+
+        <!-- Protected Admin Citadel Card (Admin Role Only) -->
+        <div class="admin-citadel-cta-card admin-only-feature" style="display:none;">
+          <div class="admin-cta-badge">👑 RESTRICTED ADMIN ACCESS</div>
+          <h3>Obsidian Citadel Control Center</h3>
+          <p>Monitor male &amp; female leaderboards side-by-side without gender filters, manage all athlete accounts, and oversee app updates.</p>
+          <button type="button" class="primary-glow-btn full-width" onclick="window.AuthSystem.openAdminDashboard()">
+            <span>Enter Admin Dashboard &rarr;</span>
+          </button>
         </div>
 
         <!-- iOS Install & iPhone QR Link Card -->
@@ -1608,9 +1671,190 @@
     </div>
   </div>
 
-  <script src="app.js?v=51"></script>
-  <script src="camera.js?v=51"></script>
-  <script src="ranks.js?v=51"></script>
+  <!-- ==================== AUTHENTICATION MODAL (SIGN IN / SIGN UP) ==================== -->
+  <div id="modal-auth" class="modal-overlay hidden">
+    <div class="modal-card auth-card">
+      <div class="modal-header auth-modal-header">
+        <div class="auth-brand-badge">
+          <span class="auth-brand-dot"></span>
+          <span>MOON CITADEL GATEWAY</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-auth')">&times;</button>
+      </div>
+
+      <div class="auth-hero-copy">
+        <h2 id="auth-main-title">Athlete Authentication</h2>
+        <p id="auth-main-sub">Access your customized biometric profile, gender division leaderboard, and dedicated AI Coach.</p>
+      </div>
+
+      <!-- Quick Demo Account Switcher -->
+      <div class="auth-demo-chips-box">
+        <span class="demo-box-label">⚡ ONE-TAP DEMO ATHLETES:</span>
+        <div class="demo-chips-grid">
+          <button type="button" class="demo-chip-btn admin" onclick="window.AuthSystem.switchDemoAccount('admin')">
+            👑 Admin (Architect)
+          </button>
+          <button type="button" class="demo-chip-btn male" onclick="window.AuthSystem.switchDemoAccount('male')">
+            ♂ Male (Alex &bull; Coach N)
+          </button>
+          <button type="button" class="demo-chip-btn female" onclick="window.AuthSystem.switchDemoAccount('female')">
+            ♀ Female (Maya &bull; Coach M)
+          </button>
+        </div>
+      </div>
+
+      <!-- Sub-Tab Switcher: Sign In vs Sign Up -->
+      <div class="modal-tab-switcher auth-mode-switcher" role="tablist">
+        <button type="button" class="modal-tab-btn active" id="btn-auth-tab-signin" onclick="switchAuthTab('signin')">
+          🔐 Sign In
+        </button>
+        <button type="button" class="modal-tab-btn" id="btn-auth-tab-signup" onclick="switchAuthTab('signup')">
+          ⚡ Sign Up (New Athlete)
+        </button>
+      </div>
+
+      <!-- VIEW 1: SIGN IN FORM -->
+      <form id="form-auth-signin" onsubmit="handleAuthSignIn(event)">
+        <div class="form-group">
+          <label>Username or Email</label>
+          <input type="text" id="signin-identifier" class="ios-input" placeholder="e.g. admin or alex_titan" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="signin-password" class="ios-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="primary-glow-btn full-width auth-submit-btn">
+          <span>Enter Citadel &rarr;</span>
+        </button>
+      </form>
+
+      <!-- VIEW 2: SIGN UP FORM -->
+      <form id="form-auth-signup" class="hidden" onsubmit="handleAuthSignUp(event)">
+        <div class="form-group">
+          <label>Full Display Name</label>
+          <input type="text" id="signup-name" class="ios-input" placeholder="e.g. Jordan Knight" required>
+        </div>
+        <div class="form-group">
+          <label>Unique Username</label>
+          <input type="text" id="signup-username" class="ios-input" placeholder="e.g. jordan_titan" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Password (min 4 chars)</label>
+          <input type="password" id="signup-password" class="ios-input" placeholder="••••••••" required autocomplete="new-password">
+        </div>
+
+        <!-- MANDATORY GENDER SELECTION -->
+        <div class="form-group">
+          <label class="required-label">Select Athlete Gender (Mandatory)</label>
+          <p class="gender-help-text">Assigns your dedicated AI Coach &amp; locks your Official Division Leaderboard standard.</p>
+          <div class="gender-select-cards-grid">
+            <div class="gender-card active" id="card-gender-male" onclick="selectSignupGender('male')">
+              <span class="gc-icon male">♂</span>
+              <div class="gc-info">
+                <strong>Male Athlete</strong>
+                <span>Assigned AI Coach 'N' &bull; Male Division Leaderboard &amp; HD Male Anatomy</span>
+              </div>
+              <span class="gc-radio-dot"></span>
+            </div>
+            <div class="gender-card" id="card-gender-female" onclick="selectSignupGender('female')">
+              <span class="gc-icon female">♀</span>
+              <div class="gc-info">
+                <strong>Female Athlete</strong>
+                <span>Assigned AI Coach 'M' &bull; Female Division Leaderboard &amp; HD Lady Anatomy</span>
+              </div>
+              <span class="gc-radio-dot"></span>
+            </div>
+          </div>
+          <input type="hidden" id="signup-gender" value="male">
+        </div>
+
+        <!-- Optional Admin Key Toggle -->
+        <div class="form-group admin-key-group">
+          <label>Admin Access Key (Optional for Creator Access)</label>
+          <input type="password" id="signup-adminkey" class="ios-input" placeholder="Enter key for Admin tier (MOON2026)">
+        </div>
+
+        <button type="submit" class="primary-glow-btn full-width auth-submit-btn">
+          <span>Create Account &amp; Assign Coach &rarr;</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== DUAL AI ASSISTANT MODAL (COACH N & COACH M) ==================== -->
+  <div id="modal-ai-coach" class="modal-overlay hidden">
+    <div class="modal-card coach-modal-card">
+      <div class="modal-header coach-modal-header" id="coach-modal-header">
+        <div class="coach-header-left">
+          <div class="coach-avatar-circle" id="coach-avatar-circle">⚡</div>
+          <div>
+            <h3 id="coach-modal-title">Coach N</h3>
+            <span class="coach-status-tag" id="coach-modal-subtitle">Titan Bio-Strategist &bull; Active</span>
+          </div>
+        </div>
+        <div class="coach-header-right">
+          <button type="button" class="coach-voice-btn" id="btn-toggle-coach-voice" onclick="toggleCoachVoice()" title="Toggle Voice Audio">
+            <span id="coach-voice-icon">🔊</span>
+            <span id="coach-voice-label">Voice: ON</span>
+          </button>
+          <button class="modal-close-btn" onclick="closeModal('modal-ai-coach')">&times;</button>
+        </div>
+      </div>
+
+      <div class="coach-briefing-card" id="coach-briefing-card">
+        <p class="coach-tagline" id="coach-tagline">&ldquo;Absolute tension. Biomechanical perfection. Relentless progression.&rdquo;</p>
+      </div>
+
+      <!-- Quick Interactive Inquiries -->
+      <div class="coach-quick-prompts-row">
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Give me pre-workout hype!')">🔥 Pre-Workout Hype</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Check my compound form technique')">📐 Form Technique</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How much weight should I overload today?')">⚖️ Weight Progression</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Post-workout protein and recovery protocol')">🥗 Fuel &amp; Recovery</button>
+      </div>
+
+      <!-- Live Chat Transcript Stream -->
+      <div class="coach-chat-stream" id="coach-chat-stream">
+        <div class="coach-msg assistant">
+          <div class="coach-msg-avatar" id="coach-msg-avatar">N</div>
+          <div class="coach-msg-bubble" id="coach-welcome-bubble">
+            Greetings, athlete. Coach N locked in. Mechanical tension and progressive overload are the law. What's our target today?
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Field -->
+      <form class="coach-input-bar" onsubmit="handleCoachChatSubmit(event)">
+        <input type="text" id="coach-chat-input" class="ios-input" placeholder="Ask your dedicated AI Coach anything...">
+        <button type="submit" class="primary-glow-btn small-btn">Send &rarr;</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== PROTECTED ADMIN CITADEL DASHBOARD MODAL ==================== -->
+  <div id="modal-admin-dashboard" class="modal-overlay hidden">
+    <div class="modal-card admin-modal-card">
+      <div class="modal-header admin-modal-header">
+        <div class="admin-head-left">
+          <span class="admin-crown-icon">👑</span>
+          <div>
+            <h3>Obsidian Citadel Admin Dashboard</h3>
+            <span class="admin-badge-sub">Full Platform Oversight &bull; Gender Filters Bypassed</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-admin-dashboard')">&times;</button>
+      </div>
+
+      <div id="admin-dashboard-content" class="admin-dashboard-content">
+        <!-- Dynamically rendered by window.AuthSystem.renderAdminView() -->
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js?v=52"></script>
+  <script src="app.js?v=52"></script>
+  <script src="camera.js?v=52"></script>
+  <script src="ranks.js?v=52"></script>
 </body>
 </html>
 

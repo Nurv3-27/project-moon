@@ -3287,7 +3287,11 @@ function playSplashAudio() {
     setSplashSoundStatus('blocked', 'Tap anywhere for sound 🔊');
   }
 
-  // Attach tap handlers so touching anywhere on the screen immediately plays/unmutes audio
+  // Attach gesture handlers across window & splash screen so any touch, swipe, or tap instantly unlocks sound
+  ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
+    window.addEventListener(evt, handleSplashUserInteraction, { passive: true, capture: true });
+  });
+
   const splashEl = document.getElementById('app-splash-screen');
   if (splashEl) {
     splashEl.addEventListener('pointerdown', handleSplashUserInteraction, { passive: true });
@@ -3325,6 +3329,10 @@ function dismissSplashScreen(e) {
 
   // Ensure audio stops completely before routing to the main dashboard
   stopSplashAudio();
+
+  ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
+    window.removeEventListener(evt, handleSplashUserInteraction, { capture: true });
+  });
 
   const splash = document.getElementById('app-splash-screen');
   if (!splash) return;

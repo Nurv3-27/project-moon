@@ -4216,31 +4216,177 @@ header + #antiscroll-live-banner,
   max-width: 360px;
 }
 
-/* Subtle Top-Right Skip Pill */
-.splash-skip-btn {
-  position: absolute;
-  top: max(20px, env(safe-area-inset-top, 20px));
-  right: max(20px, env(safe-area-inset-right, 20px));
-  z-index: 50;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(128, 0, 32, 0.45);
-  color: #f7d5dd;
-  font-family: 'Outfit', 'Space Grotesk', -apple-system, sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
+/* Destination Selection: Routines vs Focus */
+.splash-dest-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 4px;
+  opacity: 0;
+  transform: translateY(18px);
+  animation: splashDestEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
+}
+
+@keyframes splashDestEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.splash-dest-heading {
+  font-family: 'Cinzel', 'Outfit', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: #c48292;
+  text-shadow: 0 0 14px rgba(128, 0, 32, 0.6);
   user-select: none;
 }
 
-.splash-skip-btn:hover {
-  background: rgba(128, 0, 32, 0.35);
-  border-color: #ffccd5;
+.splash-dest-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.splash-dest-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.splash-dest-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.dest-btn-routines::before {
+  background: linear-gradient(180deg, #ff416c, #8a0022);
+}
+
+.dest-btn-focus::before {
+  background: linear-gradient(180deg, var(--accent-lime), #00b4d8);
+}
+
+.splash-dest-btn:hover,
+.splash-dest-btn:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.splash-dest-btn:active {
+  transform: scale(0.98);
+}
+
+.dest-btn-routines:hover,
+.dest-btn-routines:active {
+  background: rgba(128, 0, 32, 0.28);
+  border-color: rgba(220, 38, 76, 0.65);
+  box-shadow: 0 8px 30px rgba(128, 0, 32, 0.55);
+}
+
+.dest-btn-routines:hover::before,
+.dest-btn-routines:active::before {
+  opacity: 1;
+}
+
+.dest-btn-focus:hover,
+.dest-btn-focus:active {
+  background: rgba(20, 80, 50, 0.28);
+  border-color: rgba(57, 255, 20, 0.55);
+  box-shadow: 0 8px 30px rgba(57, 255, 20, 0.3);
+}
+
+.dest-btn-focus:hover::before,
+.dest-btn-focus:active::before {
+  opacity: 1;
+}
+
+.dest-btn-icon {
+  font-size: 1.55rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dest-btn-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dest-btn-title {
+  font-family: 'Outfit', 'Space Grotesk', -apple-system, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.dest-btn-sub {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dest-btn-arrow {
+  color: var(--text-dim);
+  font-size: 1.15rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.splash-dest-btn:hover .dest-btn-arrow {
+  transform: translateX(4px);
+  color: #fff;
+}
+
+/* Subtle glow after intro audio completes */
+.splash-dest-picker.pulse-ready .splash-dest-btn {
+  animation: splashBtnPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes splashBtnPulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(168, 39, 65, 0.4), 0 4px 25px rgba(0, 0, 0, 0.85);
+    border-color: rgba(220, 38, 76, 0.45);
+  }
 }
 
 /* Bottom-Right Corner Tribute: 'In the loving memory of 27' alongside Arabic 'من' */
@@ -4291,20 +4437,38 @@ header + #antiscroll-live-banner,
 
 @media (max-width: 480px) {
   .splash-custom-logo {
-    width: 220px;
-    height: 220px;
+    width: 190px;
+    height: 190px;
+  }
+  .splash-center-content {
+    gap: 14px;
   }
   .splash-quote-text {
-    font-size: 1.22rem;
+    font-size: 1.15rem;
+    max-width: 300px;
+  }
+  .splash-dest-picker {
     max-width: 320px;
+    gap: 10px;
+  }
+  .splash-dest-btn {
+    padding: 10px 14px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+  .dest-btn-title {
+    font-size: 0.92rem;
+  }
+  .dest-btn-sub {
+    font-size: 0.7rem;
   }
   .splash-corner-tribute {
-    bottom: max(16px, env(safe-area-inset-bottom, 16px));
-    right: max(16px, env(safe-area-inset-right, 16px));
-    font-size: 0.64rem;
+    bottom: max(14px, env(safe-area-inset-bottom, 14px));
+    right: max(14px, env(safe-area-inset-right, 14px));
+    font-size: 0.62rem;
     letter-spacing: 1.2px;
   }
   .splash-tribute-arabic {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 }

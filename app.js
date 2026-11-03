@@ -3627,16 +3627,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// Splash Screen Lifecycle & Automated Startup Audio Controller (5-Second Extended Duration)
-const SPLASH_TOTAL_DURATION_MS = 5000;
-const SPLASH_FADE_START_MS = 4000;
-const SPLASH_FADE_DURATION_MS = 1000;
-
+// Splash Screen Lifecycle & Full Intro Audio + Destination Selector (Routines vs Focus)
 let splashDismissed = false;
 let splashAudio = null;
-let splashAudioFadeInterval = null;
-let splashDismissTimer = null;
-let splashFadeTimer = null;
+let splashIdleSafetyTimer = null;
 
 function setSplashSoundStatus(state, message) {
   const container = document.getElementById('splash-sound-status');
@@ -3654,25 +3648,23 @@ function setSplashSoundStatus(state, message) {
 
 function handleSplashUserInteraction(e) {
   if (splashDismissed) return;
-  // Allow skip button to proceed with skip instead of absorbing tap
-  if (e && e.target && e.target.closest && e.target.closest('.splash-skip-btn')) {
+  // If user tapped directly on a destination button, let selectAppDestination handle it
+  if (e && e.target && e.target.closest && e.target.closest('.splash-dest-btn')) {
     return;
   }
 
   // Direct un-mute and playback inside synchronous user gesture (unlocks iOS/Safari/Chrome)
-  if (splashAudio) {
+  if (splashAudio && (splashAudio.paused || splashAudio.currentTime === 0)) {
     try {
       splashAudio.muted = false;
       splashAudio.volume = 1.0;
       const p = splashAudio.play();
       if (p !== undefined) {
         p.then(() => {
-          setSplashSoundStatus('playing', 'Sound active 🔊');
+          setSplashSoundStatus('playing', 'Intro sound active 🔊');
         }).catch((err) => {
           console.warn('[Splash Audio] Tap play failed:', err);
         });
-      } else {
-        setSplashSoundStatus('playing', 'Sound active 🔊');
       }
     } catch (err) {
       console.warn('[Splash Audio] Tap error:', err);
@@ -3688,49 +3680,12 @@ function handleSplashUserInteraction(e) {
 }
 
 function stopSplashAudio() {
-  if (splashAudioFadeInterval) {
-    clearInterval(splashAudioFadeInterval);
-    splashAudioFadeInterval = null;
-  }
-  if (splashFadeTimer) {
-    clearTimeout(splashFadeTimer);
-    splashFadeTimer = null;
-  }
   if (splashAudio) {
     try {
       splashAudio.pause();
       splashAudio.currentTime = 0;
-      splashAudio.volume = 0;
     } catch (e) {}
   }
-}
-
-function startSplashAudioFadeOut(durationMs = 1000) {
-  if (!splashAudio) return;
-  const fadeStart = Date.now();
-  const startVolume = splashAudio.volume || 1.0;
-
-  if (splashAudioFadeInterval) clearInterval(splashAudioFadeInterval);
-
-  splashAudioFadeInterval = setInterval(() => {
-    if (!splashAudio) {
-      clearInterval(splashAudioFadeInterval);
-      return;
-    }
-    const elapsed = Date.now() - fadeStart;
-    const progress = Math.min(1, elapsed / durationMs);
-    const newVolume = Math.max(0, startVolume * (1 - progress));
-
-    try {
-      splashAudio.volume = Number(newVolume.toFixed(2));
-    } catch (e) {}
-
-    if (progress >= 1) {
-      clearInterval(splashAudioFadeInterval);
-      splashAudioFadeInterval = null;
-      stopSplashAudio();
-    }
-  }, 25);
 }
 
 function playSplashAudio() {
@@ -3746,7 +3701,23 @@ function playSplashAudio() {
     splashAudio.currentTime = 0;
     splashAudio.muted = false;
 
-    setSplashSoundStatus('', 'Connecting audio...');
+    // Listen for full completion of the intro audio
+    splashAudio.onended = () => {
+      console.log('[Splash Audio] Intro sound completed fully.');
+      const picker = document.getElementById('splash-dest-picker');
+      if (picker) {
+        picker.classList.add('pulse-ready');
+      }
+      try { triggerHaptic([20, 20]); } catch (e) {}
+
+      // Fallback: if user leaves it unattended for 30s after audio finishes, default to routines
+      if (splashIdleSafetyTimer) clearTimeout(splashIdleSafetyTimer);
+      splashIdleSafetyTimer = setTimeout(() => {
+        if (!splashDismissed) {
+          selectAppDestination('routines');
+        }
+      }, 30000);
+    };
 
     // Direct automated unmuted playback attempt
     const p = splashAudio.play();
@@ -3757,7 +3728,6 @@ function playSplashAudio() {
         console.warn('[Splash Audio] Autoplay blocked, awaiting tap:', err);
         setSplashSoundStatus('blocked', 'Tap anywhere for sound 🔊');
 
-        // Resume AudioContext in parallel if available
         try {
           const ctx = getAudioContext();
           if (ctx && ctx.state === 'suspended') {
@@ -3773,7 +3743,7 @@ function playSplashAudio() {
     setSplashSoundStatus('blocked', 'Tap anywhere for sound 🔊');
   }
 
-  // Attach gesture handlers across window & splash screen so any touch, swipe, or tap instantly unlocks sound
+  // Attach gesture handlers across window & splash screen so any tap unlocks sound if autoplay was blocked
   ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
     window.addEventListener(evt, handleSplashUserInteraction, { passive: true, capture: true });
   });
@@ -3783,19 +3753,32 @@ function playSplashAudio() {
     splashEl.addEventListener('pointerdown', handleSplashUserInteraction, { passive: true });
     splashEl.addEventListener('touchstart', handleSplashUserInteraction, { passive: true });
   }
-
-  // Programmatically decrease volume during the last 1 second of the 5-second duration (at 4000ms)
-  if (splashFadeTimer) clearTimeout(splashFadeTimer);
-  splashFadeTimer = setTimeout(() => {
-    startSplashAudioFadeOut(SPLASH_FADE_DURATION_MS);
-  }, SPLASH_FADE_START_MS);
-
-  // Automatically route user to main dashboard after exactly 5 seconds
-  if (splashDismissTimer) clearTimeout(splashDismissTimer);
-  splashDismissTimer = setTimeout(() => {
-    dismissSplashScreen();
-  }, SPLASH_TOTAL_DURATION_MS);
 }
+
+window.selectAppDestination = function(destination, e) {
+  if (e && e.stopPropagation) {
+    e.stopPropagation();
+  }
+  if (splashDismissed) return;
+
+  if (splashIdleSafetyTimer) {
+    clearTimeout(splashIdleSafetyTimer);
+    splashIdleSafetyTimer = null;
+  }
+
+  // Route to user's selected tab
+  if (destination === 'focus') {
+    switchTab('focus');
+  } else {
+    switchTab('routines');
+  }
+
+  // Stop audio and dismiss splash
+  dismissSplashScreen();
+  try {
+    triggerHaptic([30, 45]);
+  } catch (err) {}
+};
 
 function dismissSplashScreen(e) {
   if (e && e.stopPropagation) {
@@ -3804,16 +3787,12 @@ function dismissSplashScreen(e) {
   if (splashDismissed) return;
   splashDismissed = true;
 
-  if (splashDismissTimer) {
-    clearTimeout(splashDismissTimer);
-    splashDismissTimer = null;
-  }
-  if (splashFadeTimer) {
-    clearTimeout(splashFadeTimer);
-    splashFadeTimer = null;
+  if (splashIdleSafetyTimer) {
+    clearTimeout(splashIdleSafetyTimer);
+    splashIdleSafetyTimer = null;
   }
 
-  // Ensure audio stops completely before routing to the main dashboard
+  // Ensure audio stops completely
   stopSplashAudio();
 
   ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
@@ -3842,7 +3821,7 @@ function initSplashScreenTimer() {
   const splash = document.getElementById('app-splash-screen');
   if (!splash) return;
 
-  // Fully automated: play startup audio and start 5.0s loading duration immediately
+  // Play full intro sound
   playSplashAudio();
 }
 
@@ -3853,6 +3832,8 @@ window.showSplashScreen = function() {
     splashDismissed = false;
     splash.style.display = '';
     splash.classList.remove('hidden', 'fade-out');
+    const picker = document.getElementById('splash-dest-picker');
+    if (picker) picker.classList.remove('pulse-ready');
     initSplashScreenTimer();
   }
 };

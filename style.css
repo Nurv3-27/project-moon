@@ -2071,8 +2071,8 @@ input:checked + .slider:before {
 
 /* ---------- Live Anti-Scroll Active Banner ---------- */
 .antiscroll-live-banner {
-  margin: 10px 16px 0;
-  padding: 10px 12px;
+  margin: 0 0 14px 0;
+  padding: 10px 14px;
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(16, 42, 26, 0.96), rgba(10, 20, 14, 0.96));
   border: 1.5px solid rgba(52, 199, 89, 0.6);

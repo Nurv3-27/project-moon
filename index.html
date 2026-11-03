@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=43">
+  <link rel="stylesheet" href="style.css?v=44">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (5-SECOND LOADING + SOLID PITCH-BLACK + CUSTOM IMAGE_7.PNG) -->
@@ -96,22 +96,6 @@
         </button>
       </div>
     </header>
-
-    <!-- Live Anti-Scroll Shield Active Bar (Visible across all tabs when Anti-Scroll is ON) -->
-    <div id="antiscroll-live-banner" class="antiscroll-live-banner hidden">
-      <div class="antiscroll-live-left" onclick="switchTab('focus')">
-        <span class="antiscroll-live-dot"></span>
-        <div class="antiscroll-live-text">
-          <strong id="antiscroll-live-title">&#128737;&#65039; ANTI-SCROLL SHIELD ACTIVE</strong>
-          <span id="antiscroll-live-sub">Feeds blocked &bull; DMs &amp; 1 Friend Reel allowed &bull; <b id="antiscroll-live-timer">00:00</b></span>
-        </div>
-      </div>
-      <div class="antiscroll-live-actions">
-        <button type="button" class="antiscroll-mini-btn" onclick="openInstagramInboxNoScroll()" title="Open IG Chat Inbox Only">&#128172; Inbox</button>
-        <button type="button" class="antiscroll-mini-btn" onclick="openAntiScrollLockScreen()" title="Open Full Anti-Scroll Lock Screen">&#128274; Lock</button>
-        <button type="button" class="antiscroll-mini-btn off" onclick="setAntiScrollMode(false)" title="Turn Off Anti-Scroll Shield">Off</button>
-      </div>
-    </div>
 
     <!-- Active Workout Banner (Sticky mini banner if workout in progress and on another tab) -->
     <div id="floating-active-banner" class="floating-active-banner hidden" onclick="switchTab('workout')">
@@ -791,6 +775,22 @@
           <div class="hero-text">
             <span class="greeting-subtitle">ANTI-DOOMSCROLL SHIELD</span>
             <h1 class="hero-title">Focus &amp; Scroll Bank</h1>
+          </div>
+        </div>
+
+        <!-- Live Anti-Scroll Shield Active Bar (Inside Focus Tab) -->
+        <div id="antiscroll-live-banner" class="antiscroll-live-banner hidden">
+          <div class="antiscroll-live-left" onclick="switchTab('focus')">
+            <span class="antiscroll-live-dot"></span>
+            <div class="antiscroll-live-text">
+              <strong id="antiscroll-live-title">&#128737;&#65039; ANTI-SCROLL SHIELD ACTIVE</strong>
+              <span id="antiscroll-live-sub">Feeds blocked &bull; DMs &amp; 1 Friend Reel allowed &bull; <b id="antiscroll-live-timer">00:00</b></span>
+            </div>
+          </div>
+          <div class="antiscroll-live-actions">
+            <button type="button" class="antiscroll-mini-btn" onclick="openInstagramInboxNoScroll()" title="Open IG Chat Inbox Only">&#128172; Inbox</button>
+            <button type="button" class="antiscroll-mini-btn" onclick="openAntiScrollLockScreen()" title="Open Full Anti-Scroll Lock Screen">&#128274; Lock</button>
+            <button type="button" class="antiscroll-mini-btn off" onclick="setAntiScrollMode(false)" title="Turn Off Anti-Scroll Shield">Off</button>
           </div>
         </div>
 
@@ -1566,9 +1566,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=43"></script>
-  <script src="camera.js?v=43"></script>
-  <script src="ranks.js?v=43"></script>
+  <script src="app.js?v=44"></script>
+  <script src="camera.js?v=44"></script>
+  <script src="ranks.js?v=44"></script>
 </body>
 </html>
 

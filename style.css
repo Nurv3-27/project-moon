@@ -1410,6 +1410,10 @@ input:checked + .slider:before {
   justify-content: center;
 }
 
+#modal-add-exercise {
+  z-index: 150;
+}
+
 .modal-card {
   width: 100%;
   max-width: 520px;

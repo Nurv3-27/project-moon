@@ -2090,6 +2090,11 @@ function renderScroll() {
   }
 }
 
+function updateAntiScrollUI() {
+  renderScroll();
+}
+window.updateAntiScrollUI = updateAntiScrollUI;
+
 function setAntiScrollMode(enabled, openFocusIfActivated = false) {
   ensureScrollState();
   const turnOn = Boolean(enabled);

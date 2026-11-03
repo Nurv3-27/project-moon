@@ -1212,6 +1212,8 @@ window.switchTab = function(tabName) {
   if (tabName === 'ranks') renderRanks();
   if (tabName === 'workout') renderActiveWorkout();
 
+  updateAntiScrollUI();
+
   window.scrollTo(0, 0);
 };
 
@@ -2001,12 +2003,28 @@ function renderScroll() {
   const shieldActive = Boolean(s.antiScrollActive);
   const dmEnabled = AppState.settings.dmOnlyMode !== false;
 
-  // Update Live Anti-Scroll Shield Banner across all tabs
+  // Relocate any stray banner from global root into view-focus if cached DOM had it outside
+  const strayBanner = document.querySelector('.app-root > #antiscroll-live-banner, body > #antiscroll-live-banner');
+  const focusView = document.getElementById('view-focus');
+  if (strayBanner && focusView) {
+    const heroBtn = focusView.querySelector('#btn-activate-antiscroll');
+    if (heroBtn) {
+      focusView.insertBefore(strayBanner, heroBtn);
+    } else {
+      focusView.appendChild(strayBanner);
+    }
+  }
+
+  // Update Live Anti-Scroll Shield Banner (Strictly visible ONLY when on Focus tab)
   const liveBanner = document.getElementById('antiscroll-live-banner');
   const liveTimer  = document.getElementById('antiscroll-live-timer');
   const liveSub    = document.getElementById('antiscroll-live-sub');
+  const isFocusActive = Boolean(focusView && focusView.classList.contains('active'));
+  const shouldShowLiveBanner = shieldActive && isFocusActive;
+
   if (liveBanner) {
-    liveBanner.classList.toggle('hidden', !shieldActive);
+    liveBanner.classList.toggle('hidden', !shouldShowLiveBanner);
+    liveBanner.style.setProperty('display', shouldShowLiveBanner ? 'flex' : 'none', 'important');
   }
   if (liveTimer && shieldActive) {
     const elapsedSec = s.antiScrollStartedAt ? Math.max(0, Math.floor((Date.now() - s.antiScrollStartedAt) / 1000)) : 0;
@@ -2859,6 +2877,7 @@ document.addEventListener('DOMContentLoaded', () => {
     switchTab('workout');
   } else {
     renderRoutines();
+    updateAntiScrollUI();
   }
 
   // Rest time selector (per workout)
@@ -3244,7 +3263,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- Initial App Splash Screen Auto-Routing (2.5s duration) ---
+  // Ensure Anti-Scroll Shield elements are strictly positioned inside focus tab
+  updateAntiScrollUI();
+
+  // --- Initial App Splash Screen Auto-Routing (5s duration) ---
   initSplashScreenTimer();
 
 });

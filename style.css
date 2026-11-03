@@ -2069,8 +2069,24 @@ input:checked + .slider:before {
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* ---------- Live Anti-Scroll Active Banner ---------- */
-.antiscroll-live-banner {
+/* ---------- Live Anti-Scroll Active Banner (Strictly inside view-focus only) ---------- */
+.app-root > #antiscroll-live-banner,
+body > #antiscroll-live-banner,
+header + #antiscroll-live-banner,
+#view-routines #antiscroll-live-banner,
+#view-routines ~ #antiscroll-live-banner,
+#antiscroll-live-banner:not(#view-focus *) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+#view-focus #antiscroll-live-banner {
   margin: 0 0 14px 0;
   padding: 10px 14px;
   border-radius: 16px;

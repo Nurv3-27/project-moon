@@ -26,11 +26,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=37">
+  <link rel="stylesheet" href="style.css?v=38">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (SOLID PITCH-BLACK + CUSTOM IMAGE_7.PNG) -->
-  <div id="app-splash-screen" class="splash-screen-overlay" aria-label="Loading Moon OS" onclick="dismissSplashScreen()">
+  <div id="app-splash-screen" class="splash-screen-overlay" aria-label="Loading Moon OS">
     <audio id="splash-audio" src="startup.mp3" preload="auto" playsinline></audio>
     <div class="splash-center-content">
       <!-- Central Custom Logo Asset: image_7.png (Maroon crescent moon with two figures & dumbbell) -->
@@ -47,6 +47,14 @@
       <!-- Slow, Smooth Fade-In Quote Below Logo -->
       <div class="splash-quote-box">
         <p class="splash-quote-text">&ldquo;Are you ready to take it to the moon?&rdquo;</p>
+      </div>
+
+      <!-- Autoplay Sound Fallback Trigger (Displays if iOS / browser blocks silent autoplay) -->
+      <div id="splash-audio-prompt" class="splash-audio-prompt hidden">
+        <button type="button" class="splash-audio-btn" id="splash-play-btn" title="Tap to start sound">
+          <span class="splash-audio-icon">&#128266;</span>
+          <span>Tap for Sound</span>
+        </button>
       </div>
     </div>
 
@@ -1557,9 +1565,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=37"></script>
-  <script src="camera.js?v=37"></script>
-  <script src="ranks.js?v=37"></script>
+  <script src="app.js?v=38"></script>
+  <script src="camera.js?v=38"></script>
+  <script src="ranks.js?v=38"></script>
 </body>
 </html>
 

@@ -3143,10 +3143,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Splash Screen Lifecycle & Startup Audio Controller
 let splashDismissed = false;
+let splashAudioStarted = false;
 let splashAudio = null;
 let splashAudioFadeInterval = null;
 let splashDismissTimer = null;
 let splashFadeTimer = null;
+
+function showSplashAudioPrompt() {
+  const promptEl = document.getElementById('splash-audio-prompt');
+  if (promptEl) promptEl.classList.remove('hidden');
+}
+
+function hideSplashAudioPrompt() {
+  const promptEl = document.getElementById('splash-audio-prompt');
+  if (promptEl) promptEl.classList.add('hidden');
+}
 
 function stopSplashAudio() {
   if (splashAudioFadeInterval) {
@@ -3194,8 +3205,67 @@ function startSplashAudioFadeOut(durationMs = 1000) {
   }, 25);
 }
 
+function scheduleSplashDismissal() {
+  if (splashDismissTimer) clearTimeout(splashDismissTimer);
+  if (splashFadeTimer) clearTimeout(splashFadeTimer);
+
+  // Programmatically decrease volume during the last 1 second of the 2.5-second duration (at 1500ms)
+  splashFadeTimer = setTimeout(() => {
+    startSplashAudioFadeOut(1000);
+  }, 1500);
+
+  // Automatically route user to main dashboard after exactly 2.5 seconds of playback
+  splashDismissTimer = setTimeout(() => {
+    dismissSplashScreen();
+  }, 2500);
+}
+
+function userActivateSplashSound(e) {
+  if (e) {
+    e.stopPropagation();
+  }
+  if (splashDismissed) return;
+
+  if (splashAudioStarted) {
+    // Second tap acts as an instant skip directly to dashboard
+    dismissSplashScreen();
+    return;
+  }
+
+  splashAudioStarted = true;
+  hideSplashAudioPrompt();
+
+  // Unlock iOS / WebKit audio context
+  try {
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume();
+    }
+  } catch (err) {}
+
+  if (!splashAudio) {
+    splashAudio = document.getElementById('splash-audio') || new Audio('startup.mp3');
+  }
+
+  if (splashAudio) {
+    try {
+      splashAudio.volume = 1.0;
+      splashAudio.currentTime = 0;
+      const p = splashAudio.play();
+      if (p !== undefined) {
+        p.catch(() => {});
+      }
+    } catch (err) {}
+  }
+
+  // Start the 2.5s timer with 1s fade-out from this user gesture
+  scheduleSplashDismissal();
+}
+
 function playSplashAudio() {
   stopSplashAudio();
+  splashAudioStarted = false;
+
   try {
     splashAudio = document.getElementById('splash-audio');
     if (!splashAudio) {
@@ -3206,32 +3276,25 @@ function playSplashAudio() {
 
     const playPromise = splashAudio.play();
     if (playPromise !== undefined) {
-      playPromise.catch((err) => {
-        // Standard iOS / Safari strict autoplay policy handler
-        console.warn('[Splash Audio] Autoplay deferred until user interaction:', err);
-
-        const resumeOnUserGesture = () => {
-          if (!splashDismissed && splashAudio) {
-            try {
-              splashAudio.play().catch(() => {});
-            } catch (e) {}
-          }
-          document.removeEventListener('click', resumeOnUserGesture);
-          document.removeEventListener('touchstart', resumeOnUserGesture);
-        };
-
-        document.addEventListener('click', resumeOnUserGesture, { once: true, passive: true });
-        document.addEventListener('touchstart', resumeOnUserGesture, { once: true, passive: true });
+      playPromise.then(() => {
+        // Autoplay allowed by browser!
+        splashAudioStarted = true;
+        hideSplashAudioPrompt();
+        scheduleSplashDismissal();
+      }).catch((err) => {
+        // Autoplay blocked by browser policy (iOS Safari / Chrome first-load restriction)
+        console.warn('[Splash Audio] Autoplay blocked by policy:', err);
+        splashAudioStarted = false;
+        showSplashAudioPrompt();
       });
+    } else {
+      splashAudioStarted = true;
+      scheduleSplashDismissal();
     }
   } catch (e) {
-    console.warn('[Splash Audio] Failed to play startup sound:', e);
+    console.warn('[Splash Audio] Init error:', e);
+    showSplashAudioPrompt();
   }
-
-  // Programmatically decrease volume during the last 1 second of the 2.5-second splash (at 1500ms)
-  splashFadeTimer = setTimeout(() => {
-    startSplashAudioFadeOut(1000);
-  }, 1500);
 }
 
 function dismissSplashScreen() {
@@ -3265,19 +3328,24 @@ function initSplashScreenTimer() {
   const splash = document.getElementById('app-splash-screen');
   if (!splash) return;
 
-  // 1. Play startup sound effect the moment the splash screen mounts
-  playSplashAudio();
+  // Listen for user tap anywhere on splash screen to activate sound if autoplay blocked
+  splash.onclick = userActivateSplashSound;
+  const playBtn = document.getElementById('splash-play-btn');
+  if (playBtn) {
+    playBtn.onclick = userActivateSplashSound;
+  }
 
-  // 2. Automatically route user to main dashboard after exactly 2.5 seconds
-  if (splashDismissTimer) clearTimeout(splashDismissTimer);
-  splashDismissTimer = setTimeout(dismissSplashScreen, 2500);
+  // Attempt automatic startup sound effect playback on mount
+  playSplashAudio();
 }
 
 window.dismissSplashScreen = dismissSplashScreen;
+window.userActivateSplashSound = userActivateSplashSound;
 window.showSplashScreen = function() {
   const splash = document.getElementById('app-splash-screen');
   if (splash) {
     splashDismissed = false;
+    splashAudioStarted = false;
     splash.style.display = '';
     splash.classList.remove('hidden', 'fade-out');
     initSplashScreenTimer();

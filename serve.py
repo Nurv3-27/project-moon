@@ -321,6 +321,22 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                     return self._send(f.read(), ctype='application/javascript; charset=utf-8')
             except Exception:
                 pass
+        if clean in ('/startup.mp3', '/audio/startup.mp3'):
+            mp3_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'startup.mp3')
+            if os.path.exists(mp3_path):
+                try:
+                    with open(mp3_path, 'rb') as f:
+                        data = f.read()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'audio/mpeg')
+                    self.send_header('Content-Length', str(len(data)))
+                    self.send_header('Accept-Ranges', 'bytes')
+                    self.send_header('Cache-Control', 'public, max-age=86400')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    return self.wfile.write(data)
+                except Exception:
+                    pass
         if clean in ('/apple-touch-icon.png', '/apple-touch-icon-precomposed.png'):
             self.path = '/apple-touch-icon.png'
         elif clean == '/favicon.ico':

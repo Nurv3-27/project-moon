@@ -1,5 +1,4 @@
 __pycache__/
 *.bat
-serve.py
-moon_cert.pem 
-moon_key.pem 
+moon_cert.pem
+moon_key.pem

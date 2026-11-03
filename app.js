@@ -328,11 +328,18 @@ function renderTimerDisplays(elapsed) {
   if (bannerTimerEl) bannerTimerEl.textContent = formatted;
 }
 
-// --- Rest Timer Floating Bar ---
+// --- Rest Timer Floating Bar (Countdown + Count-Up Stopwatch) ---
+let restTimerMode = 'countdown'; // 'countdown' | 'stopwatch'
+let restStartedAt = 0;
+let restStopwatchPaused = false;
+
 function triggerRestTimer(seconds) {
-  restTotalDuration = seconds || AppState.settings.defaultRest || 90;
+  restTimerMode = 'countdown';
+  restStartedAt = Date.now();
+  restTotalDuration = seconds || (AppState.activeWorkout && AppState.activeWorkout.restSeconds) || AppState.settings.defaultRest || 90;
   restTimeRemaining = restTotalDuration;
   restEndsAt = Date.now() + restTotalDuration * 1000;
+  restStopwatchPaused = false;
 
   const bar = document.getElementById('rest-timer-bar');
   if (bar) bar.classList.remove('hidden');
@@ -344,38 +351,101 @@ function triggerRestTimer(seconds) {
 }
 
 function tickRestTimer() {
-  restTimeRemaining = Math.max(0, Math.ceil((restEndsAt - Date.now()) / 1000));
-  if (restTimeRemaining <= 0) {
-    clearInterval(restTimerInterval);
-    restTimerInterval = null;
-    updateRestTimerUI();
-    playRestTimerChime();
-    triggerHaptic([100, 50, 100, 50, 200]);
-    notifyRestOver();
-    showToast('\u23F1\uFE0F Rest over \u2013 next set!');
-    setTimeout(() => {
-      closeRestTimer();
-    }, 3000);
+  if (restTimerMode === 'countdown') {
+    restTimeRemaining = Math.max(0, Math.ceil((restEndsAt - Date.now()) / 1000));
+    if (restTimeRemaining <= 0) {
+      // Countdown finished
+      playRestTimerChime();
+      triggerHaptic([100, 50, 100, 50, 200]);
+      notifyRestOver();
+      showToast('\u23F1\uFE0F Rest target reached! Tap to begin next set.');
+
+      // Transition smoothly into overtime count-up so user sees extra rest taken
+      restTimerMode = 'stopwatch';
+      restStartedAt = restEndsAt;
+      updateRestTimerUI();
+    } else {
+      updateRestTimerUI();
+    }
   } else {
-    updateRestTimerUI();
+    // Stopwatch Count-Up mode
+    if (!restStopwatchPaused) {
+      updateRestTimerUI();
+    }
   }
 }
 
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && restTimerInterval) tickRestTimer();
-  if (!document.hidden) scrollTick();
-});
+function toggleRestStopwatchMode() {
+  if (restTimerMode === 'countdown') {
+    // Switch Countdown -> Count-Up Stopwatch
+    restTimerMode = 'stopwatch';
+    const restedSecs = Math.max(0, restTotalDuration - restTimeRemaining);
+    restStartedAt = Date.now() - (restedSecs * 1000);
+    restStopwatchPaused = false;
+    triggerHaptic([40]);
+    showToast('\u23F1\uFE0F Rest Stopwatch active (Counting Up)');
+  } else {
+    // Switch Count-Up -> Countdown
+    restTimerMode = 'countdown';
+    restTimeRemaining = restTotalDuration;
+    restEndsAt = Date.now() + restTotalDuration * 1000;
+    triggerHaptic([40]);
+    showToast(`\u23F3 Rest countdown reset to ${restTotalDuration}s`);
+  }
+  updateRestTimerUI();
+}
 
 function updateRestTimerUI() {
   const textEl = document.getElementById('rest-timer-text');
   const ringFill = document.getElementById('timer-ring-fill');
-  if (textEl) textEl.textContent = restTimeRemaining;
+  const tagEl = document.getElementById('rest-timer-tag');
+  const modeTagEl = document.getElementById('rest-timer-mode-tag');
+  const subEl = document.getElementById('rest-timer-sub');
+  const toggleBtn = document.getElementById('timer-btn-mode-toggle');
+  const minusBtn = document.getElementById('timer-btn-minus');
+  const plusBtn = document.getElementById('timer-btn-plus');
 
-  if (ringFill) {
-    const circumference = 113.09; // 2 * PI * 18
-    const progress = restTimeRemaining / restTotalDuration;
-    const offset = circumference * (1 - progress);
-    ringFill.style.strokeDashoffset = offset;
+  const circumference = 113.09; // 2 * PI * 18
+
+  if (restTimerMode === 'countdown') {
+    if (tagEl) tagEl.textContent = 'RESTING';
+    if (modeTagEl) modeTagEl.textContent = 'COUNTDOWN';
+    if (subEl) subEl.textContent = 'Next set coming up \u2022 \u23F1\uFE0F Count Up available';
+    if (toggleBtn) toggleBtn.textContent = '\u23F1\uFE0F Count Up';
+    if (minusBtn) minusBtn.textContent = '-15s';
+    if (plusBtn) plusBtn.textContent = '+30s';
+    if (textEl) {
+      textEl.textContent = restTimeRemaining;
+      textEl.style.color = 'var(--accent-lime)';
+    }
+    if (ringFill) {
+      const progress = Math.max(0, Math.min(1, restTimeRemaining / restTotalDuration));
+      ringFill.style.stroke = 'var(--accent-lime)';
+      ringFill.style.strokeDashoffset = circumference * (1 - progress);
+    }
+  } else {
+    // Count-Up Stopwatch mode
+    const elapsedSecs = Math.max(0, Math.floor((Date.now() - restStartedAt) / 1000));
+    const m = Math.floor(elapsedSecs / 60);
+    const s = elapsedSecs % 60;
+    const formatted = m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
+
+    const isOvertime = restEndsAt > 0 && Date.now() > restEndsAt;
+    if (tagEl) tagEl.textContent = isOvertime ? 'REST OVERTIME' : 'REST STOPWATCH';
+    if (modeTagEl) modeTagEl.textContent = 'COUNTING UP';
+    if (subEl) subEl.textContent = isOvertime ? 'Past target rest \u2022 Tap Skip when ready' : 'Open-ended rest \u2022 Count-up active';
+    if (toggleBtn) toggleBtn.textContent = '\u23F3 Countdown';
+    if (minusBtn) minusBtn.textContent = restStopwatchPaused ? '\u25B6 Resume' : '\u23F8 Pause';
+    if (plusBtn) plusBtn.textContent = 'Reset';
+    if (textEl) {
+      textEl.textContent = formatted;
+      textEl.style.color = isOvertime ? 'var(--accent-crimson)' : 'var(--accent-cyan)';
+    }
+    if (ringFill) {
+      ringFill.style.stroke = isOvertime ? 'var(--accent-crimson)' : 'var(--accent-cyan)';
+      const sweepProgress = (elapsedSecs % 60) / 60;
+      ringFill.style.strokeDashoffset = circumference * (1 - sweepProgress);
+    }
   }
 }
 
@@ -385,6 +455,369 @@ function closeRestTimer() {
   const bar = document.getElementById('rest-timer-bar');
   if (bar) bar.classList.add('hidden');
 }
+
+// --- High-Precision Stopwatch Engine ---
+const StopwatchState = {
+  running: false,
+  startTime: 0,
+  elapsed: 0,
+  laps: [],
+  targetSeconds: 0,
+  targetFired: false,
+  minimizedDismissed: false,
+  _rafId: null,
+  _bgInterval: null
+};
+
+function formatStopwatchTime(ms) {
+  if (ms < 0 || isNaN(ms)) ms = 0;
+  const totalHundredths = Math.floor(ms / 10);
+  const cs = (totalHundredths % 100).toString().padStart(2, '0');
+  const totalSec = Math.floor(ms / 1000);
+  const s = (totalSec % 60).toString().padStart(2, '0');
+  const m = (Math.floor(totalSec / 60) % 60).toString().padStart(2, '0');
+  const h = Math.floor(totalSec / 3600);
+  const minSec = h > 0 ? `${h.toString().padStart(2, '0')}:${m}:${s}` : `${m}:${s}`;
+  return { minSec, cs: `.${cs}`, full: `${minSec}.${cs}`, totalMs: ms, totalSec };
+}
+
+function playStopwatchTickSound() {
+  playTone(880, 'sine', 0.08, 0);
+}
+
+function playStopwatchTargetSound() {
+  playTone(587.33, 'triangle', 0.2, 0);
+  playTone(880, 'sine', 0.25, 0.12);
+  playTone(1174.66, 'sine', 0.5, 0.25);
+}
+
+function startStopwatch() {
+  if (StopwatchState.running) return;
+  StopwatchState.running = true;
+  StopwatchState.startTime = performance.now() - StopwatchState.elapsed;
+  StopwatchState.targetFired = false;
+  StopwatchState.minimizedDismissed = false;
+
+  playStopwatchTickSound();
+  triggerHaptic([40]);
+  renderStopwatchUI();
+
+  if (StopwatchState._rafId) cancelAnimationFrame(StopwatchState._rafId);
+  function loop() {
+    if (!StopwatchState.running) return;
+    tickStopwatch();
+    StopwatchState._rafId = requestAnimationFrame(loop);
+  }
+  StopwatchState._rafId = requestAnimationFrame(loop);
+
+  if (StopwatchState._bgInterval) clearInterval(StopwatchState._bgInterval);
+  StopwatchState._bgInterval = setInterval(tickStopwatch, 200);
+}
+
+function pauseStopwatch() {
+  if (!StopwatchState.running) return;
+  StopwatchState.running = false;
+  StopwatchState.elapsed = Math.max(0, performance.now() - StopwatchState.startTime);
+  if (StopwatchState._rafId) cancelAnimationFrame(StopwatchState._rafId);
+  if (StopwatchState._bgInterval) clearInterval(StopwatchState._bgInterval);
+  triggerHaptic([30]);
+  renderStopwatchUI();
+}
+
+function toggleStopwatch() {
+  if (StopwatchState.running) {
+    pauseStopwatch();
+  } else {
+    startStopwatch();
+  }
+}
+
+function resetStopwatch() {
+  StopwatchState.running = false;
+  StopwatchState.elapsed = 0;
+  StopwatchState.startTime = 0;
+  StopwatchState.laps = [];
+  StopwatchState.targetFired = false;
+  if (StopwatchState._rafId) cancelAnimationFrame(StopwatchState._rafId);
+  if (StopwatchState._bgInterval) clearInterval(StopwatchState._bgInterval);
+  triggerHaptic([20, 30]);
+  renderStopwatchUI();
+}
+
+function recordStopwatchLap() {
+  const currentElapsed = StopwatchState.running 
+    ? Math.max(0, performance.now() - StopwatchState.startTime) 
+    : StopwatchState.elapsed;
+  if (currentElapsed <= 0) return;
+
+  const prevSplit = StopwatchState.laps.length > 0 ? StopwatchState.laps[0].splitTime : 0;
+  const lapDuration = Math.max(0, currentElapsed - prevSplit);
+  const lap = {
+    num: StopwatchState.laps.length + 1,
+    lapTime: lapDuration,
+    splitTime: currentElapsed
+  };
+  StopwatchState.laps.unshift(lap); // Newest on top
+  playTone(1046.5, 'sine', 0.1, 0); // High C6 ping
+  triggerHaptic([30, 40]);
+  renderStopwatchLaps();
+  renderStopwatchUI();
+}
+
+function handleStopwatchSecondaryAction() {
+  if (StopwatchState.running) {
+    recordStopwatchLap();
+  } else {
+    resetStopwatch();
+  }
+}
+
+function clearStopwatchLaps() {
+  StopwatchState.laps = [];
+  renderStopwatchLaps();
+}
+
+function setStopwatchTarget(seconds) {
+  StopwatchState.targetSeconds = Number(seconds) || 0;
+  StopwatchState.targetFired = false;
+  document.querySelectorAll('.sw-target-chip').forEach(chip => {
+    chip.classList.toggle('active', Number(chip.dataset.sec) === StopwatchState.targetSeconds);
+  });
+  document.querySelectorAll('#inline-sw-chips .sw-chip').forEach(chip => {
+    chip.classList.toggle('active', Number(chip.dataset.sec) === StopwatchState.targetSeconds);
+  });
+  triggerHaptic([20]);
+}
+
+window.setInlineStopwatchTarget = function(sec) {
+  setStopwatchTarget(sec);
+};
+
+function tickStopwatch() {
+  if (StopwatchState.running) {
+    StopwatchState.elapsed = Math.max(0, performance.now() - StopwatchState.startTime);
+  }
+  const curMs = StopwatchState.elapsed;
+  const time = formatStopwatchTime(curMs);
+
+  // Target alert check (e.g., for timed plank, holds, or rest)
+  if (StopwatchState.running && StopwatchState.targetSeconds > 0 && !StopwatchState.targetFired) {
+    if (time.totalSec >= StopwatchState.targetSeconds) {
+      StopwatchState.targetFired = true;
+      playStopwatchTargetSound();
+      triggerHaptic([120, 60, 120, 60, 200]);
+      showToast(`\u23F1\uFE0F Target ${StopwatchState.targetSeconds}s reached!`);
+    }
+  }
+
+  updateStopwatchDisplayValues(time);
+}
+
+function updateStopwatchDisplayValues(time) {
+  const running = StopwatchState.running;
+  const elapsed = StopwatchState.elapsed;
+
+  // 1. Modal displays
+  const modalDigits = document.getElementById('sw-modal-digits');
+  const modalCentis = document.getElementById('sw-modal-centis');
+  const modalStatus = document.getElementById('sw-modal-status');
+  const sweepCircle = document.getElementById('sw-dial-sweep');
+  if (modalDigits) modalDigits.textContent = time.minSec;
+  if (modalCentis) modalCentis.textContent = time.cs;
+  if (modalStatus) {
+    modalStatus.textContent = running ? 'RUNNING' : (elapsed > 0 ? 'PAUSED' : 'READY');
+    modalStatus.className = 'sw-state-tag ' + (running ? 'running' : (elapsed > 0 ? 'paused' : 'ready'));
+  }
+  if (sweepCircle) {
+    const sweepCircumference = 603.18; // 2 * PI * 96
+    const secProgress = (time.totalMs % 60000) / 60000;
+    sweepCircle.style.strokeDashoffset = sweepCircumference * (1 - secProgress);
+  }
+
+  // 2. Inline Workout Widget displays
+  const inlineDigits = document.getElementById('inline-sw-digits');
+  const inlineCentis = document.getElementById('inline-sw-centis');
+  const inlineState = document.getElementById('inline-sw-state');
+  const inlineToggleLabel = document.getElementById('inline-sw-toggle-label');
+  const inlineToggleIcon = document.getElementById('inline-sw-toggle-icon');
+  const inlineToggleBtn = document.getElementById('inline-sw-toggle-btn');
+  if (inlineDigits) inlineDigits.textContent = time.minSec;
+  if (inlineCentis) inlineCentis.textContent = time.cs;
+  if (inlineState) {
+    inlineState.textContent = running ? 'RUNNING' : (elapsed > 0 ? 'PAUSED' : 'READY');
+    inlineState.className = 'sw-badge-state ' + (running ? 'running' : (elapsed > 0 ? 'paused' : 'ready'));
+  }
+  if (inlineToggleLabel) inlineToggleLabel.textContent = running ? 'Stop' : (elapsed > 0 ? 'Resume' : 'Start');
+  if (inlineToggleIcon) inlineToggleIcon.textContent = running ? '\u23F8' : '\u25B6';
+  if (inlineToggleBtn) {
+    inlineToggleBtn.className = 'sw-action-btn sw-btn-primary ' + (running ? 'stop' : 'start');
+  }
+
+  // 3. Floating Pill displays
+  const pillDigits = document.getElementById('sw-pill-digits');
+  const pillPlayBtn = document.getElementById('sw-pill-play-btn');
+  if (pillDigits) {
+    const tenths = Math.floor(parseInt(time.cs.slice(1)) / 10);
+    pillDigits.textContent = `${time.minSec}.${tenths}`;
+  }
+  if (pillPlayBtn) pillPlayBtn.textContent = running ? '\u23F8' : '\u25B6';
+
+  // Floating pill visibility: show if elapsed > 0 and stopwatch modal is not open
+  const pillEl = document.getElementById('floating-stopwatch-pill');
+  const modalEl = document.getElementById('modal-stopwatch');
+  const isModalOpen = modalEl && !modalEl.classList.contains('hidden');
+  if (pillEl) {
+    if ((running || elapsed > 0) && !isModalOpen && !StopwatchState.minimizedDismissed) {
+      pillEl.classList.remove('hidden');
+    } else {
+      pillEl.classList.add('hidden');
+    }
+  }
+
+  // 4. Header action button label
+  const headerLabel = document.getElementById('header-stopwatch-label');
+  const headerBtn = document.getElementById('header-stopwatch-btn');
+  if (headerLabel && headerBtn) {
+    if (running) {
+      headerLabel.textContent = time.minSec;
+      headerBtn.classList.add('active-running');
+      headerBtn.classList.remove('active-paused');
+    } else if (elapsed > 0) {
+      headerLabel.textContent = `${time.minSec} \u23F8`;
+      headerBtn.classList.add('active-paused');
+      headerBtn.classList.remove('active-running');
+    } else {
+      headerLabel.textContent = 'Stopwatch';
+      headerBtn.classList.remove('active-running', 'active-paused');
+    }
+  }
+}
+
+function renderStopwatchUI() {
+  const time = formatStopwatchTime(StopwatchState.elapsed);
+  updateStopwatchDisplayValues(time);
+
+  // Modal primary/secondary button states
+  const primaryBtn = document.getElementById('sw-modal-primary-btn');
+  const primaryLabel = document.getElementById('sw-modal-primary-label');
+  const secondaryBtn = document.getElementById('sw-modal-secondary-btn');
+  const secondaryLabel = document.getElementById('sw-modal-secondary-label');
+  if (primaryBtn && primaryLabel) {
+    if (StopwatchState.running) {
+      primaryBtn.className = 'sw-circle-btn primary-circle stop-state';
+      primaryLabel.textContent = 'Stop';
+    } else {
+      primaryBtn.className = 'sw-circle-btn primary-circle start-state';
+      primaryLabel.textContent = StopwatchState.elapsed > 0 ? 'Resume' : 'Start';
+    }
+  }
+  if (secondaryBtn && secondaryLabel) {
+    if (StopwatchState.running) {
+      secondaryLabel.textContent = 'Lap';
+      secondaryBtn.disabled = false;
+    } else {
+      secondaryLabel.textContent = 'Reset';
+      secondaryBtn.disabled = (StopwatchState.elapsed === 0 && StopwatchState.laps.length === 0);
+    }
+  }
+
+  renderStopwatchLaps();
+}
+
+function renderStopwatchLaps() {
+  const modalLapsList = document.getElementById('sw-modal-laps-list');
+  const inlineLapsBox = document.getElementById('inline-sw-laps-box');
+  const inlineLapsList = document.getElementById('inline-sw-laps-list');
+
+  const laps = StopwatchState.laps;
+  if (!laps || laps.length === 0) {
+    if (modalLapsList) {
+      modalLapsList.innerHTML = '<div class="sw-laps-empty">No laps recorded yet. Tap <strong>Lap</strong> while running to mark splits.</div>';
+    }
+    if (inlineLapsBox) inlineLapsBox.classList.add('hidden');
+    return;
+  }
+
+  // Find min and max lap times for badges
+  let minTime = Infinity;
+  let maxTime = -Infinity;
+  if (laps.length >= 2) {
+    laps.forEach(l => {
+      if (l.lapTime < minTime) minTime = l.lapTime;
+      if (l.lapTime > maxTime) maxTime = l.lapTime;
+    });
+  }
+
+  const lapsHtml = laps.map(l => {
+    const isFastest = laps.length >= 2 && l.lapTime === minTime;
+    const isSlowest = laps.length >= 2 && l.lapTime === maxTime;
+    const badge = isFastest 
+      ? '<span class="sw-lap-badge fastest">Fastest</span>' 
+      : (isSlowest ? '<span class="sw-lap-badge slowest">Slowest</span>' : '');
+    const lapFormatted = formatStopwatchTime(l.lapTime).full;
+    const splitFormatted = formatStopwatchTime(l.splitTime).full;
+
+    return `
+      <div class="sw-lap-row ${isFastest ? 'fastest-row' : ''} ${isSlowest ? 'slowest-row' : ''}">
+        <span class="sw-lap-num">Lap ${l.num} ${badge}</span>
+        <span class="sw-lap-duration mono">+${lapFormatted}</span>
+        <span class="sw-lap-split mono">${splitFormatted}</span>
+      </div>
+    `;
+  }).join('');
+
+  if (modalLapsList) modalLapsList.innerHTML = lapsHtml;
+
+  if (inlineLapsBox && inlineLapsList) {
+    inlineLapsBox.classList.remove('hidden');
+    inlineLapsList.innerHTML = lapsHtml;
+  }
+}
+
+function openStopwatchModal() {
+  StopwatchState.minimizedDismissed = false;
+  openModal('modal-stopwatch');
+  renderStopwatchUI();
+  const pillEl = document.getElementById('floating-stopwatch-pill');
+  if (pillEl) pillEl.classList.add('hidden');
+}
+
+function closeStopwatchModal() {
+  closeModal('modal-stopwatch');
+  renderStopwatchUI();
+}
+
+function dockStopwatch() {
+  closeModal('modal-stopwatch');
+  StopwatchState.minimizedDismissed = false;
+  renderStopwatchUI();
+  showToast('\u23F1\uFE0F Stopwatch docked to floating pill');
+}
+
+function closeFloatingStopwatchPill() {
+  StopwatchState.minimizedDismissed = true;
+  const pillEl = document.getElementById('floating-stopwatch-pill');
+  if (pillEl) pillEl.classList.add('hidden');
+}
+
+// Window exports for HTML attributes
+window.openStopwatchModal = openStopwatchModal;
+window.closeStopwatchModal = closeStopwatchModal;
+window.dockStopwatch = dockStopwatch;
+window.toggleStopwatch = toggleStopwatch;
+window.resetStopwatch = resetStopwatch;
+window.recordStopwatchLap = recordStopwatchLap;
+window.handleStopwatchSecondaryAction = handleStopwatchSecondaryAction;
+window.clearStopwatchLaps = clearStopwatchLaps;
+window.setStopwatchTarget = setStopwatchTarget;
+window.toggleRestStopwatchMode = toggleRestStopwatchMode;
+window.closeFloatingStopwatchPill = closeFloatingStopwatchPill;
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && restTimerInterval) tickRestTimer();
+  if (!document.hidden && StopwatchState.running) tickStopwatch();
+  if (!document.hidden) scrollTick();
+});
 
 // --- Tab Switching Navigation ---
 window.switchTab = function(tabName) {
@@ -1947,18 +2380,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Rest Timer Controls
   document.getElementById('timer-btn-minus').addEventListener('click', () => {
-    restTimeRemaining = Math.max(5, restTimeRemaining - 15);
-    restEndsAt -= 15000;
+    if (restTimerMode === 'countdown') {
+      restTimeRemaining = Math.max(5, restTimeRemaining - 15);
+      restEndsAt -= 15000;
+    } else {
+      restStopwatchPaused = !restStopwatchPaused;
+      if (!restStopwatchPaused) {
+        // Resuming from pause
+        restStartedAt = Date.now();
+      }
+    }
     updateRestTimerUI();
     triggerHaptic([20]);
   });
+
   document.getElementById('timer-btn-plus').addEventListener('click', () => {
-    restTimeRemaining += 30;
-    restEndsAt += 30000;
-    restTotalDuration += 30;
+    if (restTimerMode === 'countdown') {
+      restTimeRemaining += 30;
+      restEndsAt += 30000;
+      restTotalDuration += 30;
+    } else {
+      restStartedAt = Date.now();
+      restEndsAt = 0;
+      showToast('\u23F1\uFE0F Rest Stopwatch reset to 0s');
+    }
     updateRestTimerUI();
     triggerHaptic([20]);
   });
+
   document.getElementById('timer-btn-skip').addEventListener('click', () => {
     closeRestTimer();
     triggerHaptic([20]);

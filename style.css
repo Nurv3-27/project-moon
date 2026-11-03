@@ -2669,3 +2669,724 @@ input:checked + .slider:before {
   align-items: center;
   gap: 4px;
 }
+
+/* ==========================================================================
+   STOPWATCH ENGINE & WORKOUT TIMER ENHANCEMENTS
+   ========================================================================== */
+
+/* Header Stopwatch Button Active Glow */
+#header-stopwatch-btn.active-running {
+  border-color: var(--accent-lime);
+  background: rgba(var(--accent-rgb), 0.2);
+  color: #fff;
+  box-shadow: 0 0 16px var(--accent-lime-glow);
+  animation: pulseGlow 1.8s infinite ease-in-out;
+}
+#header-stopwatch-btn.active-paused {
+  border-color: var(--accent-gold);
+  background: rgba(255, 214, 10, 0.16);
+  color: var(--accent-gold);
+}
+
+/* Active Workout Rest Row Enhancements */
+.rest-select-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rest-quick-sw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(var(--accent-rgb), 0.14);
+  border: 1px solid var(--accent-lime);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.rest-quick-sw-btn:hover {
+  background: var(--accent-lime);
+  color: var(--on-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Workout Stopwatch Card (Inline Widget)
+   -------------------------------------------------------------------------- */
+.workout-stopwatch-card {
+  background: linear-gradient(145deg, var(--bg-card), var(--bg-raised));
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.workout-stopwatch-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-lime), transparent);
+  opacity: 0.8;
+}
+
+.stopwatch-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stopwatch-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stopwatch-icon-pulse {
+  font-size: 1.3rem;
+  filter: drop-shadow(0 0 8px var(--accent-lime-glow));
+}
+
+.stopwatch-heading {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--accent-lime);
+  display: block;
+}
+
+.stopwatch-subheading {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+.stopwatch-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stopwatch-expand-btn:hover {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-color: var(--accent-lime);
+}
+
+/* Preset Chips for Hold/Rest Timing */
+.stopwatch-preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.sw-chip {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sw-chip:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sw-chip.active {
+  background: rgba(var(--accent-rgb), 0.18);
+  border-color: var(--accent-lime);
+  color: var(--accent-lime);
+  box-shadow: 0 0 10px var(--accent-lime-glow);
+}
+
+.stopwatch-card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.stopwatch-big-display {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sw-digits-wrap {
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.sw-digits {
+  font-family: var(--font-mono);
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.sw-centis {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-lime);
+}
+
+.sw-badge-state {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.sw-badge-state.ready {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.sw-badge-state.running {
+  background: rgba(var(--accent-rgb), 0.25);
+  color: var(--accent-lime);
+  box-shadow: 0 0 8px var(--accent-lime-glow);
+  animation: pulseGlow 1.5s infinite;
+}
+
+.sw-badge-state.paused {
+  background: rgba(255, 214, 10, 0.2);
+  color: var(--accent-gold);
+}
+
+.stopwatch-actions-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sw-action-btn {
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s ease;
+  border: 1px solid transparent;
+}
+
+.sw-btn-reset, .sw-btn-lap {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-subtle);
+  color: var(--text-main);
+}
+
+.sw-btn-reset:hover, .sw-btn-lap:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.sw-btn-primary.start {
+  background: linear-gradient(135deg, var(--accent-grad-a) 0%, var(--accent-grad-b) 100%);
+  color: var(--on-accent);
+  box-shadow: 0 4px 14px var(--accent-lime-glow);
+}
+
+.sw-btn-primary.stop {
+  background: rgba(255, 59, 48, 0.2);
+  border-color: rgba(255, 59, 48, 0.5);
+  color: var(--accent-crimson);
+  box-shadow: 0 4px 14px var(--accent-crimson-glow);
+}
+
+/* Inline Laps Collapsible Table */
+.inline-sw-laps-box {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+}
+
+.inline-laps-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.inline-laps-clear {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.inline-laps-clear:hover {
+  color: var(--accent-crimson);
+}
+
+.inline-sw-laps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Rest Timer Bar: Countdown & Stopwatch Count-Up Mode
+   -------------------------------------------------------------------------- */
+.timer-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timer-mode-tag {
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.timer-pill-btn.sw-pill-mode-btn {
+  background: rgba(var(--accent-rgb), 0.16);
+  border-color: var(--accent-lime);
+  color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   Floating Mini-Stopwatch Pill (Picture-in-Picture)
+   -------------------------------------------------------------------------- */
+.floating-stopwatch-pill {
+  position: fixed;
+  bottom: calc(var(--tab-bar-height) + 14px);
+  right: 14px;
+  background: rgba(14, 18, 24, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--accent-lime);
+  border-radius: 999px;
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 0 18px var(--accent-lime-glow);
+  z-index: 62;
+  cursor: pointer;
+  animation: slideUp 0.25s ease;
+}
+
+.sw-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-lime);
+  box-shadow: 0 0 8px var(--accent-lime);
+  animation: pulseDot 1.5s infinite;
+}
+
+.sw-pill-icon {
+  font-size: 0.95rem;
+}
+
+.sw-pill-digits {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.sw-pill-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 2px;
+}
+
+.sw-pill-mini-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sw-pill-mini-btn:hover {
+  background: rgba(var(--accent-rgb), 0.3);
+}
+
+.sw-pill-mini-btn.close {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+
+.sw-pill-mini-btn.close:hover {
+  color: var(--accent-crimson);
+}
+
+/* --------------------------------------------------------------------------
+   Dedicated Full Stopwatch Modal
+   -------------------------------------------------------------------------- */
+.stopwatch-modal-card {
+  max-width: 440px;
+  width: 100%;
+  background: linear-gradient(160deg, #140d12 0%, #0d080c 100%);
+  border: 1px solid var(--border-active);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-lime-glow);
+  border-radius: 28px;
+  padding: 22px 20px;
+}
+
+.sw-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sw-modal-icon {
+  font-size: 1.6rem;
+  filter: drop-shadow(0 0 10px var(--accent-lime-glow));
+}
+
+.sw-modal-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.sw-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sw-dock-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sw-dock-btn:hover {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-color: var(--accent-lime);
+}
+
+.sw-modal-display-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0 12px;
+}
+
+.sw-dial-circle {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sw-dial-svg {
+  transform: rotate(-90deg);
+  width: 220px;
+  height: 220px;
+}
+
+.sw-dial-sweep {
+  transition: stroke-dashoffset 0.05s linear;
+  filter: drop-shadow(0 0 8px var(--accent-lime-glow));
+}
+
+.sw-display-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sw-time-main {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: #fff;
+  line-height: 1;
+}
+
+.sw-time-sub {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--accent-lime);
+  margin-top: 2px;
+}
+
+.sw-state-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+.sw-state-tag.ready {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.sw-state-tag.running {
+  background: rgba(var(--accent-rgb), 0.25);
+  color: var(--accent-lime);
+  box-shadow: 0 0 10px var(--accent-lime-glow);
+}
+
+.sw-state-tag.paused {
+  background: rgba(255, 214, 10, 0.2);
+  color: var(--accent-gold);
+}
+
+/* Target Chips */
+.sw-target-chips-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.sw-target-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-right: 2px;
+}
+
+/* Big Action Circular Buttons (iOS Stopwatch Style) */
+.sw-modal-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 18px;
+  padding: 0 16px;
+}
+
+.sw-circle-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 2px solid;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+  user-select: none;
+}
+
+.sw-circle-btn:active {
+  transform: scale(0.92);
+}
+
+.secondary-circle {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.secondary-circle:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.secondary-circle:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.primary-circle.start-state {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-color: var(--accent-lime);
+  color: var(--accent-lime);
+  box-shadow: 0 0 20px var(--accent-lime-glow);
+}
+
+.primary-circle.start-state:hover {
+  background: var(--accent-lime);
+  color: var(--on-accent);
+}
+
+.primary-circle.stop-state {
+  background: rgba(255, 59, 48, 0.2);
+  border-color: var(--accent-crimson);
+  color: var(--accent-crimson);
+  box-shadow: 0 0 20px var(--accent-crimson-glow);
+}
+
+/* Laps List Table in Modal */
+.sw-laps-container {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.sw-laps-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sw-laps-header span:last-child {
+  text-align: right;
+}
+
+.sw-laps-header span:nth-child(2) {
+  text-align: center;
+}
+
+.sw-laps-list {
+  max-height: 160px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sw-laps-empty {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  padding: 20px 10px;
+}
+
+.sw-lap-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+}
+
+.sw-lap-row:last-child {
+  border-bottom: none;
+}
+
+.sw-lap-num {
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sw-lap-duration {
+  font-size: 0.82rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.sw-lap-split {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: right;
+  color: #fff;
+}
+
+.sw-lap-row.fastest-row .sw-lap-duration {
+  color: #4ade80;
+  font-weight: 800;
+}
+
+.sw-lap-row.slowest-row .sw-lap-duration {
+  color: var(--accent-crimson);
+  font-weight: 800;
+}
+
+.sw-lap-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.sw-lap-badge.fastest {
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+}
+
+.sw-lap-badge.slowest {
+  background: rgba(255, 59, 48, 0.2);
+  color: var(--accent-crimson);
+  border: 1px solid rgba(255, 59, 48, 0.4);
+}

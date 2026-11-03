@@ -3141,12 +3141,110 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// Splash Screen Lifecycle Controller
+// Splash Screen Lifecycle & Startup Audio Controller
 let splashDismissed = false;
+let splashAudio = null;
+let splashAudioFadeInterval = null;
+let splashDismissTimer = null;
+let splashFadeTimer = null;
+
+function stopSplashAudio() {
+  if (splashAudioFadeInterval) {
+    clearInterval(splashAudioFadeInterval);
+    splashAudioFadeInterval = null;
+  }
+  if (splashFadeTimer) {
+    clearTimeout(splashFadeTimer);
+    splashFadeTimer = null;
+  }
+  if (splashAudio) {
+    try {
+      splashAudio.pause();
+      splashAudio.currentTime = 0;
+      splashAudio.volume = 0;
+    } catch (e) {}
+  }
+}
+
+function startSplashAudioFadeOut(durationMs = 1000) {
+  if (!splashAudio) return;
+  const fadeStart = Date.now();
+  const startVolume = splashAudio.volume || 1.0;
+
+  if (splashAudioFadeInterval) clearInterval(splashAudioFadeInterval);
+
+  splashAudioFadeInterval = setInterval(() => {
+    if (!splashAudio) {
+      clearInterval(splashAudioFadeInterval);
+      return;
+    }
+    const elapsed = Date.now() - fadeStart;
+    const progress = Math.min(1, elapsed / durationMs);
+    const newVolume = Math.max(0, startVolume * (1 - progress));
+
+    try {
+      splashAudio.volume = Number(newVolume.toFixed(2));
+    } catch (e) {}
+
+    if (progress >= 1) {
+      clearInterval(splashAudioFadeInterval);
+      splashAudioFadeInterval = null;
+      stopSplashAudio();
+    }
+  }, 25);
+}
+
+function playSplashAudio() {
+  stopSplashAudio();
+  try {
+    splashAudio = document.getElementById('splash-audio');
+    if (!splashAudio) {
+      splashAudio = new Audio('startup.mp3');
+    }
+    splashAudio.volume = 1.0;
+    splashAudio.currentTime = 0;
+
+    const playPromise = splashAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((err) => {
+        // Standard iOS / Safari strict autoplay policy handler
+        console.warn('[Splash Audio] Autoplay deferred until user interaction:', err);
+
+        const resumeOnUserGesture = () => {
+          if (!splashDismissed && splashAudio) {
+            try {
+              splashAudio.play().catch(() => {});
+            } catch (e) {}
+          }
+          document.removeEventListener('click', resumeOnUserGesture);
+          document.removeEventListener('touchstart', resumeOnUserGesture);
+        };
+
+        document.addEventListener('click', resumeOnUserGesture, { once: true, passive: true });
+        document.addEventListener('touchstart', resumeOnUserGesture, { once: true, passive: true });
+      });
+    }
+  } catch (e) {
+    console.warn('[Splash Audio] Failed to play startup sound:', e);
+  }
+
+  // Programmatically decrease volume during the last 1 second of the 2.5-second splash (at 1500ms)
+  splashFadeTimer = setTimeout(() => {
+    startSplashAudioFadeOut(1000);
+  }, 1500);
+}
 
 function dismissSplashScreen() {
   if (splashDismissed) return;
   splashDismissed = true;
+
+  if (splashDismissTimer) {
+    clearTimeout(splashDismissTimer);
+    splashDismissTimer = null;
+  }
+
+  // Ensure audio stops completely before routing to the main dashboard
+  stopSplashAudio();
 
   const splash = document.getElementById('app-splash-screen');
   if (!splash) return;
@@ -3167,8 +3265,12 @@ function initSplashScreenTimer() {
   const splash = document.getElementById('app-splash-screen');
   if (!splash) return;
 
-  // Auto-route user to main dashboard after exactly 2.5 seconds
-  setTimeout(dismissSplashScreen, 2500);
+  // 1. Play startup sound effect the moment the splash screen mounts
+  playSplashAudio();
+
+  // 2. Automatically route user to main dashboard after exactly 2.5 seconds
+  if (splashDismissTimer) clearTimeout(splashDismissTimer);
+  splashDismissTimer = setTimeout(dismissSplashScreen, 2500);
 }
 
 window.dismissSplashScreen = dismissSplashScreen;
@@ -3178,6 +3280,6 @@ window.showSplashScreen = function() {
     splashDismissed = false;
     splash.style.display = '';
     splash.classList.remove('hidden', 'fade-out');
-    setTimeout(dismissSplashScreen, 2500);
+    initSplashScreenTimer();
   }
 };

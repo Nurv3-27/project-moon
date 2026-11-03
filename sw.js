@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v35';
+const CACHE_NAME = 'moon-v36';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

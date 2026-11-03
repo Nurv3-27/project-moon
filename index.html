@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=53">
+  <link rel="stylesheet" href="style.css?v=54">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + CUSTOM IMAGE_7.PNG + FULL INTRO SOUND) -->
@@ -1021,6 +1021,7 @@
           </div>
           <div class="athlete-profile-actions">
             <button type="button" class="secondary-btn small-btn" onclick="openAICoachModal()">💬 Talk to Coach</button>
+            <button type="button" class="secondary-btn small-btn" onclick="window.AuthSystem.toggleCoach()" title="Toggle between Coach Nurv and Coach Maryam">🔄 Switch AI Coach</button>
             <button type="button" class="secondary-btn small-btn" onclick="openAuthModal()">Switch / Sign In</button>
             <button type="button" class="danger-ghost-btn small-btn" onclick="window.AuthSystem.logout()">Log Out</button>
           </div>
@@ -1744,29 +1745,60 @@
           <input type="password" id="signup-password" class="ios-input" placeholder="••••••••" required autocomplete="new-password">
         </div>
 
-        <!-- MANDATORY GENDER SELECTION -->
-        <div class="form-group">
-          <label class="required-label">Select Athlete Gender (Mandatory)</label>
-          <p class="gender-help-text">Assigns your dedicated AI Coach &amp; locks your Official Division Leaderboard standard.</p>
+        <!-- STEP 1: GENDER SELECTION (PR LEADERBOARD BRACKET & 3D ANATOMY) -->
+        <div class="form-group onboarding-step-group">
+          <div class="onboarding-step-header">
+            <span class="step-badge">STEP 1</span>
+            <label class="required-label">Select Your Gender Bracket (For PR Leaderboard)</label>
+          </div>
+          <p class="gender-help-text">Filters your Official Division Leaderboard bracket and calibrates your 3D muscle anatomy.</p>
           <div class="gender-select-cards-grid">
             <div class="gender-card active" id="card-gender-male" onclick="selectSignupGender('male')">
               <span class="gc-icon male">♂</span>
               <div class="gc-info">
-                <strong>Male Athlete</strong>
-                <span>Assigned AI Coach 'Nurv' &bull; Male Division Leaderboard &amp; HD Male Anatomy</span>
+                <strong>Male Division Bracket</strong>
+                <span>Official Male PR Leaderboard &bull; HD Male Muscle Anatomy</span>
               </div>
               <span class="gc-radio-dot"></span>
             </div>
             <div class="gender-card" id="card-gender-female" onclick="selectSignupGender('female')">
               <span class="gc-icon female">♀</span>
               <div class="gc-info">
-                <strong>Female Athlete</strong>
-                <span>Assigned AI Coach 'Maryam' &bull; Female Division Leaderboard &amp; HD Lady Anatomy</span>
+                <strong>Female Division Bracket</strong>
+                <span>Official Female PR Leaderboard &bull; HD Lady Muscle Anatomy</span>
               </div>
               <span class="gc-radio-dot"></span>
             </div>
           </div>
           <input type="hidden" id="signup-gender" value="male">
+        </div>
+
+        <!-- STEP 2: FREE-CHOICE AI ASSISTANT SELECTION -->
+        <div class="form-group onboarding-step-group" style="margin-top: 18px;">
+          <div class="onboarding-step-header">
+            <span class="step-badge coach-step-badge">STEP 2</span>
+            <label class="required-label">Choose Your AI Assistant (Free Choice)</label>
+          </div>
+          <p class="gender-help-text">Free choice: pick either coach regardless of gender. Both specialize strictly in form, pain management, splits &amp; nutrition.</p>
+          <div class="gender-select-cards-grid coach-select-cards-grid">
+            <div class="gender-card active coach-choice-card" id="card-coach-n" onclick="selectSignupCoach('Nurv')">
+              <span class="gc-icon coach-n-icon">⚡</span>
+              <div class="gc-info">
+                <strong>Coach 'N' (Nurv) &bull; Male AI Assistant</strong>
+                <span>Titan Bio-Strategist &bull; Hypertrophy, Mechanical Tension &amp; Overload Cues</span>
+              </div>
+              <span class="gc-radio-dot"></span>
+            </div>
+            <div class="gender-card coach-choice-card" id="card-coach-m" onclick="selectSignupCoach('Maryam')">
+              <span class="gc-icon coach-m-icon">👑</span>
+              <div class="gc-info">
+                <strong>Coach 'M' (Maryam) &bull; Female AI Assistant</strong>
+                <span>Valkyrie Precision Architect &bull; Posterior Chain, Symmetry &amp; Density Cues</span>
+              </div>
+              <span class="gc-radio-dot"></span>
+            </div>
+          </div>
+          <input type="hidden" id="signup-coach" value="Nurv">
         </div>
 
         <!-- Optional Admin Key Toggle -->
@@ -1806,12 +1838,14 @@
         <p class="coach-tagline" id="coach-tagline">&ldquo;Absolute tension. Biomechanical perfection. Relentless progression.&rdquo;</p>
       </div>
 
-      <!-- Quick Interactive Inquiries -->
+      <!-- Specialized Interactive Inquiries (6 Hardcoded Domains) -->
       <div class="coach-quick-prompts-row">
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Give me pre-workout hype!')">🔥 Pre-Workout Hype</button>
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Check my compound form technique')">📐 Form Technique</button>
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How much weight should I overload today?')">⚖️ Weight Progression</button>
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Post-workout protein and recovery protocol')">🥗 Fuel &amp; Recovery</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How do I optimize my bench press and squat form cues?')">📐 Form Cues</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How do I fix knee caving and lower back rounding?')">🛠️ Fix Form</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('I have unknown shoulder and knee pain during lifting, how should I triage and modify?')">⚠️ Pain Triage</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How much protein and calories should I eat for my goals?')">🥗 Diet &amp; Macros</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How should I structure a 4-day Upper Lower or Push Pull Legs split?')">📅 Workout Splits</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Explain progressive overload double progression and RPE scale')">⚡ Gym Guidance</button>
       </div>
 
       <!-- Live Chat Transcript Stream -->
@@ -1852,10 +1886,10 @@
     </div>
   </div>
 
-  <script src="auth.js?v=53"></script>
-  <script src="app.js?v=53"></script>
-  <script src="camera.js?v=53"></script>
-  <script src="ranks.js?v=53"></script>
+  <script src="auth.js?v=54"></script>
+  <script src="app.js?v=54"></script>
+  <script src="camera.js?v=54"></script>
+  <script src="ranks.js?v=54"></script>
 </body>
 </html>
 

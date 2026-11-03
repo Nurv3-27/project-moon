@@ -1,6 +1,6 @@
 /**
  * Moon Fitness OS - Authentication, RBAC, Dual AI Assistants & Admin Citadel
- * Pitch-Black & Dark Maroon Architecture (v52)
+ * Pitch-Black & Dark Maroon Architecture (v54)
  */
 
 (function () {
@@ -321,10 +321,33 @@
     getCoach: function () {
       if (!this.currentUser) return AI_COACHES.N;
       const c = String(this.currentUser.aiCoach || '').toLowerCase();
-      if (c === 'm' || c.includes('maryam') || this.currentUser.gender === 'female') {
+      if (c === 'm' || c.includes('maryam')) {
         return AI_COACHES.M;
       }
-      return AI_COACHES.N;
+      if (c === 'n' || c.includes('nurv')) {
+        return AI_COACHES.N;
+      }
+      return this.currentUser.gender === 'female' ? AI_COACHES.M : AI_COACHES.N;
+    },
+
+    toggleCoach: function () {
+      if (!this.currentUser) return;
+      const current = (this.currentUser.aiCoach || '').toLowerCase();
+      const nextCoach = (current === 'm' || current.includes('maryam')) ? 'Nurv' : 'Maryam';
+      this.currentUser.aiCoach = nextCoach;
+
+      const localUser = this.users.find(u => u.id === this.currentUser.id);
+      if (localUser) localUser.aiCoach = nextCoach;
+      saveUsersDB(this.users);
+      setActiveSession(this.currentUser);
+      this.applyUserContext();
+      this.updateCoachModalUI();
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Switched AI Assistant to Coach ${nextCoach}!`);
+      }
+      if (typeof window.triggerHaptic === 'function') {
+        window.triggerHaptic([30, 45]);
+      }
     },
 
     applyUserContext: function () {
@@ -467,7 +490,7 @@
         throw new Error('Password must be at least 4 characters.');
       }
       if (!gender || (gender !== 'male' && gender !== 'female')) {
-        throw new Error('Please select your gender (Male ♂ or Female ♀) to assign your AI Coach and Leaderboard bracket.');
+        throw new Error('Please select your gender bracket (Male ♂ or Female ♀) for the PR leaderboard.');
       }
 
       const cleanUsername = username.trim().toLowerCase();
@@ -477,7 +500,8 @@
       }
 
       const assignedRole = (role === 'Admin' || data.adminSecret === 'MOON2026') ? 'Admin' : 'Standard';
-      const assignedCoach = gender === 'female' ? 'Maryam' : 'Nurv';
+      const cleanCoach = (data.aiCoach || '').toString().toLowerCase();
+      const assignedCoach = (cleanCoach === 'm' || cleanCoach.includes('maryam')) ? 'Maryam' : 'Nurv';
 
       const newUser = {
         id: 'usr_' + Date.now(),
@@ -500,9 +524,7 @@
       saveUsersDB(this.users);
       this.loginUserObject(newUser);
 
-      const welcomeMsg = gender === 'female' 
-        ? "Welcome, Athlete! Coach Maryam assigned. Female Division Leaderboard active." 
-        : "Welcome, Athlete! Coach Nurv assigned. Male Division Leaderboard active.";
+      const welcomeMsg = `Welcome, ${newUser.displayName}! Coach ${assignedCoach} assigned to your training. ${gender === 'female' ? 'Female' : 'Male'} Division Leaderboard active.`;
       
       this.speak(welcomeMsg);
       return newUser;
@@ -596,35 +618,254 @@
       } catch (e) {}
     },
 
-    // AI Coach Chat Engine
+    // Hardcoded System Prompts & Guardrails for AI Coaches
+    systemPrompts: {
+      N: `You are Coach 'N' (Coach Nurv), a premier male bio-strategist and mechanical overload coach in Moon Fitness OS.
+STRICT SCOPE AND GUARDRAILS:
+You are strictly hardcoded to act EXCLUSIVELY as a specialized fitness and nutrition guide. You must ONLY handle:
+1. Form Development (setup, bracing, barbell paths, eccentric tempo, mind-muscle connection)
+2. Form Correction (diagnosing & fixing mechanical faults, knee valgus, lower back rounding, elbow flare)
+3. Unknown Pain Queries (triage unexpected gym pain, joint vs muscle soreness, mechanical modifications, deloading, with medical disclaimer)
+4. Diet & Macronutrient Advice (caloric surplus/deficit, protein requirements 1.6-2.2g/kg, carb timing, hydration, electrolytes, creatine)
+5. Workout Split Structuring (PPL, Upper/Lower, Arnold split, volume per muscle group, weekly frequency, deload weeks)
+6. General Gym Guidance (progressive overload, RPE/RIR scale, warm-up ramp sets, gym etiquette, machine vs free weight selection)
+
+ABSOLUTE RESTRICTION:
+If the user asks ANY question outside of fitness, pain management, and nutrition, you MUST politely decline and firmly redirect them back to gym training, form, and diet. Never entertain out-of-scope discussions.`,
+
+      M: `You are Coach 'M' (Coach Maryam), a premier female precision architect and high-density hypertrophy coach in Moon Fitness OS.
+STRICT SCOPE AND GUARDRAILS:
+You are strictly hardcoded to act EXCLUSIVELY as a specialized fitness and nutrition guide. You must ONLY handle:
+1. Form Development (kinetic elegance, posterior chain anchoring, pelvic tilt control, chin tuck, time-under-tension)
+2. Form Correction (correcting lumbar hyperextension, knee caving, hip shift, asymmetrical pressing)
+3. Unknown Pain Queries (investigating pinching sensations, hip impingement, lower back tension, tendonitis, modifying exercise range of motion, with professional medical disclaimer)
+4. Diet & Macronutrient Advice (hormonal-supportive healthy fats, high-leucine protein distribution, pre/post workout glycogen replenishment, intra-workout hydration)
+5. Workout Split Structuring (glute/hamstring prioritized splits, push-pull-legs, upper/lower, recovery distribution, volume optimization)
+6. General Gym Guidance (RPE management, active recovery protocols, progressive overload tracking, gym confidence, rest intervals)
+
+ABSOLUTE RESTRICTION:
+If the user asks ANY question outside of fitness, pain management, and nutrition, you MUST politely decline and guide them back to their training and nutrition. Maintain a disciplined, elite athletic persona.`
+    },
+
+    // AI Coach Chat Engine with Guardrail Filter
     askCoach: function (query) {
       const coach = this.getCoach();
       const user = this.currentUser || {};
       const q = (query || '').toLowerCase().trim();
 
+      // Guardrail Check: Detect explicit out-of-scope non-fitness topics
+      const outOfScopePatterns = [
+        /\b(code|coding|python|javascript|java|c\+\+|html|css|sql|react|programming|bug|git|algorithm|developer)\b/i,
+        /\b(politics|president|democrat|republican|election|senate|congress|war|vote|government|prime minister)\b/i,
+        /\b(weather|forecast|rain|snow|temperature today|umbrella|storm)\b/i,
+        /\b(movie|film|cinema|actor|actress|hollywood|netflix|oscars|tv show|series|celebrity)\b/i,
+        /\b(song|music|singer|album|rap|pop song|lyrics|spotify playlist)\b/i,
+        /\b(video game|gaming|playstation|xbox|nintendo|fortnite|minecraft|gta)\b/i,
+        /\b(crypto|bitcoin|ethereum|stock market|investing|wall street|shares|dividend)\b/i,
+        /\b(homework|essay|math problem|algebra|calculus|geometry|who wrote|history of rome)\b/i,
+        /\b(joke|riddle|funny story|tell me a joke|standup comedy)\b/i,
+        /\b(dating|tinder|boyfriend|girlfriend|romance|relationship advice)\b/i
+      ];
+
+      for (const pattern of outOfScopePatterns) {
+        if (pattern.test(q)) {
+          return this.declineOutOfScope(coach);
+        }
+      }
+
+      // Allowed Topic Domains Classification
+      const isPain = /\b(pain|hurt|hurts|aching|ache|sharp|twinge|pinching|pinch|clicking|popping|impingement|tendonitis|tendinitis|sprain|strain|injury|injured|soreness vs pain|unknown pain|inflammation)\b/i.test(q);
+      const isFormCorrection = /\b(fix|mistake|error|wrong|bad form|rounding|round my back|butt wink|valgus|caving|knees cave|elbows flare|flaring|hyperextend|arching too much|arching|correct my|form check|bouncing|asymmetry)\b/i.test(q);
+      const isFormDev = /\b(form|technique|cue|cues|setup|bar path|rom|range of motion|eccentric|concentric|brace|bracing|valsalva|breathe|breathing|grip|stance|depth|lockout|scapula|pelvic tilt|tempo|squat|bench|deadlift|press|thrust|row|curl|lunge|pullup|pushup|dip|rdl)\b/i.test(q);
+      const isDiet = /\b(diet|food|nutrition|macro|macros|protein|carbs|carbohydrate|fat|calories|caloric|surplus|deficit|cut|cutting|bulk|bulking|recomp|meal|eating|creatine|hydration|water|electrolytes|whey|supplement)\b/i.test(q);
+      const isSplits = /\b(split|routine|program|programming|ppl|push pull legs|upper lower|full body|arnold|schedule|days a week|frequency|volume|sets per week|how many sets|how many reps|deload|rest day)\b/i.test(q);
+      const isGymGuidance = /\b(gym|etiquette|rpe|rir|progressive overload|overload|overloading|weight progression|how much weight|warmup|warm up|machine|free weight|dumbbell|barbell|plate|plates|confidence|anxiety|hype|motivation|ready|intensity)\b/i.test(q);
+
+      // If query does not match any allowed fitness/nutrition domain, politely decline
+      if (!isPain && !isFormCorrection && !isFormDev && !isDiet && !isSplits && !isGymGuidance) {
+        return this.declineOutOfScope(coach);
+      }
+
       let reply = '';
-      if (q.includes('form') || q.includes('bench') || q.includes('squat') || q.includes('thrust') || q.includes('deadlift')) {
-        if (coach.gender === 'male') {
-          reply = `Lock in your scapulae retract-and-depress before unrack. Create mechanical tension by breaking the bar in half. 15-degree torso angle prevents joint impingement. Squeeze hard at the peak.`;
+
+      // 1. UNKNOWN PAIN QUERIES (With Mandatory Biomechanical Triage & Medical Disclaimer)
+      if (isPain) {
+        if (q.includes('shoulder')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Pain Triage [Shoulder]: Anterior shoulder pain during pressing usually indicates subacromial impingement or lack of thoracic extension. 
+Fix: Tuck elbows to 45°, depress and pack scapulae into your lats before unrack, and regress to neutral-grip dumbbells or landmine presses.
+⚠️ Medical Notice: If pain is sharp, pinching, or persistent, stop immediately and consult a sports physiotherapist.`
+            : `Coach Maryam Pain Assessment [Shoulder]: Anterior pinching often stems from excessive internal rotation and flared elbows under load.
+Fix: Anchor your scapulae down, engage external rotators by "breaking the bar", and swap to incline dumbbell pressing with neutral hands.
+⚠️ Medical Notice: Never press through sharp joint pain. If symptoms continue beyond 48 hours, seek medical evaluation.`;
+        } else if (q.includes('knee')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Pain Triage [Knee]: Patellar tendon tension happens when the knee travels excessively forward without hip hinge co-contraction.
+Fix: Sit back into the hips, screw your feet into the floor, and regress to box squats or Romanian deadlifts to balance posterior chain forces.
+⚠️ Medical Notice: For persistent swelling, clicking with pain, or acute sharp pangs, consult a sports medicine physician.`
+            : `Coach Maryam Pain Assessment [Knee]: Anterior knee strain is frequently caused by quad dominance and underactive gluteus medius.
+Fix: Pre-activate glutes with banded abductions, ensure knees track over the 2nd toe, and substitute with reverse lunges or leg presses.
+⚠️ Medical Notice: If the joint is inflamed or tender to touch, rest the knee and consult a medical professional.`;
+        } else if (q.includes('back') || q.includes('spine')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Pain Triage [Lower Back]: Lumbar twinges in deadlifts or squats indicate spinal flexion under load rather than pure hip hinging.
+Fix: Stop heavy spinal loading immediately. Practice the McGill Big 3 (bird-dog, side plank, curl-up) to re-stabilize your core cylinder. Regress to chest-supported rows and belt squats.
+⚠️ Medical Notice: Radiating pain or sharp nerve twinges mandate immediate cessation and medical physician evaluation.`
+            : `Coach Maryam Pain Assessment [Lower Back]: Lower back tightness often results from anterior pelvic tilt and ribcage flare during hip extension.
+Fix: Keep your ribs locked downward to your pelvis. Avoid hyperextending at lockout. Substitute conventional pulls with high-box Romanian deadlifts.
+⚠️ Medical Notice: If pain radiates into the glute or leg, halt lifting and consult a spine/sports physiotherapist.`;
         } else {
-          reply = `Anchor your ribcage to pelvis. In the hip thrust and squat, drive purely through heel-midfoot, tuck the chin and lock out with strong posterior pelvic tilt. Hold the contraction for 2 seconds.`;
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Unknown Pain Protocol: Distinguish between DOMS (dull muscular ache 24-48h post-lift) and joint/ligament strain (sharp, localized, or aggravated by movement).
+Protocol: De-load the affected joint by 50% or regress to pain-free machine/cable planes of motion. Never train through acute joint pain.
+⚠️ Medical Notice: If pain is sharp, swollen, or restricts daily mobility, cease the movement and seek professional medical guidance.`
+            : `Coach Maryam Unknown Pain Protocol: Muscle soreness is normal adaptation; joint, tendon, or shooting nerve pain is an immediate stop signal.
+Protocol: Reduce range of motion to pain-free limits, apply ice/compression for acute inflammation, and prioritize gentle active mobility.
+⚠️ Medical Notice: For any unresolved or sharp pain, schedule an evaluation with a licensed physical therapist.`;
         }
-      } else if (q.includes('hype') || q.includes('motivation') || q.includes('ready') || q.includes('push')) {
-        if (coach.gender === 'male') {
-          reply = `The iron does not negotiate, ${user.displayName || 'warrior'}. You didn't come here to stay average. Load the plates, take your breath into the belly, and dominate every rep!`;
+      }
+
+      // 2. FORM CORRECTION QUERIES
+      else if (isFormCorrection) {
+        if (q.includes('knee') || q.includes('valgus') || q.includes('cave')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Form Correction [Knee Valgus]: Knees caving inward in the squat bleeds power and stresses the ACL.
+Correction: "Spread the floor apart" with the outer edges of your shoes. This forces gluteus medius engagement and locks the femurs in external rotation.`
+            : `Coach Maryam Form Correction [Knee Cave]: Knee valgus stems from weak hip external rotators.
+Correction: Screw your heels into the ground, drive knees out along the line of your toes, and add 2 sets of banded lateral walks as your pre-squat primer.`;
+        } else if (q.includes('back') || q.includes('round') || q.includes('deadlift')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Form Correction [Spinal Rounding]: Upper or lower back rounding on pulls compromises the spinal erectors.
+Correction: "Squeeze two oranges in your armpits" to pack your lats down. Pull the slack out of the barbell until you hear the 'click' before driving through the floor.`
+            : `Coach Maryam Form Correction [Deadlift Rounding]: Back rounding occurs when the hips shoot up faster than the chest.
+Correction: Lock the chest tall, wedge your hips close to the bar, and push the floor away like a leg press rather than yanking with your lower back.`;
+        } else if (q.includes('bench') || q.includes('elbow') || q.includes('flare')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Form Correction [Bench Elbow Flare]: Flaring elbows out to 90 degrees causes front delt impingement.
+Correction: Tuck elbows to a 45-degree angle relative to torso. Bend the bar in half to pack your lats and touch the lower sternum at the bottom.`
+            : `Coach Maryam Form Correction [Bench Press]: Excessive flare stresses the rotator cuff.
+Correction: Retract your shoulder blades into your back pockets, maintain proud chest posture, and press slightly backward in a subtle J-curve path.`;
         } else {
-          reply = `Every single rep builds your future physique, ${user.displayName || 'athlete'}. Channel the intensity. Focus your nervous system right now and let form translate into pure power!`;
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Form Correction: Biomechanical efficiency requires three pillars: 1) Rigid 360° diaphragmatic intra-abdominal pressure, 2) Joint stacking (wrists over elbows, knees over midfoot), 3) Controlled 3-second eccentric tempo. Master these to eliminate form leaks.`
+            : `Coach Maryam Form Correction: Precision mechanics dictate that your joints must move through their intended anatomical paths. Maintain neutral cervical spine, keep core braced, and eliminate momentum by pausing for 1 full second at peak contraction.`;
         }
-      } else if (q.includes('weight') || q.includes('progression') || q.includes('how much') || q.includes('overload')) {
-        reply = `Based on your current streak and recovery, add +2.5kg to compound lifts today if you reached 8+ clean reps on your previous top set. If RPE is above 9, maintain and refine bar speed.`;
-      } else if (q.includes('diet') || q.includes('food') || q.includes('protein') || q.includes('recovery')) {
-        reply = `Aim for 2.0g to 2.2g of protein per kg of bodyweight, hydrate with 700ml electrolyte water intra-workout, and hit 8 hours of deep sleep to let CNS receptors regenerate.`;
+      }
+
+      // 3. FORM DEVELOPMENT QUERIES
+      else if (isFormDev) {
+        if (q.includes('bench')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Bench Press Blueprint: 1) Plant feet flat and drive heels hard into the floor, 2) Retract and depress scapulae, creating a stable arch through the mid-back, 3) Grip bar tight to transfer neural drive, 4) Lower to nipple line with 3-second eccentric control, 5) Explode up without letting shoulders unpin.`
+            : `Coach Maryam Bench Press Architecture: 1) Create full-body tension from heels through lats, 2) Maintain moderate natural lumbar arch while keeping glutes locked on the bench, 3) Lower smoothly in a controlled arc touching the bottom sternum, 4) Drive up with synchronized leg drive.`;
+        } else if (q.includes('squat')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Squat Blueprint: 1) Set bar across mid-traps, pull down firmly into back, 2) Stance slightly wider than shoulders, toes 15-30° out, 3) Inhale deep into diaphragm and brace core against your belt, 4) Break at hips and knees simultaneously, 5) Hit parallel, 6) Push the earth away through mid-foot.`
+            : `Coach Maryam Squat Architecture: 1) Anchor ribcage to pelvis to avoid lumbar hyperextension, 2) Maintain upright torso balance with eyes fixed 10 feet forward, 3) Track knees strictly over 2nd and 3rd toes, 4) Hit deep parallel with zero butt wink, 5) Stand tall and squeeze glutes at the top.`;
+        } else if (q.includes('deadlift')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Deadlift Blueprint: 1) Bar directly over mid-foot (1 inch from shins), 2) Hinge hips back until hands grip the knurling, 3) Pull lats down to remove bar slack, 4) Chest tall, breath braced, 5) Push floor away—do not pull with lower back. Lock out glutes cleanly.`
+            : `Coach Maryam Deadlift Architecture: 1) Shins vertical over bar, 2) Hinge deep into hamstrings and glutes, 3) Engage lats to keep bar touching your legs throughout ascent, 4) Squeeze posterior chain through lockout without leaning back.`;
+        } else if (q.includes('hip thrust') || q.includes('thrust')) {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Hip Thrust Blueprint: 1) Bench positioned right below lower shoulder blade border, 2) Shins strictly vertical at the apex (90° knee angle), 3) Chin tucked into chest throughout, 4) Drive purely through heels, locking out with aggressive posterior pelvic tilt.`
+            : `Coach Maryam Hip Thrust Architecture: 1) Place upper back against bench with ribs anchored down, 2) Feet hip-width with slight toe flare, 3) Chin tucked looking forward, 4) Drive hips upward until thighs and torso form a flat table, 5) Hold apex contraction for 2 strict seconds.`;
+        } else {
+          reply = coach.gender === 'male'
+            ? `Coach Nurv Form Development: For every compound lift, master the Valsalva brace (360° belly pressure), establish stacked joint angles, control the eccentric phase (3 seconds down), and fire through concentric with violent intent. Pristine technique builds Titans.`
+            : `Coach Maryam Form Development: True muscular symmetry is created by kinetic control. Focus on maximizing the active stretch under load, maintaining neutral spine alignment, and executing every repetition with zero jerking or cheating momentum.`;
+        }
+      }
+
+      // 4. DIET & MACRONUTRIENT ADVICE
+      else if (isDiet) {
+        if (q.includes('protein')) {
+          reply = `Nutrition Protocol [Protein Targets]: Target 1.6g to 2.2g of high-quality protein per kilogram of bodyweight (approx 0.8g to 1.0g per lb). Distribute across 4-5 meals with ~30-45g per meal to maximize muscle protein synthesis (MPS) spikes via leucine saturation.`;
+        } else if (q.includes('bulk') || q.includes('surplus') || q.includes('gain')) {
+          reply = `Nutrition Protocol [Hypertrophic Surplus]: Aim for a lean caloric surplus of +250 to +400 kcal above maintenance (approx 0.25kg to 0.5kg gain per month for trained lifters). Keep protein at 2.0g/kg, carbs at 4-6g/kg to fuel high-volume glycogen, and fats at 20-25% of total calories.`;
+        } else if (q.includes('cut') || q.includes('deficit') || q.includes('lose')) {
+          reply = `Nutrition Protocol [Fat Loss Deficit]: Set a moderate 300 to 500 kcal deficit under maintenance to shed pure adipose tissue while preserving lean tissue. Elevate protein to 2.2g - 2.4g/kg to blunt muscle catabolism and keep lifting intensity high with reduced set volume.`;
+        } else if (q.includes('creatine') || q.includes('supplement')) {
+          reply = `Nutrition Protocol [Creatine & Hydration]: Take 5g of pure Creatine Monohydrate daily—timing is flexible, consistency is what matters for cellular phosphocreatine saturation. Pair with minimum 3.5 liters of water daily plus sodium/potassium electrolytes intra-workout.`;
+        } else {
+          reply = `Nutrition Protocol [Macros & Fueling]: Balance your energy: 1) Protein 1.8-2.2g/kg, 2) Complex carbohydrates (oats, rice, sweet potatoes) timed 90 minutes pre-workout and immediately post-workout, 3) Healthy fats (avocado, olive oil, nuts) for endocrine health, 4) 750ml electrolyte water intra-workout.`;
+        }
+      }
+
+      // 5. WORKOUT SPLIT STRUCTURING
+      else if (isSplits) {
+        if (q.includes('ppl') || q.includes('push pull legs')) {
+          reply = `Programming Protocol [Push-Pull-Legs]: 
+• Push: Bench Press, Overhead Press, Incline DB, Lateral Raises, Tricep Pushdowns (16-18 sets)
+• Pull: Barbell Rows, Lat Pulldowns, Facepulls, Rear Delts, Incline Bicep Curls (16-18 sets)
+• Legs: Squat/Leg Press, RDL/Hamstring Curl, Bulgarian Split Squats, Calves (16-18 sets)
+Frequency: 3-day (PPL-Rest-Rest) or 6-day (PPL-Rest-PPL).`;
+        } else if (q.includes('upper lower') || q.includes('4 day')) {
+          reply = `Programming Protocol [4-Day Upper/Lower Split]: 
+• Mon: Upper A (Horizontal Press + Vertical Pull emphasis)
+• Tue: Lower A (Quad/Squat + Calf emphasis)
+• Wed: Active Recovery / Rest
+• Thu: Upper B (Vertical Press + Horizontal Row emphasis)
+• Fri: Lower B (Hips/Hamstring/Deadlift + Core emphasis)
+• Sat/Sun: Rest & CNS Recovery. Optimal split for progressive strength.`;
+        } else if (q.includes('volume') || q.includes('how many sets')) {
+          reply = `Programming Protocol [Volume & Recovery]: Aim for 10 to 18 high-intensity working sets per muscle group per week, distributed across 2 sessions (e.g. 6-9 sets per session). Train each set to 1-2 reps in reserve (RIR 1-2). Take a deload week every 6 to 8 weeks.`;
+        } else {
+          reply = `Programming Protocol [Split Design]: Optimal split selection depends on your weekly availability: 3 days = Full Body; 4 days = Upper/Lower; 5-6 days = Push-Pull-Legs. Keep weekly volume between 12-18 sets per muscle group, track progressive overload obsessively, and schedule 1-2 mandatory full rest days for CNS recovery.`;
+        }
+      }
+
+      // 6. GENERAL GYM GUIDANCE
+      else if (isGymGuidance) {
+        if (q.includes('rpe') || q.includes('rir')) {
+          reply = `Gym Guidance [RPE & RIR Scale]:
+• RPE 10 (0 RIR): Absolute mechanical failure—cannot complete another rep with proper form.
+• RPE 9 (1 RIR): 1 rep left in the tank. Peak hypertrophy stimulus.
+• RPE 8 (2 RIR): 2 reps left in the tank. Ideal for heavy compound work.
+• RPE 7 (3 RIR): Fast bar speed, 3 reps in reserve. Great for explosive warmups and technique work.`;
+        } else if (q.includes('overload') || q.includes('weight') || q.includes('progression')) {
+          reply = `Gym Guidance [Progressive Overload]: Use Double Progression. Choose a rep range (e.g. 8-12 reps). Keep weight identical until you can complete 12 clean reps on all sets. Only then increase load by +2.5kg (compounds) or +1kg (isolations) and start back at 8 reps. Never sacrifice form for weight.`;
+        } else if (q.includes('warmup') || q.includes('warm up')) {
+          reply = `Gym Guidance [Warmup Protocol]:
+1) 3-5 mins dynamic joint mobility (arm circles, leg swings, hip circles).
+2) Ramp-up Pyramid on your primary compound:
+• Empty bar x 10 reps
+• 50% working weight x 5 reps
+• 70% working weight x 3 reps
+• 85% working weight x 1 rep (potentiates nervous system without fatigue)
+• 3 mins rest, then start working sets.`;
+        } else {
+          reply = `Gym Guidance [Gym Fundamentals]: 1) Consistency beats novelty—stick to proven compound movements for 8-12 weeks, 2) Rest 2-3 minutes on heavy compound lifts and 60-90 seconds on isolations, 3) Track every weight and rep in your log, 4) Prioritize 8 hours of sleep—muscles grow during deep rest, not in the gym.`;
+        }
+      }
+
+      this.speak(reply);
+      return reply;
+    },
+
+    // Polite Decline for Queries Outside Fitness, Pain Management, and Nutrition
+    declineOutOfScope: function (coach) {
+      let reply = '';
+      if (coach.gender === 'female') {
+        reply = `I am Coach Maryam, your high-density precision fitness and nutrition architect. My directives are strictly hardcoded to physical training. I exclusively assist with:
+• 📐 Form development & kinetic setup
+• 🛠️ Form correction & symmetry adjustments
+• ⚠️ Unknown gym pain analysis & range regressions
+• 🥗 Diet, macronutrients & fueling protocols
+• 📅 Workout split design & weekly frequency
+• ⚡ General gym guidance & progressive tension
+
+I politely decline inquiries outside of these physical performance boundaries to keep our energy focused on your results. How can I assist your lifts, split, or nutrition today?`;
       } else {
-        if (coach.gender === 'male') {
-          reply = `Coach Nurv analysis: Focus on controlled eccentrics (3 seconds down) and explosive concentrics. Mechanical tension builds Titans. Keep the intensity pinned!`;
-        } else {
-          reply = `Coach Maryam assessment: Keep rest intervals strictly under 90 seconds today to maintain metabolic density. Cadence and neuromuscular control create champions. Let's execute!`;
-        }
+        reply = `I am Coach Nurv, your specialized biomechanical fitness and nutrition guide. My operational directives strictly mandate that I exclusively answer queries regarding:
+• 📐 Form development & setup cues
+• 🛠️ Form correction & biomechanical fixes
+• ⚠️ Unknown gym pain triage & movement modifications
+• 🥗 Diet, macronutrients & caloric optimization
+• 📅 Workout split structuring & volume programming
+• ⚡ General gym guidance & progressive overload
+
+I cannot assist with queries outside of these specific training and nutritional boundaries. Let's direct our focus back to your performance—what lifting or nutrition goal can I help you tackle right now?`;
       }
 
       this.speak(reply);
@@ -755,7 +996,7 @@
           </div>
           <div class="admin-stat-card highlight">
             <span class="astat-label">CORE APP CACHE</span>
-            <span class="astat-val mono">v52</span>
+            <span class="astat-val mono">v54</span>
             <span class="astat-sub">Pitch-Black Maroon PWA</span>
           </div>
         </div>
@@ -890,9 +1131,9 @@
 
           <div class="admin-control-box">
             <h4>🔄 Cache Invalidation &amp; Update Dispatch</h4>
-            <p>Triggers immediate Service Worker cache eviction and prompts clients to upgrade to v52.</p>
+            <p>Triggers immediate Service Worker cache eviction and prompts clients to upgrade to v54.</p>
             <div style="display:flex; gap:8px; margin-top:8px;">
-              <button type="button" class="secondary-btn small-btn" onclick="window.AuthSystem.forceCacheUpdate()">Force Client Update (v52)</button>
+              <button type="button" class="secondary-btn small-btn" onclick="window.AuthSystem.forceCacheUpdate()">Force Client Update (v54)</button>
               <button type="button" class="secondary-btn small-btn" onclick="window.AuthSystem.exportDatabaseJSON()">Export DB JSON</button>
             </div>
           </div>

@@ -5197,6 +5197,31 @@ header + #antiscroll-live-banner,
   margin: 3px 0 10px 0;
   line-height: 1.35;
 }
+.onboarding-step-group {
+  margin-top: 14px;
+}
+.onboarding-step-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.step-badge {
+  font-size: 0.65rem;
+  font-weight: 900;
+  background: rgba(224, 80, 106, 0.2);
+  color: var(--accent-lime);
+  border: 1px solid rgba(224, 80, 106, 0.35);
+  padding: 2px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.step-badge.coach-step-badge {
+  background: linear-gradient(135deg, rgba(224, 80, 106, 0.25), rgba(245, 110, 138, 0.25));
+  border-color: rgba(245, 110, 138, 0.4);
+  color: #FFF;
+}
 .gender-select-cards-grid {
   display: flex;
   flex-direction: column;
@@ -5223,6 +5248,16 @@ header + #antiscroll-live-banner,
   background: linear-gradient(135deg, rgba(46, 11, 20, 0.7), rgba(74, 14, 28, 0.8));
   box-shadow: 0 4px 16px rgba(224, 80, 106, 0.25);
 }
+.coach-choice-card#card-coach-m.active {
+  border-color: #F56E8A;
+  background: linear-gradient(135deg, rgba(58, 13, 34, 0.7), rgba(92, 19, 54, 0.8));
+  box-shadow: 0 4px 16px rgba(245, 110, 138, 0.25);
+}
+.coach-choice-card#card-coach-m.active .gc-radio-dot {
+  border-color: #F56E8A;
+  background: #F56E8A;
+  box-shadow: 0 0 6px #F56E8A;
+}
 .gc-icon {
   font-size: 1.4rem;
   width: 36px;
@@ -5233,11 +5268,11 @@ header + #antiscroll-live-banner,
   justify-content: center;
   flex-shrink: 0;
 }
-.gc-icon.male {
+.gc-icon.male, .gc-icon.coach-n-icon {
   background: rgba(224, 80, 106, 0.18);
   color: #E0506A;
 }
-.gc-icon.female {
+.gc-icon.female, .gc-icon.coach-m-icon {
   background: rgba(245, 110, 138, 0.18);
   color: #F56E8A;
 }

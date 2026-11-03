@@ -4037,6 +4037,24 @@ window.selectSignupGender = function(gender) {
   triggerHaptic([30]);
 };
 
+window.selectSignupCoach = function(coachId) {
+  const cardN = document.getElementById('card-coach-n');
+  const cardM = document.getElementById('card-coach-m');
+  const input = document.getElementById('signup-coach');
+
+  const isM = (coachId === 'M' || coachId === 'Maryam');
+  if (isM) {
+    if (cardN) cardN.classList.remove('active');
+    if (cardM) cardM.classList.add('active');
+    if (input) input.value = 'Maryam';
+  } else {
+    if (cardN) cardN.classList.add('active');
+    if (cardM) cardM.classList.remove('active');
+    if (input) input.value = 'Nurv';
+  }
+  triggerHaptic([30]);
+};
+
 window.handleAuthSignIn = function(e) {
   if (e) e.preventDefault();
   const idInput = document.getElementById('signin-identifier');
@@ -4062,12 +4080,14 @@ window.handleAuthSignUp = function(e) {
   const userEl = document.getElementById('signup-username');
   const passEl = document.getElementById('signup-password');
   const genderEl = document.getElementById('signup-gender');
+  const coachEl = document.getElementById('signup-coach');
   const adminKeyEl = document.getElementById('signup-adminkey');
 
   const displayName = nameInput ? nameInput.value.trim() : '';
   const username = userEl ? userEl.value.trim() : '';
   const password = passEl ? passEl.value : '';
   const gender = genderEl ? genderEl.value : 'male';
+  const aiCoach = coachEl ? coachEl.value : 'Nurv';
   const adminSecret = adminKeyEl ? adminKeyEl.value.trim() : '';
 
   try {
@@ -4077,6 +4097,7 @@ window.handleAuthSignUp = function(e) {
         username,
         password,
         gender,
+        aiCoach,
         adminSecret
       });
     }

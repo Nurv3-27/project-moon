@@ -1696,6 +1696,137 @@ input:checked + .slider:before {
   z-index: 10;
 }
 
+/* Modal Tab Switcher (New Routine Modal: Custom vs Featured) */
+.modal-tab-switcher {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 3px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-subtle);
+  gap: 4px;
+}
+
+.modal-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Outfit', 'Space Grotesk', -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.modal-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.modal-tab-btn.active {
+  background: var(--bg-card-hover, rgba(255, 255, 255, 0.12));
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Featured / Recommended Templates List in Routine Builder */
+.template-tab-intro {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.featured-templates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.featured-template-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.featured-template-card:hover {
+  background: rgba(255, 255, 255, 0.065);
+  border-color: rgba(255, 195, 0, 0.4);
+}
+
+.template-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.template-card-title {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.template-card-tag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--accent-cyan);
+  background: rgba(var(--accent2-rgb), 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 3px;
+}
+
+.template-load-btn {
+  background: var(--accent-lime);
+  color: #000;
+  border: none;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.template-load-btn:hover {
+  transform: scale(1.04);
+}
+
+.template-load-btn:active {
+  transform: scale(0.96);
+}
+
+.template-exercises-preview {
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
 /* Celebration Modal */
 .celebration-card {
   text-align: center;

@@ -1494,7 +1494,7 @@ function renderRoutines() {
   const chipFeatured = document.querySelector('#routine-filter-chips [data-filter="featured"]');
   const chipCustom = document.querySelector('#routine-filter-chips [data-filter="custom"]');
   if (chipAll) chipAll.textContent = `All Routines (${totalCount})`;
-  if (chipFeatured) chipFeatured.textContent = `★ Featured (${featuredCount})`;
+  if (chipFeatured) chipFeatured.textContent = `★ Featured / Recommended (${featuredCount})`;
   if (chipCustom) chipCustom.textContent = `My Routines (${customCount})`;
 
   // Filter routines based on active category filter
@@ -2175,6 +2175,76 @@ function renderRoutineBuilderExercises() {
 window.removeBuilderEx = function(idx) {
   newRoutineSelectedExerciseIds.splice(idx, 1);
   renderRoutineBuilderExercises();
+};
+
+window.switchCreateRoutineTab = function(tab) {
+  const customView = document.getElementById('create-routine-custom-view');
+  const featuredView = document.getElementById('create-routine-featured-view');
+  const btnCustom = document.getElementById('tab-btn-create-custom');
+  const btnFeatured = document.getElementById('tab-btn-create-featured');
+
+  if (tab === 'featured') {
+    if (customView) customView.classList.add('hidden');
+    if (featuredView) featuredView.classList.remove('hidden');
+    if (btnCustom) btnCustom.classList.remove('active');
+    if (btnFeatured) btnFeatured.classList.add('active');
+    renderFeaturedRoutineTemplates();
+    triggerHaptic([25]);
+  } else {
+    if (customView) customView.classList.remove('hidden');
+    if (featuredView) featuredView.classList.add('hidden');
+    if (btnCustom) btnCustom.classList.add('active');
+    if (btnFeatured) btnFeatured.classList.remove('active');
+    triggerHaptic([25]);
+  }
+};
+
+window.renderFeaturedRoutineTemplates = function() {
+  const container = document.getElementById('create-routine-featured-list');
+  if (!container) return;
+
+  container.innerHTML = DEFAULT_ROUTINES.map(defR => {
+    const exNames = defR.exerciseIds
+      .map(id => {
+        const found = AppState.exercises.find(e => e.id === id);
+        return found ? found.name : '';
+      })
+      .filter(Boolean);
+
+    return `
+      <div class="featured-template-card">
+        <div class="template-card-top">
+          <div>
+            <h4 class="template-card-title">${escapeHtml(defR.name)}</h4>
+            <span class="template-card-tag">${escapeHtml(defR.tag || 'Featured')}</span>
+          </div>
+          <button type="button" class="template-load-btn" onclick="loadRoutineTemplate('${defR.id}')">
+            Load Template &rarr;
+          </button>
+        </div>
+        <p class="template-exercises-preview">${escapeHtml(exNames.join(' • '))}</p>
+      </div>
+    `;
+  }).join('');
+};
+
+window.loadRoutineTemplate = function(templateId) {
+  const template = DEFAULT_ROUTINES.find(r => r.id === templateId) || (AppState.routines || []).find(r => r.id === templateId);
+  if (!template) return;
+
+  newRoutineSelectedExerciseIds = [...template.exerciseIds];
+  const nameInput = document.getElementById('new-routine-name');
+  const tagInput = document.getElementById('new-routine-tag');
+  const featuredCheck = document.getElementById('new-routine-is-featured');
+
+  if (nameInput) nameInput.value = template.name;
+  if (tagInput) tagInput.value = template.tag || '';
+  if (featuredCheck) featuredCheck.checked = true;
+
+  renderRoutineBuilderExercises();
+  switchCreateRoutineTab('custom');
+  triggerHaptic([40]);
+  showToast(`Loaded "${template.name}" into builder!`);
 };
 
 // --- Modal Controls ---
@@ -3475,6 +3545,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('new-routine-tag').value = '';
     const isFeaturedCheck = document.getElementById('new-routine-is-featured');
     if (isFeaturedCheck) isFeaturedCheck.checked = false;
+    switchCreateRoutineTab('custom');
     renderRoutineBuilderExercises();
     openModal('modal-create-routine');
   });

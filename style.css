@@ -4037,43 +4037,47 @@ input:checked + .slider:before {
   max-width: 350px;
 }
 
-/* Subtle Incorporation of Number 27 & Arabic 'من' */
-.splash-subtle-signature {
+/* Bottom-Right Corner Tribute: 'In the loving memory of 27' alongside Arabic 'من' */
+.splash-corner-tribute {
+  position: absolute;
+  bottom: 22px;
+  right: 24px;
+  bottom: max(20px, env(safe-area-inset-bottom, 20px));
+  right: max(22px, env(safe-area-inset-right, 22px));
+  z-index: 20;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 4px;
-  padding: 4px 14px;
-  background: rgba(128, 0, 32, 0.12);
-  border: 1px solid rgba(128, 0, 32, 0.28);
-  border-radius: 999px;
-  box-shadow: 0 0 15px rgba(128, 0, 32, 0.2);
+  gap: 7px;
+  font-family: 'Outfit', 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: #7a1528; /* Subtle, dark maroon blending with pitch-black */
+  text-shadow: 0 0 10px rgba(122, 21, 40, 0.45);
+  opacity: 0;
+  animation: splashCornerFadeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
 }
 
-.splash-sig-arabic {
-  font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', 'Noto Naskh Arabic', 'Geeza Pro', serif;
-  font-size: 1.25rem;
+.splash-tribute-arabic {
+  font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  font-size: 0.96rem;
   font-weight: 700;
-  color: #ffccd5;
-  text-shadow: 0 0 10px rgba(217, 59, 98, 0.7);
+  color: #8c1e33;
   line-height: 1;
 }
 
-.splash-sig-dot {
-  color: rgba(200, 40, 75, 0.8);
-  font-size: 0.85rem;
-  line-height: 1;
-}
-
-.splash-sig-num {
-  font-family: 'Outfit', 'Space Grotesk', -apple-system, sans-serif;
-  font-weight: 800;
-  font-size: 0.92rem;
-  letter-spacing: 2px;
-  color: #f4e8eb;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-  line-height: 1;
+@keyframes splashCornerFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 0.82;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 480px) {
@@ -4084,5 +4088,13 @@ input:checked + .slider:before {
   .splash-quote-text {
     font-size: 1.08rem;
     max-width: 310px;
+  }
+  .splash-corner-tribute {
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    right: max(16px, env(safe-area-inset-right, 16px));
+    font-size: 0.68rem;
+  }
+  .splash-tribute-arabic {
+    font-size: 0.88rem;
   }
 }

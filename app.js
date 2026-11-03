@@ -4107,7 +4107,7 @@ window.askCoachPrompt = function(promptText) {
   const stream = document.getElementById('coach-chat-stream');
   if (!stream || !window.AuthSystem) return;
 
-  const coach = window.AuthSystem.getCoach ? window.AuthSystem.getCoach() : { sigilText: 'N', accentColor: '#E0506A' };
+  const coach = window.AuthSystem && window.AuthSystem.getCoach ? window.AuthSystem.getCoach() : { sigilText: 'Nurv', accentColor: '#E0506A' };
 
   // Append user message
   const userMsgDiv = document.createElement('div');
@@ -4124,7 +4124,7 @@ window.askCoachPrompt = function(promptText) {
   const coachMsgDiv = document.createElement('div');
   coachMsgDiv.className = 'coach-msg assistant';
   coachMsgDiv.innerHTML = `
-    <div class="coach-msg-avatar" style="background:${coach.accentColor || '#E0506A'}">${coach.sigilText || 'N'}</div>
+    <div class="coach-msg-avatar" style="background:${coach.accentColor || '#E0506A'}">${coach.sigilText || 'Nurv'}</div>
     <div class="coach-msg-bubble">${escapeHtml(reply)}</div>
   `;
   stream.appendChild(coachMsgDiv);

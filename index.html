@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=52">
+  <link rel="stylesheet" href="style.css?v=53">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + CUSTOM IMAGE_7.PNG + FULL INTRO SOUND) -->
@@ -95,13 +95,6 @@
         </div>
       </div>
       <div class="header-right">
-        <!-- AI Coach Status Pill (Coach N for Male / Coach M for Female) -->
-        <button type="button" id="header-ai-coach-pill" class="header-coach-pill" onclick="openAICoachModal()" title="Talk to your AI Coach">
-          <span class="coach-pulse-dot"></span>
-          <span class="coach-pill-icon" id="header-coach-icon">⚡</span>
-          <span class="coach-pill-label" id="header-coach-label">Coach N</span>
-        </button>
-
         <!-- Admin Quick Access (Visible only if Admin) -->
         <button type="button" class="header-admin-pill admin-only-feature" onclick="window.AuthSystem.openAdminDashboard()" title="Open Admin Control Center" style="display:none;">
           <span>👑</span>
@@ -1022,12 +1015,12 @@
               <span class="athlete-handle" id="settings-user-handle">@athlete</span>
               <div class="athlete-tags-row">
                 <span class="athlete-gender-pill" id="settings-user-gender">♂ Male Athlete</span>
-                <span class="athlete-coach-pill" id="settings-user-coach">⚡ Assigned AI: Coach N</span>
+                <span class="athlete-coach-pill" id="settings-user-coach">⚡ Assigned AI: Coach Nurv</span>
               </div>
             </div>
           </div>
           <div class="athlete-profile-actions">
-            <button type="button" class="secondary-btn small-btn" onclick="openAICoachModal()">🤖 Talk to Coach</button>
+            <button type="button" class="secondary-btn small-btn" onclick="openAICoachModal()">💬 Talk to Coach</button>
             <button type="button" class="secondary-btn small-btn" onclick="openAuthModal()">Switch / Sign In</button>
             <button type="button" class="danger-ghost-btn small-btn" onclick="window.AuthSystem.logout()">Log Out</button>
           </div>
@@ -1253,6 +1246,14 @@
           <path d="M12 8v7M8 10l4-1 4 1M9 21l3-6 3 6"></path>
         </svg>
         <span class="tab-label">Ranks &amp; PRs</span>
+      </button>
+
+      <!-- Floating AI Coach Chat Bubble (Positioned right above the Settings tab) -->
+      <button type="button" id="tab-coach-chat-bubble" class="tab-coach-chat-bubble" onclick="openAICoachModal()" title="Talk to your AI Coach" aria-label="Talk to your AI Coach">
+        <span class="coach-bubble-pulse-dot"></span>
+        <span class="coach-bubble-icon" id="coach-bubble-icon">⚡</span>
+        <span class="coach-bubble-name" id="coach-bubble-name">Nurv</span>
+        <span class="coach-bubble-tail"></span>
       </button>
 
       <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">
@@ -1695,10 +1696,10 @@
             👑 Admin (Architect)
           </button>
           <button type="button" class="demo-chip-btn male" onclick="window.AuthSystem.switchDemoAccount('male')">
-            ♂ Male (Alex &bull; Coach N)
+            ♂ Male (Alex &bull; Coach Nurv)
           </button>
           <button type="button" class="demo-chip-btn female" onclick="window.AuthSystem.switchDemoAccount('female')">
-            ♀ Female (Maya &bull; Coach M)
+            ♀ Female (Maya &bull; Coach Maryam)
           </button>
         </div>
       </div>
@@ -1752,7 +1753,7 @@
               <span class="gc-icon male">♂</span>
               <div class="gc-info">
                 <strong>Male Athlete</strong>
-                <span>Assigned AI Coach 'N' &bull; Male Division Leaderboard &amp; HD Male Anatomy</span>
+                <span>Assigned AI Coach 'Nurv' &bull; Male Division Leaderboard &amp; HD Male Anatomy</span>
               </div>
               <span class="gc-radio-dot"></span>
             </div>
@@ -1760,7 +1761,7 @@
               <span class="gc-icon female">♀</span>
               <div class="gc-info">
                 <strong>Female Athlete</strong>
-                <span>Assigned AI Coach 'M' &bull; Female Division Leaderboard &amp; HD Lady Anatomy</span>
+                <span>Assigned AI Coach 'Maryam' &bull; Female Division Leaderboard &amp; HD Lady Anatomy</span>
               </div>
               <span class="gc-radio-dot"></span>
             </div>
@@ -1781,14 +1782,14 @@
     </div>
   </div>
 
-  <!-- ==================== DUAL AI ASSISTANT MODAL (COACH N & COACH M) ==================== -->
+  <!-- ==================== DUAL AI ASSISTANT MODAL (COACH NURV & COACH MARYAM) ==================== -->
   <div id="modal-ai-coach" class="modal-overlay hidden">
     <div class="modal-card coach-modal-card">
       <div class="modal-header coach-modal-header" id="coach-modal-header">
         <div class="coach-header-left">
           <div class="coach-avatar-circle" id="coach-avatar-circle">⚡</div>
           <div>
-            <h3 id="coach-modal-title">Coach N</h3>
+            <h3 id="coach-modal-title">Coach Nurv</h3>
             <span class="coach-status-tag" id="coach-modal-subtitle">Titan Bio-Strategist &bull; Active</span>
           </div>
         </div>
@@ -1816,9 +1817,9 @@
       <!-- Live Chat Transcript Stream -->
       <div class="coach-chat-stream" id="coach-chat-stream">
         <div class="coach-msg assistant">
-          <div class="coach-msg-avatar" id="coach-msg-avatar">N</div>
+          <div class="coach-msg-avatar" id="coach-msg-avatar">Nurv</div>
           <div class="coach-msg-bubble" id="coach-welcome-bubble">
-            Greetings, athlete. Coach N locked in. Mechanical tension and progressive overload are the law. What's our target today?
+            Greetings, athlete. Coach Nurv locked in. Mechanical tension and progressive overload are the law. What's our target today?
           </div>
         </div>
       </div>
@@ -1851,10 +1852,10 @@
     </div>
   </div>
 
-  <script src="auth.js?v=52"></script>
-  <script src="app.js?v=52"></script>
-  <script src="camera.js?v=52"></script>
-  <script src="ranks.js?v=52"></script>
+  <script src="auth.js?v=53"></script>
+  <script src="app.js?v=53"></script>
+  <script src="camera.js?v=53"></script>
+  <script src="ranks.js?v=53"></script>
 </body>
 </html>
 

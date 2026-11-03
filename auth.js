@@ -20,7 +20,7 @@
       password: 'admin',
       gender: 'male',
       role: 'Admin',
-      aiCoach: 'N',
+      aiCoach: 'Nurv',
       avatar: '👑',
       joinedDate: '2026-01-01',
       totalWorkouts: 42,
@@ -40,7 +40,7 @@
       password: 'password',
       gender: 'male',
       role: 'Standard',
-      aiCoach: 'N',
+      aiCoach: 'Nurv',
       avatar: '♂',
       joinedDate: '2026-02-14',
       totalWorkouts: 36,
@@ -60,7 +60,7 @@
       password: 'password',
       gender: 'male',
       role: 'Standard',
-      aiCoach: 'N',
+      aiCoach: 'Nurv',
       avatar: '♂',
       joinedDate: '2026-03-01',
       totalWorkouts: 29,
@@ -80,7 +80,7 @@
       password: 'password',
       gender: 'male',
       role: 'Standard',
-      aiCoach: 'N',
+      aiCoach: 'Nurv',
       avatar: '♂',
       joinedDate: '2026-04-12',
       totalWorkouts: 22,
@@ -100,7 +100,7 @@
       password: 'password',
       gender: 'male',
       role: 'Standard',
-      aiCoach: 'N',
+      aiCoach: 'Nurv',
       avatar: '♂',
       joinedDate: '2026-05-20',
       totalWorkouts: 17,
@@ -112,7 +112,7 @@
         'Deadlift': { weight: 170, reps: 5, date: '2026-10-30' }
       }
     },
-    // Female Bracket (Division M)
+    // Female Bracket (Division Maryam)
     {
       id: 'usr_maya',
       username: 'maya_valkyrie',
@@ -121,7 +121,7 @@
       password: 'password',
       gender: 'female',
       role: 'Standard',
-      aiCoach: 'M',
+      aiCoach: 'Maryam',
       avatar: '♀',
       joinedDate: '2026-01-20',
       totalWorkouts: 38,
@@ -141,7 +141,7 @@
       password: 'password',
       gender: 'female',
       role: 'Standard',
-      aiCoach: 'M',
+      aiCoach: 'Maryam',
       avatar: '♀',
       joinedDate: '2026-02-18',
       totalWorkouts: 31,
@@ -161,7 +161,7 @@
       password: 'password',
       gender: 'female',
       role: 'Standard',
-      aiCoach: 'M',
+      aiCoach: 'Maryam',
       avatar: '♀',
       joinedDate: '2026-03-10',
       totalWorkouts: 25,
@@ -181,7 +181,7 @@
       password: 'password',
       gender: 'female',
       role: 'Standard',
-      aiCoach: 'M',
+      aiCoach: 'Maryam',
       avatar: '♀',
       joinedDate: '2026-04-05',
       totalWorkouts: 19,
@@ -201,7 +201,7 @@
       password: 'password',
       gender: 'female',
       role: 'Standard',
-      aiCoach: 'M',
+      aiCoach: 'Maryam',
       avatar: '♀',
       joinedDate: '2026-05-15',
       totalWorkouts: 14,
@@ -218,36 +218,46 @@
   // AI Assistant Profiles
   const AI_COACHES = {
     N: {
-      id: 'N',
+      id: 'Nurv',
+      legacyId: 'N',
       gender: 'male',
-      name: 'Coach N',
+      name: 'Coach Nurv',
+      shortName: 'Nurv',
       title: 'Titan Bio-Strategist & Mechanical Overload Engine',
       tagline: 'Absolute tension. Biomechanical perfection. Relentless progression.',
       accentColor: '#E0506A',
       badgeBg: 'linear-gradient(135deg, #2E0B14, #4A0E1C)',
       avatarIcon: '⚡',
-      sigilText: 'N',
+      sigilText: 'Nurv',
       voicePitch: 0.82,
       voiceRate: 1.0,
-      greeting: "Greetings, athlete. Coach N locked in. Mechanical tension and progressive overload are the law. What's our target today?",
+      greeting: "Greetings, athlete. Coach Nurv locked in. Mechanical tension and progressive overload are the law. What's our target today?",
       style: 'intense, stoic, mechanical, hyper-focused on form and overload'
     },
     M: {
-      id: 'M',
+      id: 'Maryam',
+      legacyId: 'M',
       gender: 'female',
-      name: 'Coach M',
+      name: 'Coach Maryam',
+      shortName: 'Maryam',
       title: 'Valkyrie Precision Architect & High-Density Master',
       tagline: 'Kinetic elegance. Glute-posterior torque. Unstoppable cadence.',
       accentColor: '#F56E8A',
       badgeBg: 'linear-gradient(135deg, #3A0D22, #5C1336)',
       avatarIcon: '👑',
-      sigilText: 'M',
+      sigilText: 'Maryam',
       voicePitch: 1.16,
       voiceRate: 1.04,
-      greeting: "Welcome, warrior. Coach M active. We sculpt symmetry through explosive torque and uncompromising discipline. Let's move.",
+      greeting: "Welcome, warrior. Coach Maryam active. We sculpt symmetry through explosive torque and uncompromising discipline. Let's move.",
       style: 'sharp, disciplined, high-cadence, anatomical mastery'
     }
   };
+
+  // Provide direct key aliases
+  AI_COACHES.Nurv = AI_COACHES.N;
+  AI_COACHES.nurv = AI_COACHES.N;
+  AI_COACHES.Maryam = AI_COACHES.M;
+  AI_COACHES.maryam = AI_COACHES.M;
 
   // State Management
   function loadUsersDB() {
@@ -310,7 +320,11 @@
 
     getCoach: function () {
       if (!this.currentUser) return AI_COACHES.N;
-      return this.currentUser.gender === 'female' ? AI_COACHES.M : AI_COACHES.N;
+      const c = String(this.currentUser.aiCoach || '').toLowerCase();
+      if (c === 'm' || c.includes('maryam') || this.currentUser.gender === 'female') {
+        return AI_COACHES.M;
+      }
+      return AI_COACHES.N;
     },
 
     applyUserContext: function () {
@@ -346,6 +360,25 @@
       if (!u) return;
 
       const coach = this.getCoach();
+
+      // Update floating chat bubble right above Settings tab
+      const bubble = document.getElementById('tab-coach-chat-bubble');
+      const bubbleName = document.getElementById('coach-bubble-name');
+      const bubbleIcon = document.getElementById('coach-bubble-icon');
+      const bubbleTail = bubble ? bubble.querySelector('.coach-bubble-tail') : null;
+      if (bubble) {
+        bubble.style.borderColor = coach.accentColor;
+        bubble.style.background = coach.badgeBg;
+        bubble.style.boxShadow = `0 4px 18px ${coach.accentColor}66, 0 2px 8px rgba(0, 0, 0, 0.8)`;
+        bubble.setAttribute('data-coach', coach.shortName || coach.sigilText);
+      }
+      if (bubbleTail) {
+        bubbleTail.style.borderTopColor = coach.accentColor;
+      }
+      if (bubbleName) bubbleName.textContent = coach.shortName || coach.sigilText;
+      if (bubbleIcon) bubbleIcon.textContent = coach.avatarIcon;
+
+      // Safe fallback for legacy header pill if present
       const coachPill = document.getElementById('header-ai-coach-pill');
       const coachLabel = document.getElementById('header-coach-label');
       const coachIcon = document.getElementById('header-coach-icon');
@@ -444,7 +477,7 @@
       }
 
       const assignedRole = (role === 'Admin' || data.adminSecret === 'MOON2026') ? 'Admin' : 'Standard';
-      const assignedCoach = gender === 'female' ? 'M' : 'N';
+      const assignedCoach = gender === 'female' ? 'Maryam' : 'Nurv';
 
       const newUser = {
         id: 'usr_' + Date.now(),
@@ -468,8 +501,8 @@
       this.loginUserObject(newUser);
 
       const welcomeMsg = gender === 'female' 
-        ? "Welcome, Athlete! Coach M assigned. Female Division Leaderboard active." 
-        : "Welcome, Athlete! Coach N assigned. Male Division Leaderboard active.";
+        ? "Welcome, Athlete! Coach Maryam assigned. Female Division Leaderboard active." 
+        : "Welcome, Athlete! Coach Nurv assigned. Male Division Leaderboard active.";
       
       this.speak(welcomeMsg);
       return newUser;
@@ -533,7 +566,7 @@
       }
     },
 
-    // Voice Synthesis Engine for Coach N (Male) and Coach M (Female)
+    // Voice Synthesis Engine for Coach Nurv (Male) and Coach Maryam (Female)
     voiceEnabled: true,
     initVoiceSynthesis: function () {
       if ('speechSynthesis' in window) {
@@ -571,13 +604,13 @@
 
       let reply = '';
       if (q.includes('form') || q.includes('bench') || q.includes('squat') || q.includes('thrust') || q.includes('deadlift')) {
-        if (coach.id === 'N') {
+        if (coach.gender === 'male') {
           reply = `Lock in your scapulae retract-and-depress before unrack. Create mechanical tension by breaking the bar in half. 15-degree torso angle prevents joint impingement. Squeeze hard at the peak.`;
         } else {
           reply = `Anchor your ribcage to pelvis. In the hip thrust and squat, drive purely through heel-midfoot, tuck the chin and lock out with strong posterior pelvic tilt. Hold the contraction for 2 seconds.`;
         }
       } else if (q.includes('hype') || q.includes('motivation') || q.includes('ready') || q.includes('push')) {
-        if (coach.id === 'N') {
+        if (coach.gender === 'male') {
           reply = `The iron does not negotiate, ${user.displayName || 'warrior'}. You didn't come here to stay average. Load the plates, take your breath into the belly, and dominate every rep!`;
         } else {
           reply = `Every single rep builds your future physique, ${user.displayName || 'athlete'}. Channel the intensity. Focus your nervous system right now and let form translate into pure power!`;
@@ -587,10 +620,10 @@
       } else if (q.includes('diet') || q.includes('food') || q.includes('protein') || q.includes('recovery')) {
         reply = `Aim for 2.0g to 2.2g of protein per kg of bodyweight, hydrate with 700ml electrolyte water intra-workout, and hit 8 hours of deep sleep to let CNS receptors regenerate.`;
       } else {
-        if (coach.id === 'N') {
-          reply = `Coach N analysis: Focus on controlled eccentrics (3 seconds down) and explosive concentrics. Mechanical tension builds Titans. Keep the intensity pinned!`;
+        if (coach.gender === 'male') {
+          reply = `Coach Nurv analysis: Focus on controlled eccentrics (3 seconds down) and explosive concentrics. Mechanical tension builds Titans. Keep the intensity pinned!`;
         } else {
-          reply = `Coach M assessment: Keep rest intervals strictly under 90 seconds today to maintain metabolic density. Cadence and neuromuscular control create champions. Let's execute!`;
+          reply = `Coach Maryam assessment: Keep rest intervals strictly under 90 seconds today to maintain metabolic density. Cadence and neuromuscular control create champions. Let's execute!`;
         }
       }
 
@@ -629,7 +662,7 @@
 
       const userGender = (this.currentUser && this.currentUser.gender) || 'male';
       const isFemale = userGender === 'female';
-      const bracketLabel = isFemale ? 'Female Division (Division M)' : 'Male Division (Division N)';
+      const bracketLabel = isFemale ? 'Female Division (Division Maryam)' : 'Male Division (Division Nurv)';
       const coach = this.getCoach();
       const athletes = this.getLeaderboard(userGender);
 
@@ -640,7 +673,7 @@
               🔒 AUTO-FILTERED BRACKET
             </span>
             <h2 class="lb-title">${bracketLabel}</h2>
-            <p class="lb-subtitle">Official standings for ${isFemale ? 'Female athletes mentored by Coach M' : 'Male athletes mentored by Coach N'}. Locked to your division standard.</p>
+            <p class="lb-subtitle">Official standings for ${isFemale ? 'Female athletes mentored by Coach Maryam' : 'Male athletes mentored by Coach Nurv'}. Locked to your division standard.</p>
           </div>
           <div class="lb-coach-sigil" style="background:${coach.badgeBg}; border: 1.5px solid ${coach.accentColor};">
             <span>${coach.sigilText}</span>
@@ -748,7 +781,7 @@
                   <span class="gender-symbol male">♂</span>
                   <strong>MALE DIVISION LEADERBOARD</strong>
                 </div>
-                <span class="col-head-badge">COACH N &bull; ${maleAthletes.length} ATHLETES</span>
+                <span class="col-head-badge">COACH NURV &bull; ${maleAthletes.length} ATHLETES</span>
               </div>
               <div class="admin-mini-table">
                 ${maleAthletes.map((a, i) => `
@@ -772,7 +805,7 @@
                   <span class="gender-symbol female">♀</span>
                   <strong>FEMALE DIVISION LEADERBOARD</strong>
                 </div>
-                <span class="col-head-badge">COACH M &bull; ${femaleAthletes.length} ATHLETES</span>
+                <span class="col-head-badge">COACH MARYAM &bull; ${femaleAthletes.length} ATHLETES</span>
               </div>
               <div class="admin-mini-table">
                 ${femaleAthletes.map((a, i) => `
@@ -819,7 +852,7 @@
                   </div>
                 </div>
                 <span class="col-u-gender"><span class="gender-pill ${u.gender}">${u.gender === 'female' ? '♀ Female' : '♂ Male'}</span></span>
-                <span class="col-u-coach"><strong style="color:${u.gender === 'female' ? '#F56E8A' : '#E0506A'}">Coach ${u.aiCoach || (u.gender === 'female' ? 'M' : 'N')}</strong></span>
+                <span class="col-u-coach"><strong style="color:${u.gender === 'female' ? '#F56E8A' : '#E0506A'}">Coach ${u.gender === 'female' ? 'Maryam' : 'Nurv'}</strong></span>
                 <span class="col-u-role">
                   <button type="button" class="role-toggle-btn ${u.role === 'Admin' ? 'admin' : 'standard'}" onclick="window.AuthSystem.toggleUserRole('${u.id}')" title="Click to toggle role">
                     ${u.role === 'Admin' ? '👑 Admin' : 'Standard'}
@@ -935,7 +968,7 @@
           role: role
         });
         this.renderAdminView();
-        alert(`Athlete @${created.username} created successfully in ${gender === 'female' ? 'Female Division M' : 'Male Division N'}!`);
+        alert(`Athlete @${created.username} created successfully in ${gender === 'female' ? 'Female Division Maryam' : 'Male Division Nurv'}!`);
       } catch (err) {
         alert(err.message);
       }

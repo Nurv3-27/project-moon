@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=54">
+  <link rel="stylesheet" href="style.css?v=56">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + CUSTOM IMAGE_7.PNG + FULL INTRO SOUND) -->
@@ -153,6 +153,165 @@
             <div class="stat-pill">
               <span class="stat-num" id="stat-total-volume">0</span>
               <span class="stat-label" id="stat-volume-unit">TOTAL KG &#9889;</span>
+            </div>
+          </div>
+
+          <!-- COSMIC PROGRESSION MAP: EARTH TO MAROON MOON -->
+          <div class="streak-roadmap-card" id="streak-progression-map">
+            <div class="cosmic-map-header">
+              <div class="cosmic-map-header-left">
+                <span class="cosmic-title-icon">🚀</span>
+                <div>
+                  <h3>Cosmic Progression Map</h3>
+                  <span class="cosmic-map-sub">Earth &rarr; Asteroids &rarr; Maroon Moon Citadel</span>
+                </div>
+              </div>
+              <div class="cosmic-streak-counter-pill">
+                <span class="streak-flame">🔥</span>
+                <span><span id="cosmic-streak-num">0</span> DAYS</span>
+              </div>
+            </div>
+
+            <!-- Mission Status Bar -->
+            <div class="cosmic-status-bar">
+              <span id="cosmic-distance-text"><strong>10 Days Remaining</strong> to Moon Landing</span>
+              <div class="cosmic-quick-controls">
+                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(0)" title="Reset to Earth">Earth</button>
+                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(3)" title="Jump to Day 3">Day 3</button>
+                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(7)" title="Jump to Day 7">Day 7</button>
+                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(10)" title="Land on Moon">Moon</button>
+              </div>
+            </div>
+
+            <!-- Winding Cosmic Roadmap Stage -->
+            <div class="cosmic-roadmap-stage">
+              <div class="cosmic-nodes-track">
+                <!-- Node 0: EARTH (Start Station • Day 0) -->
+                <div class="cosmic-node-row pos-center">
+                  <div class="celestial-node active-station" id="celestial-node-0" onclick="inspectAsteroidNode(0)">
+                    <div class="earth-planet-body">
+                      <span class="earth-continent-swirl">🌍</span>
+                    </div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">🌍 EARTH</span>
+                      <span class="node-sub">Launchpad &bull; Day 0</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 1: Ruby Igniter (Day 1) -->
+                <div class="cosmic-node-row pos-left">
+                  <div class="celestial-node" id="celestial-node-1" onclick="inspectAsteroidNode(1)">
+                    <div class="asteroid-rock-body ast-color-ruby">1</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Ruby Igniter</span>
+                      <span class="node-sub">Day 1 Streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 2: Amber Thruster (Day 2) -->
+                <div class="cosmic-node-row pos-center">
+                  <div class="celestial-node" id="celestial-node-2" onclick="inspectAsteroidNode(2)">
+                    <div class="asteroid-rock-body ast-color-amber">2</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Amber Thruster</span>
+                      <span class="node-sub">Day 2 Streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 3: Golden Sling (Day 3) -->
+                <div class="cosmic-node-row pos-right">
+                  <div class="celestial-node" id="celestial-node-3" onclick="inspectAsteroidNode(3)">
+                    <div class="asteroid-rock-body ast-color-gold">3</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Golden Sling</span>
+                      <span class="node-sub">Day 3 Streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 4: Emerald Belt (Day 4) -->
+                <div class="cosmic-node-row pos-center">
+                  <div class="celestial-node" id="celestial-node-4" onclick="inspectAsteroidNode(4)">
+                    <div class="asteroid-rock-body ast-color-emerald">4</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Emerald Belt</span>
+                      <span class="node-sub">Day 4 Streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 5: Cyan Comet (Day 5) -->
+                <div class="cosmic-node-row pos-left">
+                  <div class="celestial-node" id="celestial-node-5" onclick="inspectAsteroidNode(5)">
+                    <div class="asteroid-rock-body ast-color-cyan">5</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Cyan Comet</span>
+                      <span class="node-sub">Day 5 Streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 6: Cobalt Void (Day 6) -->
+                <div class="cosmic-node-row pos-center">
+                  <div class="celestial-node" id="celestial-node-6" onclick="inspectAsteroidNode(6)">
+                    <div class="asteroid-rock-body ast-color-sapphire">6</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Cobalt Void</span>
+                      <span class="node-sub">Day 6 Streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 7: Nebula Crown (Day 7 Milestone) -->
+                <div class="cosmic-node-row pos-right">
+                  <div class="celestial-node" id="celestial-node-7" onclick="inspectAsteroidNode(7)">
+                    <div class="asteroid-rock-body ast-color-amethyst">7</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Nebula Crown</span>
+                      <span class="node-sub">1-Week Titan</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 8: Rose Valkyrie (Day 8) -->
+                <div class="cosmic-node-row pos-center">
+                  <div class="celestial-node" id="celestial-node-8" onclick="inspectAsteroidNode(8)">
+                    <div class="asteroid-rock-body ast-color-rose">8</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Rose Valkyrie</span>
+                      <span class="node-sub">Day 8 Streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 9: Chrome Sentinel (Day 9) -->
+                <div class="cosmic-node-row pos-left">
+                  <div class="celestial-node" id="celestial-node-9" onclick="inspectAsteroidNode(9)">
+                    <div class="asteroid-rock-body ast-color-chrome">9</div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title">Chrome Sentinel</span>
+                      <span class="node-sub">Day 9 Streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Node 10: MAROON MOON (Destination • Day 10+ Lunar Conqueror) -->
+                <div class="cosmic-node-row pos-center">
+                  <div class="celestial-node" id="celestial-node-10" onclick="inspectAsteroidNode(10)">
+                    <div class="maroon-moon-body">
+                      <span class="moon-crater-texture">🌑</span>
+                      <span class="moon-flag-badge">🚩 MOON CITADEL</span>
+                    </div>
+                    <div class="celestial-node-meta">
+                      <span class="node-title" style="color:#FFA8BA;">MAROON MOON</span>
+                      <span class="node-sub">Target Destination</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -857,88 +1016,88 @@
           <span class="antiscroll-hero-pill" id="antiscroll-hero-pill">ACTIVATE</span>
         </button>
 
-        <!-- Focus Tab Controls: Instant Block & Scheduled Block -->
-        <div class="focus-controls-grid">
-          <!-- Card 1: Instant Block -->
-          <div class="focus-control-card instant-block-card" id="card-instant-block">
-            <div class="focus-card-header">
-              <div class="focus-card-title-row">
-                <span class="focus-card-icon">⚡</span>
-                <div>
-                  <h3>Instant Block</h3>
-                  <span class="focus-card-subtitle">Lock designated apps immediately</span>
+        <!-- Focus Tab Controls: Opal-Inspired Minimalist Pill Layout -->
+        <div class="opal-focus-stage">
+          <!-- 1. Opal Instant Block Pill -->
+          <div class="opal-pill-wrap">
+            <button type="button" class="opal-pill-btn" id="opal-btn-instant-block" onclick="toggleInstantBlock()">
+              <div class="opal-pill-left">
+                <div class="opal-pill-icon">⚡</div>
+                <div class="opal-pill-text">
+                  <span class="opal-pill-title" id="opal-instant-title">Instant Block</span>
+                  <span class="opal-pill-sub" id="opal-instant-sub">TAP TO LOCK DISTRACTIONS</span>
                 </div>
               </div>
-              <span class="focus-status-pill idle" id="instant-block-pill">IDLE</span>
-            </div>
-            
-            <p class="focus-card-desc">Immediately enforce lockdown for YouTube Shorts, games, and distracting feeds for your chosen duration.</p>
-            
-            <div class="instant-duration-selector" id="instant-duration-selector">
-              <button type="button" class="duration-chip active" data-mins="15" onclick="selectInstantDuration(15)">15m</button>
-              <button type="button" class="duration-chip" data-mins="30" onclick="selectInstantDuration(30)">30m</button>
-              <button type="button" class="duration-chip" data-mins="45" onclick="selectInstantDuration(45)">45m</button>
-              <button type="button" class="duration-chip" data-mins="60" onclick="selectInstantDuration(60)">1h</button>
-              <button type="button" class="duration-chip" data-mins="120" onclick="selectInstantDuration(120)">2h</button>
-              <button type="button" class="duration-chip" data-mins="0" onclick="selectInstantDuration(0)">Indefinite</button>
-            </div>
+              <div class="opal-pill-right">
+                <span class="opal-badge-pill" id="opal-instant-badge">START</span>
+              </div>
+            </button>
 
-            <div class="instant-timer-display hidden" id="instant-timer-display">
-              <span class="instant-timer-countdown mono" id="instant-countdown-digits">30:00</span>
-              <span class="instant-timer-label">Lockdown Time Remaining</span>
-            </div>
-
-            <div class="focus-card-actions">
-              <button type="button" id="btn-toggle-instant-block" class="primary-glow-btn full-width" onclick="toggleInstantBlock()">
-                <span>⚡ Start Instant Block</span>
-              </button>
+            <!-- Opal Micro Duration Chips -->
+            <div class="opal-duration-chips" id="instant-duration-selector">
+              <button type="button" class="opal-micro-chip active" data-mins="15" onclick="selectInstantDuration(15)">15m</button>
+              <button type="button" class="opal-micro-chip" data-mins="30" onclick="selectInstantDuration(30)">30m</button>
+              <button type="button" class="opal-micro-chip" data-mins="45" onclick="selectInstantDuration(45)">45m</button>
+              <button type="button" class="opal-micro-chip" data-mins="60" onclick="selectInstantDuration(60)">1h</button>
+              <button type="button" class="opal-micro-chip" data-mins="120" onclick="selectInstantDuration(120)">2h</button>
+              <button type="button" class="opal-micro-chip" data-mins="0" onclick="selectInstantDuration(0)">Indefinite</button>
             </div>
           </div>
 
-          <!-- Card 2: Scheduled Block -->
-          <div class="focus-control-card scheduled-block-card" id="card-scheduled-block">
-            <div class="focus-card-header">
-              <div class="focus-card-title-row">
-                <span class="focus-card-icon">⏰</span>
-                <div>
-                  <h3>Scheduled Block</h3>
-                  <span class="focus-card-subtitle">Automated daily focus windows</span>
+          <!-- 2. Opal Scheduled Block Pill -->
+          <div class="opal-pill-wrap">
+            <div class="opal-pill-btn" id="opal-btn-scheduled-block" onclick="toggleOpalScheduleDrawer()">
+              <div class="opal-pill-left">
+                <div class="opal-pill-icon">⏰</div>
+                <div class="opal-pill-text">
+                  <span class="opal-pill-title">Scheduled Block</span>
+                  <span class="opal-pill-sub" id="opal-sched-sub">MON-FRI • 09:00 - 17:00</span>
                 </div>
               </div>
-              <label class="ios-switch">
-                <input type="checkbox" id="setting-scheduled-block" checked onchange="toggleScheduledBlockEnabled(this.checked)">
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <p class="focus-card-desc">Auto-restricts distracting apps during your recurring gym training, work, or bedtime hours.</p>
-
-            <div class="schedule-times-row">
-              <div class="schedule-time-box">
-                <label>Start Time</label>
-                <input type="time" id="schedule-start-time" class="ios-time-input" value="09:00" onchange="updateScheduledBlockTimes()">
-              </div>
-              <span class="schedule-arrow">to</span>
-              <div class="schedule-time-box">
-                <label>End Time</label>
-                <input type="time" id="schedule-end-time" class="ios-time-input" value="17:00" onchange="updateScheduledBlockTimes()">
+              <div class="opal-pill-right" onclick="event.stopPropagation()">
+                <span class="opal-badge-pill active" id="opal-sched-badge">ACTIVE</span>
+                <label class="ios-switch" title="Toggle Scheduled Block">
+                  <input type="checkbox" id="setting-scheduled-block" checked onchange="toggleScheduledBlockEnabled(this.checked)">
+                  <span class="slider"></span>
+                </label>
               </div>
             </div>
 
-            <div class="schedule-days-row" id="schedule-days-selector">
-              <button type="button" class="day-chip active" data-day="Mon" onclick="toggleScheduleDay('Mon')">M</button>
-              <button type="button" class="day-chip active" data-day="Tue" onclick="toggleScheduleDay('Tue')">T</button>
-              <button type="button" class="day-chip active" data-day="Wed" onclick="toggleScheduleDay('Wed')">W</button>
-              <button type="button" class="day-chip active" data-day="Thu" onclick="toggleScheduleDay('Thu')">T</button>
-              <button type="button" class="day-chip active" data-day="Fri" onclick="toggleScheduleDay('Fri')">F</button>
-              <button type="button" class="day-chip" data-day="Sat" onclick="toggleScheduleDay('Sat')">S</button>
-              <button type="button" class="day-chip" data-day="Sun" onclick="toggleScheduleDay('Sun')">S</button>
-            </div>
+            <!-- Collapsible Opal Schedule Configuration Drawer -->
+            <div class="opal-schedule-drawer hidden" id="opal-schedule-drawer">
+              <div class="opal-drawer-row">
+                <div class="opal-time-input-wrap">
+                  <label class="opal-time-label">START TIME</label>
+                  <input type="time" id="schedule-start-time" class="opal-time-input" value="09:00" onchange="updateScheduledBlockTimes()">
+                </div>
+                <span class="opal-time-sep">&rarr;</span>
+                <div class="opal-time-input-wrap">
+                  <label class="opal-time-label">END TIME</label>
+                  <input type="time" id="schedule-end-time" class="opal-time-input" value="17:00" onchange="updateScheduledBlockTimes()">
+                </div>
+              </div>
 
-            <div class="schedule-status-banner" id="schedule-status-banner">
-              <span class="schedule-indicator-dot" id="schedule-indicator-dot"></span>
-              <span id="schedule-status-text">Schedule Active &bull; Mon-Fri 09:00 - 17:00</span>
+              <div class="opal-days-row" id="schedule-days-selector">
+                <button type="button" class="opal-day-chip active" data-day="Mon" onclick="toggleScheduleDay('Mon')">M</button>
+                <button type="button" class="opal-day-chip active" data-day="Tue" onclick="toggleScheduleDay('Tue')">T</button>
+                <button type="button" class="opal-day-chip active" data-day="Wed" onclick="toggleScheduleDay('Wed')">W</button>
+                <button type="button" class="opal-day-chip active" data-day="Thu" onclick="toggleScheduleDay('Thu')">T</button>
+                <button type="button" class="opal-day-chip active" data-day="Fri" onclick="toggleScheduleDay('Fri')">F</button>
+                <button type="button" class="opal-day-chip" data-day="Sat" onclick="toggleScheduleDay('Sat')">S</button>
+                <button type="button" class="opal-day-chip" data-day="Sun" onclick="toggleScheduleDay('Sun')">S</button>
+              </div>
             </div>
+          </div>
+
+          <!-- Invisible fallback elements to preserve legacy DOM references if any -->
+          <div style="display:none;" aria-hidden="true">
+            <div id="card-instant-block"></div>
+            <div id="card-scheduled-block"></div>
+            <button id="btn-toggle-instant-block"></button>
+            <span id="instant-block-pill"></span>
+            <div id="instant-timer-display"><span id="instant-countdown-digits"></span></div>
+            <span id="schedule-indicator-dot"></span>
+            <span id="schedule-status-text"></span>
           </div>
         </div>
 
@@ -2303,10 +2462,10 @@
     </div>
   </div>
 
-  <script src="auth.js?v=55"></script>
-  <script src="app.js?v=55"></script>
-  <script src="camera.js?v=55"></script>
-  <script src="ranks.js?v=55"></script>
+  <script src="auth.js?v=56"></script>
+  <script src="app.js?v=56"></script>
+  <script src="camera.js?v=56"></script>
+  <script src="ranks.js?v=56"></script>
 </body>
 </html>
 

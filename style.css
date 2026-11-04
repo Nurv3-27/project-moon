@@ -6698,3 +6698,627 @@ header + #antiscroll-live-banner,
   background: rgba(224, 80, 106, 0.18);
   border-color: var(--accent-lime);
 }
+
+/* ==========================================================
+   OPAL-INSPIRED MINIMALIST FOCUS TAB BUTTON LAYOUT
+   ========================================================== */
+.opal-focus-stage {
+  margin: 12px 0 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.opal-pill-wrap {
+  position: relative;
+  width: 100%;
+}
+.opal-pill-btn {
+  width: 100%;
+  min-height: 66px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(28, 14, 20, 0.95), rgba(12, 6, 9, 0.98));
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 22px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s, background 0.2s, border-color 0.2s;
+  box-sizing: border-box;
+}
+.opal-pill-btn:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(38, 18, 26, 0.95), rgba(16, 8, 12, 0.98));
+}
+.opal-pill-btn:active {
+  transform: scale(0.97);
+}
+.opal-pill-btn.active-lockdown {
+  background: linear-gradient(135deg, rgba(62, 10, 20, 0.98), rgba(28, 4, 10, 0.98));
+  border-color: #FF2A55;
+  box-shadow: 0 0 30px rgba(255, 42, 85, 0.45), inset 0 0 16px rgba(255, 42, 85, 0.2);
+  animation: opalPulse 2s infinite ease-in-out;
+}
+@keyframes opalPulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(255, 42, 85, 0.45), inset 0 0 14px rgba(255, 42, 85, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 42, 85, 0.75), inset 0 0 20px rgba(255, 42, 85, 0.35);
+  }
+}
+.opal-pill-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.opal-pill-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.opal-pill-btn.active-lockdown .opal-pill-icon {
+  background: rgba(255, 42, 85, 0.25);
+  border-color: #FF2A55;
+}
+.opal-pill-text {
+  text-align: left;
+}
+.opal-pill-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.2px;
+  display: block;
+}
+.opal-pill-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: block;
+  margin-top: 2px;
+}
+.opal-pill-btn.active-lockdown .opal-pill-sub {
+  color: #FFA8BA;
+}
+.opal-pill-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.opal-badge-pill {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.opal-badge-pill.active {
+  background: var(--accent-lime);
+  color: var(--on-accent);
+  border-color: var(--accent-lime);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4);
+}
+.opal-badge-pill.lockdown {
+  background: #FF2A55;
+  color: #FFFFFF;
+  border-color: #FF2A55;
+  box-shadow: 0 0 14px rgba(255, 42, 85, 0.5);
+}
+.opal-duration-chips {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.opal-micro-chip {
+  padding: 6px 15px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.opal-micro-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.opal-micro-chip:active {
+  transform: scale(0.95);
+}
+.opal-micro-chip.active {
+  background: var(--accent-lime);
+  color: var(--on-accent);
+  border-color: var(--accent-lime);
+  font-weight: 900;
+  box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.4);
+}
+.opal-schedule-drawer {
+  background: linear-gradient(145deg, rgba(20, 10, 15, 0.98), rgba(12, 6, 9, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 14px 18px;
+  margin-top: 10px;
+  animation: opalSlideDown 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes opalSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.opal-drawer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.opal-time-input-wrap {
+  flex: 1;
+}
+.opal-time-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.6px;
+  margin-bottom: 4px;
+}
+.opal-time-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: #FFF;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+.opal-time-sep {
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 800;
+  margin-top: 14px;
+}
+.opal-days-row {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+}
+.opal-day-chip {
+  flex: 1;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.opal-day-chip.active {
+  background: var(--accent-lime);
+  color: var(--on-accent);
+  border-color: var(--accent-lime);
+  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.35);
+}
+
+/* ==========================================================
+   COSMIC PROGRESSION MAP: EARTH TO MAROON MOON (STREAK GAMIFICATION)
+   ========================================================== */
+.streak-roadmap-card {
+  background: radial-gradient(circle at 50% 10%, rgba(224, 80, 106, 0.18), transparent 60%),
+              linear-gradient(180deg, #13070E 0%, #080306 100%);
+  border: 1.5px solid rgba(224, 80, 106, 0.35);
+  border-radius: 24px;
+  padding: 20px 16px 24px 16px;
+  margin: 18px 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.streak-roadmap-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 100px 80px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 230px 140px, #ddd, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 320px 220px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 70px 290px, #fbc85a, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 190px 370px, #e8566f, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 280px 450px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 50px 520px, #7de3d0, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 350px 600px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.cosmic-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+}
+.cosmic-map-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cosmic-title-icon {
+  font-size: 1.4rem;
+}
+.cosmic-map-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #FFF;
+  letter-spacing: -0.2px;
+}
+.cosmic-map-sub {
+  display: block;
+  font-size: 0.72rem;
+  color: #E8A5B2;
+  margin-top: 2px;
+  font-weight: 600;
+}
+.cosmic-streak-counter-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(224, 80, 106, 0.25), rgba(74, 14, 28, 0.4));
+  border: 1px solid var(--accent-lime);
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #FFF;
+  box-shadow: 0 0 14px rgba(224, 80, 106, 0.35);
+}
+.cosmic-streak-counter-pill .streak-flame {
+  font-size: 0.95rem;
+  animation: flameFlicker 1.5s infinite alternate;
+}
+@keyframes flameFlicker {
+  0% { transform: scale(1) rotate(-3deg); }
+  100% { transform: scale(1.15) rotate(3deg); }
+}
+
+/* Mission Status Bar */
+.cosmic-status-bar {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 22px;
+  position: relative;
+  z-index: 2;
+}
+.cosmic-status-bar strong {
+  color: #FFF;
+}
+.cosmic-quick-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cosmic-sim-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: #FFF;
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cosmic-sim-btn:hover {
+  background: rgba(224, 80, 106, 0.25);
+  border-color: var(--accent-lime);
+}
+
+/* Roadmap Stage Container */
+.cosmic-roadmap-stage {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 15px 0 10px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Celestial Nodes Stack (Vertical Winding Journey) */
+.cosmic-nodes-track {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column-reverse; /* Earth at bottom (Start), Moon at top (Destination) */
+  gap: 32px;
+}
+
+.cosmic-node-row {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+.cosmic-node-row.pos-left {
+  justify-content: flex-start;
+  padding-left: 18px;
+}
+.cosmic-node-row.pos-center {
+  justify-content: center;
+}
+.cosmic-node-row.pos-right {
+  justify-content: flex-end;
+  padding-right: 18px;
+}
+
+/* Individual Celestial Node (Earth, Asteroid, Moon) */
+.celestial-node {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.celestial-node:hover {
+  transform: scale(1.08);
+}
+.celestial-node:active {
+  transform: scale(0.95);
+}
+
+/* Earth Planet Body */
+.earth-planet-body {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #29B6F6 0%, #0288D1 50%, #01579B 100%);
+  box-shadow: 0 0 26px rgba(41, 182, 246, 0.6), inset -5px -5px 14px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+.earth-continent-swirl {
+  font-size: 2.1rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.6));
+}
+
+/* Custom Maroon Moon Body */
+.maroon-moon-body {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #9E1B34 0%, #4A0E1C 55%, #180308 100%);
+  box-shadow: 0 0 38px rgba(224, 80, 106, 0.75), inset -8px -8px 22px rgba(0, 0, 0, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 2.5px solid rgba(245, 110, 138, 0.75);
+  animation: moonGlow 3s infinite alternate ease-in-out;
+}
+@keyframes moonGlow {
+  0% { box-shadow: 0 0 25px rgba(224, 80, 106, 0.5), inset -8px -8px 18px rgba(0, 0, 0, 0.85); }
+  100% { box-shadow: 0 0 50px rgba(224, 80, 106, 0.9), inset -8px -8px 24px rgba(0, 0, 0, 0.95); }
+}
+.moon-crater-texture {
+  font-size: 2.3rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
+}
+.moon-flag-badge {
+  position: absolute;
+  top: -12px;
+  right: -10px;
+  background: linear-gradient(135deg, #FF2A55, #9E1B34);
+  color: #FFF;
+  font-size: 0.64rem;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+/* Asteroid Rock Body */
+.asteroid-rock-body {
+  width: 48px;
+  height: 48px;
+  border-radius: 46% 54% 52% 48% / 48% 52% 48% 52%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: #FFF;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  transition: all 0.25s;
+}
+.celestial-node.completed .asteroid-rock-body {
+  border-color: rgba(255, 255, 255, 0.7);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
+}
+.celestial-node.active-station .asteroid-rock-body {
+  border-color: #FFF;
+  box-shadow: 0 0 26px currentColor;
+  transform: scale(1.15);
+  animation: stationPulse 2s infinite ease-in-out;
+}
+@keyframes stationPulse {
+  0%, 100% { transform: scale(1.15); }
+  50% { transform: scale(1.22); }
+}
+.celestial-node.locked .asteroid-rock-body {
+  opacity: 0.38;
+  filter: grayscale(0.8);
+}
+
+/* Asteroid Color Palette */
+.ast-color-ruby {
+  background: radial-gradient(circle at 35% 35%, #FF4D73, #B80C34, #3B0411);
+  color: #FFD4DC;
+  box-shadow: 0 0 18px rgba(255, 42, 85, 0.45);
+}
+.ast-color-amber {
+  background: radial-gradient(circle at 35% 35%, #FFB020, #D97706, #451A03);
+  color: #FEF3C7;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.45);
+}
+.ast-color-gold {
+  background: radial-gradient(circle at 35% 35%, #FDE047, #CA8A04, #422006);
+  color: #FEF9C3;
+  box-shadow: 0 0 18px rgba(234, 179, 8, 0.45);
+}
+.ast-color-emerald {
+  background: radial-gradient(circle at 35% 35%, #4ADE80, #16A34A, #052E16);
+  color: #DCFCE7;
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.45);
+}
+.ast-color-cyan {
+  background: radial-gradient(circle at 35% 35%, #38BDF8, #0284C7, #082F49);
+  color: #E0F2FE;
+  box-shadow: 0 0 18px rgba(14, 165, 233, 0.45);
+}
+.ast-color-sapphire {
+  background: radial-gradient(circle at 35% 35%, #60A5FA, #2563EB, #172554);
+  color: #DBEAFE;
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.45);
+}
+.ast-color-amethyst {
+  background: radial-gradient(circle at 35% 35%, #C084FC, #7E22CE, #2E1065);
+  color: #F3E8FF;
+  box-shadow: 0 0 22px rgba(147, 51, 234, 0.55);
+}
+.ast-color-rose {
+  background: radial-gradient(circle at 35% 35%, #F472B6, #DB2777, #500724);
+  color: #FCE7F3;
+  box-shadow: 0 0 18px rgba(219, 39, 119, 0.45);
+}
+.ast-color-chrome {
+  background: radial-gradient(circle at 35% 35%, #E2E8F0, #64748B, #0F172A);
+  color: #F8FAFC;
+  box-shadow: 0 0 18px rgba(148, 163, 184, 0.45);
+}
+
+/* Node Label & Badges */
+.celestial-node-meta {
+  text-align: center;
+  margin-top: 6px;
+  pointer-events: none;
+}
+.node-title {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #FFF;
+  display: block;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+.node-sub {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 1px;
+}
+.node-check-icon {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #34C759;
+  color: #FFF;
+  font-size: 0.68rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #000;
+  box-shadow: 0 0 8px rgba(52, 199, 89, 0.6);
+}
+
+/* Progress Indicator Rocket Marker */
+.cosmic-rocket-indicator {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+  animation: rocketHover 2.2s ease-in-out infinite alternate;
+}
+@keyframes rocketHover {
+  0% { transform: translate(-50%, 0) rotate(-4deg); }
+  100% { transform: translate(-50%, -8px) rotate(4deg); }
+}
+.rocket-ship-emoji {
+  font-size: 2.1rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 12px rgba(255, 214, 10, 0.85));
+}
+.rocket-badge-tag {
+  background: linear-gradient(135deg, #FFD60A, #FF9500);
+  color: #000;
+  font-size: 0.62rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  margin-top: 2px;
+}
+

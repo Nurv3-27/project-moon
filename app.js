@@ -1709,6 +1709,146 @@ function renderRoutines() {
   updateOverviewStats();
 }
 
+// --- Cosmic Streak Progression Logic & Roadmap ---
+const ASTEROID_STATIONS = [
+  { index: 0, id: 'celestial-node-0', name: 'Earth Launchpad', sub: 'Day 0 Streak • Home Planet', type: 'earth' },
+  { index: 1, id: 'celestial-node-1', name: 'Ruby Igniter', sub: 'Asteroid 1 • Day 1 Streak', type: 'asteroid' },
+  { index: 2, id: 'celestial-node-2', name: 'Amber Thruster', sub: 'Asteroid 2 • Day 2 Streak', type: 'asteroid' },
+  { index: 3, id: 'celestial-node-3', name: 'Golden Sling', sub: 'Asteroid 3 • Day 3 Streak', type: 'asteroid' },
+  { index: 4, id: 'celestial-node-4', name: 'Emerald Belt', sub: 'Asteroid 4 • Day 4 Streak', type: 'asteroid' },
+  { index: 5, id: 'celestial-node-5', name: 'Cyan Comet', sub: 'Asteroid 5 • Day 5 Streak', type: 'asteroid' },
+  { index: 6, id: 'celestial-node-6', name: 'Cobalt Void', sub: 'Asteroid 6 • Day 6 Streak', type: 'asteroid' },
+  { index: 7, id: 'celestial-node-7', name: 'Nebula Crown', sub: 'Asteroid 7 • 1-Week Milestone', type: 'asteroid' },
+  { index: 8, id: 'celestial-node-8', name: 'Rose Valkyrie', sub: 'Asteroid 8 • Day 8 Streak', type: 'asteroid' },
+  { index: 9, id: 'celestial-node-9', name: 'Chrome Sentinel', sub: 'Asteroid 9 • Day 9 Streak', type: 'asteroid' },
+  { index: 10, id: 'celestial-node-10', name: 'Maroon Moon Citadel', sub: 'Day 10+ • Lunar Sovereign', type: 'moon' }
+];
+
+function getConsecutiveWorkoutStreak() {
+  if (typeof AppState.streak === 'number' && AppState.streak >= 0) {
+    return AppState.streak;
+  }
+  const history = AppState.history || [];
+  if (!history.length) return 0;
+
+  // Extract unique sorted calendar date strings (YYYY-MM-DD)
+  const uniqueDates = Array.from(new Set(
+    history
+      .map(h => {
+        try {
+          const d = new Date(h.date);
+          return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+        } catch (e) {
+          return null;
+        }
+      })
+      .filter(Boolean)
+  )).sort().reverse();
+
+  if (!uniqueDates.length) return 0;
+
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  const mostRecent = uniqueDates[0];
+  // If most recent is today or yesterday, streak is currently alive
+  let streak = 0;
+  if (mostRecent === today || mostRecent === yesterday) {
+    let expectedDate = new Date(mostRecent);
+    for (const dateStr of uniqueDates) {
+      const curDate = new Date(dateStr);
+      const diffDays = Math.round((expectedDate.getTime() - curDate.getTime()) / 86400000);
+      if (diffDays === 0) {
+        streak++;
+        expectedDate = new Date(curDate.getTime() - 86400000);
+      } else {
+        break;
+      }
+    }
+  } else {
+    // If not worked out today or yesterday, consecutive streak is 0
+    streak = 0;
+  }
+
+  return streak;
+}
+window.getConsecutiveWorkoutStreak = getConsecutiveWorkoutStreak;
+
+function renderStreakProgressionMap() {
+  const streak = getConsecutiveWorkoutStreak();
+  const streakNumEl = document.getElementById('cosmic-streak-num');
+  const distanceTextEl = document.getElementById('cosmic-distance-text');
+  
+  if (streakNumEl) streakNumEl.textContent = streak;
+
+  // Current station index: 0 = Earth, 1-9 = Asteroids, 10 = Moon Citadel
+  const activeStationIdx = Math.min(Math.max(streak, 0), 10);
+
+  if (distanceTextEl) {
+    if (activeStationIdx >= 10) {
+      distanceTextEl.innerHTML = `<strong>🌕 Moon Landed!</strong> Day ${streak} Streak &bull; Lunar Conqueror Station`;
+    } else {
+      const remaining = 10 - activeStationIdx;
+      distanceTextEl.innerHTML = `<strong>${remaining} Day${remaining === 1 ? '' : 's'} Remaining</strong> to Moon Landing (Station ${activeStationIdx}/10)`;
+    }
+  }
+
+  // Remove existing rocket indicator from DOM before attaching to current station
+  const existingRocket = document.querySelector('.cosmic-rocket-indicator');
+  if (existingRocket) {
+    existingRocket.remove();
+  }
+
+  // Update styles for each celestial node
+  ASTEROID_STATIONS.forEach(station => {
+    const nodeEl = document.getElementById(station.id);
+    if (!nodeEl) return;
+
+    nodeEl.classList.remove('active-station', 'visited-station', 'locked-station');
+
+    if (station.index === activeStationIdx) {
+      nodeEl.classList.add('active-station');
+
+      // Append rocket indicator
+      const rocket = document.createElement('div');
+      rocket.className = 'cosmic-rocket-indicator';
+      const label = station.index === 0 ? 'START' : (station.index === 10 ? 'LANDED' : `DAY ${streak}`);
+      rocket.innerHTML = `
+        <span class="rocket-ship-emoji">🚀</span>
+        <span class="rocket-badge-tag">${label}</span>
+      `;
+      nodeEl.appendChild(rocket);
+    } else if (station.index < activeStationIdx) {
+      nodeEl.classList.add('visited-station');
+    } else {
+      nodeEl.classList.add('locked-station');
+    }
+  });
+}
+window.renderStreakProgressionMap = renderStreakProgressionMap;
+
+function setDemoStreak(num) {
+  AppState.streak = Number(num);
+  saveState();
+  updateOverviewStats();
+  showToast(`🚀 Workout streak set to ${num} day${num === 1 ? '' : 's'}!`);
+}
+window.setDemoStreak = setDemoStreak;
+
+function inspectAsteroidNode(index) {
+  const station = ASTEROID_STATIONS.find(s => s.index === index);
+  if (!station) return;
+  const currentStreak = getConsecutiveWorkoutStreak();
+  if (index === 0) {
+    showToast(`🌍 Earth Launchpad: Starting base. Current consecutive streak: ${currentStreak} days.`);
+  } else if (index === 10) {
+    showToast(`🌑 Maroon Moon Citadel: Final destination (10+ day streak). Current position: ${currentStreak >= 10 ? 'Landed!' : `${10 - currentStreak} days to go`}`);
+  } else {
+    showToast(`☄️ ${station.name}: Streak Day ${index}. Keep training consecutively to advance!`);
+  }
+}
+window.inspectAsteroidNode = inspectAsteroidNode;
+
 function updateOverviewStats() {
   const streakEl = document.getElementById('stat-streak');
   const countEl = document.getElementById('stat-weekly-count');
@@ -1716,19 +1856,23 @@ function updateOverviewStats() {
   const volUnitEl = document.getElementById('stat-volume-unit');
 
   // Compute streak
-  const history = AppState.history || [];
-  streakEl.textContent = history.length > 0 ? Math.min(history.length, 5) : 0;
+  const streak = getConsecutiveWorkoutStreak();
+  if (streakEl) streakEl.textContent = streak;
 
   // This week count
+  const history = AppState.history || [];
   const oneWeekAgo = Date.now() - 7 * 86400000;
   const thisWeekWorkouts = history.filter(h => new Date(h.date).getTime() > oneWeekAgo);
-  countEl.textContent = thisWeekWorkouts.length;
+  if (countEl) countEl.textContent = thisWeekWorkouts.length;
 
   // Total volume
   let totalVol = 0;
   history.forEach(h => totalVol += (h.volume || 0));
-  volEl.textContent = Math.round(totalVol).toLocaleString();
-  volUnitEl.textContent = `TOTAL ${AppState.settings.unit.toUpperCase()} ⚡`;
+  if (volEl) volEl.textContent = Math.round(totalVol).toLocaleString();
+  if (volUnitEl) volUnitEl.textContent = `TOTAL ${AppState.settings.unit.toUpperCase()} ⚡`;
+
+  // Update Cosmic Progression Map
+  renderStreakProgressionMap();
 }
 
 // --- Starting a Workout ---
@@ -2050,6 +2194,7 @@ window.finishActiveWorkout = function() {
   AppState.activeWorkout = null;
   saveState();
   closeRestTimer();
+  updateOverviewStats();
 
   // Show celebration modal
   showCelebrationModal(historyItem, newPRsEarned);
@@ -2872,6 +3017,15 @@ function removeCustomDistractionTarget(tag) {
 }
 window.removeCustomDistractionTarget = removeCustomDistractionTarget;
 
+function toggleOpalScheduleDrawer() {
+  const drawer = document.getElementById('opal-schedule-drawer');
+  if (drawer) {
+    drawer.classList.toggle('hidden');
+    triggerHaptic([20]);
+  }
+}
+window.toggleOpalScheduleDrawer = toggleOpalScheduleDrawer;
+
 function updateFocusBlockUI() {
   ensureFocusBlockState();
   const fb = AppState.focusBlock;
@@ -2880,6 +3034,14 @@ function updateFocusBlockUI() {
   const timerDisplay = document.getElementById('instant-timer-display');
   const countdownDigits = document.getElementById('instant-countdown-digits');
   const btnToggle = document.getElementById('btn-toggle-instant-block');
+
+  // Opal-Style Focus Button Elements
+  const opalInstantBtn = document.getElementById('opal-btn-instant-block');
+  const opalInstantTitle = document.getElementById('opal-instant-title');
+  const opalInstantSub = document.getElementById('opal-instant-sub');
+  const opalInstantBadge = document.getElementById('opal-instant-badge');
+  const opalSchedSub = document.getElementById('opal-sched-sub');
+  const opalSchedBadge = document.getElementById('opal-sched-badge');
 
   // Handle Instant Block Countdown
   const isInstant = Boolean(fb.instantActive);
@@ -2897,6 +3059,31 @@ function updateFocusBlockUI() {
     }
   }
 
+  // Update Opal Instant Block Pill
+  if (opalInstantBtn) {
+    opalInstantBtn.classList.toggle('active-lockdown', Boolean(fb.instantActive));
+  }
+  if (opalInstantTitle) {
+    opalInstantTitle.textContent = fb.instantActive ? 'Instant Lockdown' : 'Instant Block';
+  }
+  if (opalInstantSub) {
+    if (fb.instantActive) {
+      opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} REMAINING • APPS LOCKED` : 'ACTIVE • APPS RESTRICTED';
+    } else {
+      opalInstantSub.textContent = 'TAP TO LOCK DISTRACTIONS';
+    }
+  }
+  if (opalInstantBadge) {
+    if (fb.instantActive) {
+      opalInstantBadge.className = 'opal-badge-pill lockdown';
+      opalInstantBadge.textContent = 'END';
+    } else {
+      opalInstantBadge.className = 'opal-badge-pill';
+      opalInstantBadge.textContent = 'START';
+    }
+  }
+
+  // Fallback Legacy Instant Elements
   if (cardInstant) {
     cardInstant.classList.toggle('active-lockdown', Boolean(fb.instantActive));
   }
@@ -2920,8 +3107,8 @@ function updateFocusBlockUI() {
     }
   }
 
-  // Duration chips active state
-  document.querySelectorAll('.duration-chip').forEach(chip => {
+  // Duration chips active state (both Opal micro-chips and standard chips)
+  document.querySelectorAll('.opal-micro-chip, .duration-chip').forEach(chip => {
     const mins = Number(chip.dataset.mins);
     chip.classList.toggle('active', mins === (fb.instantDurationMinutes || 15));
   });
@@ -2938,10 +3125,35 @@ function updateFocusBlockUI() {
   if (sInput && fb.schedule.startTime) sInput.value = fb.schedule.startTime;
   if (eInput && fb.schedule.endTime) eInput.value = fb.schedule.endTime;
 
-  document.querySelectorAll('.day-chip').forEach(chip => {
+  // Day chips active state (both Opal day-chips and standard day-chips)
+  document.querySelectorAll('.opal-day-chip, .day-chip').forEach(chip => {
     const day = chip.dataset.day;
     chip.classList.toggle('active', Boolean(fb.schedule.days && fb.schedule.days.includes(day)));
   });
+
+  // Update Opal Scheduled Block Pill
+  if (opalSchedSub) {
+    if (isSchedActive) {
+      opalSchedSub.textContent = `ACTIVE NOW • RESTRICTING (${fb.schedule.startTime} - ${fb.schedule.endTime})`;
+    } else if (fb.schedule.enabled) {
+      const daysStr = (fb.schedule.days && fb.schedule.days.length) ? fb.schedule.days.join(', ') : 'MON-FRI';
+      opalSchedSub.textContent = `${daysStr} • ${fb.schedule.startTime} - ${fb.schedule.endTime}`;
+    } else {
+      opalSchedSub.textContent = 'SCHEDULE PAUSED • TAP TO CONFIGURE';
+    }
+  }
+  if (opalSchedBadge) {
+    if (isSchedActive) {
+      opalSchedBadge.className = 'opal-badge-pill lockdown';
+      opalSchedBadge.textContent = 'LOCKDOWN';
+    } else if (fb.schedule.enabled) {
+      opalSchedBadge.className = 'opal-badge-pill active';
+      opalSchedBadge.textContent = 'ACTIVE';
+    } else {
+      opalSchedBadge.className = 'opal-badge-pill';
+      opalSchedBadge.textContent = 'OFF';
+    }
+  }
 
   if (dot) {
     dot.className = `schedule-indicator-dot ${isSchedActive ? 'active' : (fb.schedule.enabled ? 'waiting' : 'off')}`;

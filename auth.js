@@ -228,6 +228,7 @@
       accentColor: '#E0506A',
       badgeBg: 'linear-gradient(135deg, #2E0B14, #4A0E1C)',
       avatarIcon: '⚡',
+      avatarImg: 'image_7.png',
       sigilText: 'Nurv',
       voicePitch: 0.82,
       voiceRate: 1.0,
@@ -245,6 +246,7 @@
       accentColor: '#F56E8A',
       badgeBg: 'linear-gradient(135deg, #3A0D22, #5C1336)',
       avatarIcon: '👑',
+      avatarImg: 'image_7.png',
       sigilText: 'Maryam',
       voicePitch: 1.16,
       voiceRate: 1.04,
@@ -399,7 +401,9 @@
         bubbleTail.style.borderTopColor = coach.accentColor;
       }
       if (bubbleName) bubbleName.textContent = coach.shortName || coach.sigilText;
-      if (bubbleIcon) bubbleIcon.textContent = coach.avatarIcon;
+      if (bubbleIcon) {
+        bubbleIcon.innerHTML = `<img src="${coach.avatarImg || 'image_7.png'}" alt="${coach.name}" class="coach-bubble-avatar-img">`;
+      }
 
       // Safe fallback for legacy header pill if present
       const coachPill = document.getElementById('header-ai-coach-pill');
@@ -462,7 +466,7 @@
       const modalHeader = document.getElementById('coach-modal-header');
 
       if (avatarCircle) {
-        avatarCircle.textContent = coach.avatarIcon;
+        avatarCircle.innerHTML = `<img src="${coach.avatarImg || 'image_7.png'}" alt="${coach.name}" class="coach-avatar-img">`;
         avatarCircle.style.background = coach.badgeBg;
         avatarCircle.style.borderColor = coach.accentColor;
       }
@@ -471,8 +475,9 @@
       if (tagline) tagline.innerHTML = `&ldquo;${coach.tagline}&rdquo;`;
       if (welcome) welcome.textContent = coach.greeting;
       if (msgAvatar) {
-        msgAvatar.textContent = coach.sigilText;
-        msgAvatar.style.background = coach.accentColor;
+        msgAvatar.innerHTML = `<img src="${coach.avatarImg || 'image_7.png'}" alt="${coach.name}" class="coach-avatar-img">`;
+        msgAvatar.style.background = 'transparent';
+        msgAvatar.style.borderColor = coach.accentColor;
       }
       if (voiceLabel) voiceLabel.textContent = this.voiceEnabled ? 'Voice: ON' : 'Voice: OFF';
       if (voiceIcon) voiceIcon.textContent = this.voiceEnabled ? '🔊' : '🔇';

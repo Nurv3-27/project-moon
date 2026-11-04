@@ -212,6 +212,24 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                     state['scroll_bank'] = 0.0
                     state['start_time'] = None
                     save_state(state)
+                if 'format' in qs and qs['format'][0] == 'json':
+                    bank = float(state.get('scroll_bank', 0.0))
+                    if state.get('start_time'):
+                        elapsed = max(0.0, time.time() - float(state['start_time'])) / 60.0
+                        effective_balance = bank - elapsed
+                    else:
+                        effective_balance = bank
+                    is_focus_blocked = state.get('focus_blocked', False)
+                    allowed = (effective_balance > 0) and (not is_focus_blocked)
+                    data = {
+                        'allowed': allowed,
+                        'dmOnly': state.get('dm_only', True),
+                        'remainingSeconds': max(0, int(effective_balance * 60)),
+                        'focusBlocked': is_focus_blocked,
+                        'instantBlock': state.get('instant_block', False),
+                        'blockedApps': state.get('blocked_apps', ['youtube_shorts', 'games', 'instagram_reels'])
+                    }
+                    return self._send(json.dumps(data), ctype='application/json; charset=utf-8')
             except Exception:
                 pass
 
@@ -222,7 +240,8 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 effective_balance = bank
 
-            resp = 'allowed' if effective_balance > 0 else 'dm_only'
+            is_focus_blocked = state.get('focus_blocked', False)
+            resp = 'allowed' if (effective_balance > 0 and not is_focus_blocked) else 'dm_only'
             return self._send(resp, ctype='text/plain; charset=utf-8')
 
         if clean in ('/api/timer/start', '/api/timer-start'):
@@ -413,12 +432,21 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
 
                 if 'start_time' in body:
                     state['start_time'] = body['start_time']
+                if 'focusBlocked' in body:
+                    state['focus_blocked'] = bool(body['focusBlocked'])
+                if 'instantActive' in body:
+                    state['instant_block'] = bool(body['instantActive'])
+                if 'blockedApps' in body:
+                    state['blocked_apps'] = list(body['blockedApps'])
+                if 'dmOnly' in body:
+                    state['dm_only'] = bool(body['dmOnly'])
                 save_state(state)
             except Exception:
                 pass
 
             bank = float(state.get('scroll_bank', 0.0))
-            resp = 'allowed' if bank > 0 else 'dm_only'
+            is_blocked = state.get('focus_blocked', False) or (bank <= 0)
+            resp = 'dm_only' if is_blocked else 'allowed'
             return self._send(resp, ctype='text/plain; charset=utf-8')
 
         if clean == '/api/users':

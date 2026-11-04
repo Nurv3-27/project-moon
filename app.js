@@ -478,6 +478,50 @@ function ensureScrollState() {
 }
 ensureScrollState();
 
+function ensureFocusBlockState() {
+  if (!AppState.focusBlock) {
+    AppState.focusBlock = {
+      instantActive: false,
+      instantEndsAt: null,
+      instantDurationMinutes: 15,
+      schedule: {
+        enabled: true,
+        startTime: '09:00',
+        endTime: '17:00',
+        days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+      },
+      targets: {
+        youtubeShorts: true,
+        games: true,
+        instagramReels: true,
+        tiktok: true,
+        customApps: ['Subway Surfers', 'Roblox']
+      }
+    };
+  }
+  if (!AppState.focusBlock.targets) {
+    AppState.focusBlock.targets = {
+      youtubeShorts: true,
+      games: true,
+      instagramReels: true,
+      tiktok: true,
+      customApps: ['Subway Surfers', 'Roblox']
+    };
+  }
+  if (!Array.isArray(AppState.focusBlock.targets.customApps)) {
+    AppState.focusBlock.targets.customApps = ['Subway Surfers', 'Roblox'];
+  }
+  if (!AppState.focusBlock.schedule) {
+    AppState.focusBlock.schedule = {
+      enabled: true,
+      startTime: '09:00',
+      endTime: '17:00',
+      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+    };
+  }
+}
+ensureFocusBlockState();
+
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(AppState));
 }
@@ -2572,6 +2616,11 @@ function renderScroll() {
   if (heroPill) {
     heroPill.textContent = shieldActive ? 'ACTIVE' : 'ACTIVATE';
   }
+
+  // Update Instant Block, Scheduled Block and Distraction Targets UI
+  if (typeof updateFocusBlockUI === 'function') {
+    updateFocusBlockUI();
+  }
 }
 
 function updateAntiScrollUI() {
@@ -2642,6 +2691,360 @@ function toggleAntiScrollMode(fromHeader = false) {
   }
 }
 window.toggleAntiScrollMode = toggleAntiScrollMode;
+
+// --- Focus Tab: Instant Block & Scheduled Block Controls ---
+function isScheduledBlockActiveNow() {
+  ensureFocusBlockState();
+  const sched = AppState.focusBlock && AppState.focusBlock.schedule;
+  if (!sched || !sched.enabled) return false;
+
+  const now = new Date();
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const todayName = dayNames[now.getDay()];
+  if (Array.isArray(sched.days) && !sched.days.includes(todayName)) {
+    return false;
+  }
+
+  const pad = n => String(n).padStart(2, '0');
+  const nowStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const startStr = sched.startTime || '09:00';
+  const endStr = sched.endTime || '17:00';
+
+  if (startStr <= endStr) {
+    return nowStr >= startStr && nowStr <= endStr;
+  } else {
+    // Overnight window (e.g. 22:00 to 06:00)
+    return nowStr >= startStr || nowStr <= endStr;
+  }
+}
+window.isScheduledBlockActiveNow = isScheduledBlockActiveNow;
+
+function selectInstantDuration(mins) {
+  ensureFocusBlockState();
+  const num = Number(mins) || 0;
+  AppState.focusBlock.instantDurationMinutes = num;
+  if (AppState.focusBlock.instantActive) {
+    AppState.focusBlock.instantEndsAt = num > 0 ? (Date.now() + num * 60 * 1000) : null;
+  }
+  saveState();
+  updateFocusBlockUI();
+  triggerHaptic([20]);
+}
+window.selectInstantDuration = selectInstantDuration;
+
+function toggleInstantBlock() {
+  ensureFocusBlockState();
+  if (AppState.focusBlock.instantActive) {
+    stopInstantBlock();
+  } else {
+    startInstantBlock(AppState.focusBlock.instantDurationMinutes || 15);
+  }
+}
+window.toggleInstantBlock = toggleInstantBlock;
+
+function startInstantBlock(mins) {
+  ensureFocusBlockState();
+  ensureScrollState();
+  const num = Number(mins) || 15;
+  AppState.focusBlock.instantActive = true;
+  AppState.focusBlock.instantDurationMinutes = num;
+  AppState.focusBlock.instantEndsAt = num > 0 ? (Date.now() + num * 60 * 1000) : null;
+  AppState.scroll.antiScrollActive = true;
+
+  // Pause and bank any active paid scroll timer
+  if (AppState.scroll.sessionEndsAt) {
+    AppState.scroll.balance = scrollRemaining();
+    AppState.scroll.sessionEndsAt = null;
+  }
+
+  playSetCompletePing();
+  triggerHaptic([60, 40, 80]);
+  saveState();
+  updateFocusBlockUI();
+  syncScrollToServer();
+
+  showToast('⚡ INSTANT BLOCK ACTIVE! YouTube Shorts, games, and distracting feeds locked.');
+}
+window.startInstantBlock = startInstantBlock;
+
+function stopInstantBlock() {
+  ensureFocusBlockState();
+  AppState.focusBlock.instantActive = false;
+  AppState.focusBlock.instantEndsAt = null;
+  triggerHaptic([30]);
+  saveState();
+  updateFocusBlockUI();
+  syncScrollToServer();
+  showToast('⚡ Instant Block deactivated.');
+}
+window.stopInstantBlock = stopInstantBlock;
+
+function toggleScheduledBlockEnabled(enabled) {
+  ensureFocusBlockState();
+  AppState.focusBlock.schedule.enabled = Boolean(enabled);
+  triggerHaptic([25]);
+  saveState();
+  updateFocusBlockUI();
+  syncScrollToServer();
+  showToast(`⏰ Scheduled Block ${enabled ? 'ENABLED' : 'PAUSED'}.`);
+}
+window.toggleScheduledBlockEnabled = toggleScheduledBlockEnabled;
+
+function updateScheduledBlockTimes() {
+  ensureFocusBlockState();
+  const sInput = document.getElementById('schedule-start-time');
+  const eInput = document.getElementById('schedule-end-time');
+  if (sInput && sInput.value) AppState.focusBlock.schedule.startTime = sInput.value;
+  if (eInput && eInput.value) AppState.focusBlock.schedule.endTime = eInput.value;
+  saveState();
+  updateFocusBlockUI();
+  syncScrollToServer();
+  showToast('Focus schedule updated!');
+}
+window.updateScheduledBlockTimes = updateScheduledBlockTimes;
+
+function toggleScheduleDay(day) {
+  ensureFocusBlockState();
+  const days = AppState.focusBlock.schedule.days || [];
+  const idx = days.indexOf(day);
+  if (idx > -1) {
+    if (days.length > 1) days.splice(idx, 1);
+    else {
+      showToast('At least 1 active day required.');
+      return;
+    }
+  } else {
+    days.push(day);
+  }
+  AppState.focusBlock.schedule.days = days;
+  triggerHaptic([20]);
+  saveState();
+  updateFocusBlockUI();
+  syncScrollToServer();
+}
+window.toggleScheduleDay = toggleScheduleDay;
+
+function toggleDistractionTarget(key, isChecked) {
+  ensureFocusBlockState();
+  AppState.focusBlock.targets[key] = Boolean(isChecked);
+  triggerHaptic([25]);
+  saveState();
+  updateFocusBlockUI();
+  syncScrollToServer();
+
+  const labels = {
+    youtubeShorts: 'YouTube Shorts',
+    games: 'Mobile & PC Games',
+    instagramReels: 'Instagram Reels & Feeds',
+    tiktok: 'TikTok & Fast Feeds'
+  };
+  showToast(`${labels[key] || key} restriction ${isChecked ? 'ACTIVATED' : 'DISABLED'}.`);
+}
+window.toggleDistractionTarget = toggleDistractionTarget;
+
+function addCustomDistractionTarget() {
+  ensureFocusBlockState();
+  const input = document.getElementById('input-custom-distraction');
+  if (!input || !input.value.trim()) return;
+  const tag = input.value.trim();
+  if (!AppState.focusBlock.targets.customApps.includes(tag)) {
+    AppState.focusBlock.targets.customApps.push(tag);
+    saveState();
+    updateFocusBlockUI();
+    syncScrollToServer();
+    showToast(`Added "${tag}" to designated blocklist!`);
+  }
+  input.value = '';
+}
+window.addCustomDistractionTarget = addCustomDistractionTarget;
+
+function removeCustomDistractionTarget(tag) {
+  ensureFocusBlockState();
+  const list = AppState.focusBlock.targets.customApps;
+  const idx = list.indexOf(tag);
+  if (idx > -1) {
+    list.splice(idx, 1);
+    saveState();
+    updateFocusBlockUI();
+    syncScrollToServer();
+    showToast(`Removed "${tag}" from blocklist.`);
+  }
+}
+window.removeCustomDistractionTarget = removeCustomDistractionTarget;
+
+function updateFocusBlockUI() {
+  ensureFocusBlockState();
+  const fb = AppState.focusBlock;
+  const cardInstant = document.getElementById('card-instant-block');
+  const pillInstant = document.getElementById('instant-block-pill');
+  const timerDisplay = document.getElementById('instant-timer-display');
+  const countdownDigits = document.getElementById('instant-countdown-digits');
+  const btnToggle = document.getElementById('btn-toggle-instant-block');
+
+  // Handle Instant Block Countdown
+  const isInstant = Boolean(fb.instantActive);
+  let remSec = 0;
+  if (isInstant) {
+    if (fb.instantEndsAt) {
+      remSec = Math.max(0, Math.floor((fb.instantEndsAt - Date.now()) / 1000));
+      if (remSec <= 0) {
+        fb.instantActive = false;
+        fb.instantEndsAt = null;
+        saveState();
+        showToast('⚡ Instant Block completed!');
+        syncScrollToServer();
+      }
+    }
+  }
+
+  if (cardInstant) {
+    cardInstant.classList.toggle('active-lockdown', Boolean(fb.instantActive));
+  }
+  if (pillInstant) {
+    pillInstant.className = `focus-status-pill ${fb.instantActive ? 'active' : 'idle'}`;
+    pillInstant.textContent = fb.instantActive ? (fb.instantEndsAt ? `${formatDuration(remSec)} LEFT` : 'ACTIVE') : 'IDLE';
+  }
+  if (timerDisplay) {
+    timerDisplay.classList.toggle('hidden', !fb.instantActive);
+  }
+  if (countdownDigits) {
+    countdownDigits.textContent = fb.instantEndsAt ? formatDuration(remSec) : 'INDEFINITE';
+  }
+  if (btnToggle) {
+    if (fb.instantActive) {
+      btnToggle.className = 'danger-btn full-width';
+      btnToggle.innerHTML = '<span>🛑 End Instant Block</span>';
+    } else {
+      btnToggle.className = 'primary-glow-btn full-width';
+      btnToggle.innerHTML = '<span>⚡ Start Instant Block</span>';
+    }
+  }
+
+  // Duration chips active state
+  document.querySelectorAll('.duration-chip').forEach(chip => {
+    const mins = Number(chip.dataset.mins);
+    chip.classList.toggle('active', mins === (fb.instantDurationMinutes || 15));
+  });
+
+  // Scheduled Block UI
+  const isSchedActive = isScheduledBlockActiveNow();
+  const schedSwitch = document.getElementById('setting-scheduled-block');
+  const sInput = document.getElementById('schedule-start-time');
+  const eInput = document.getElementById('schedule-end-time');
+  const dot = document.getElementById('schedule-indicator-dot');
+  const statusText = document.getElementById('schedule-status-text');
+
+  if (schedSwitch) schedSwitch.checked = Boolean(fb.schedule.enabled);
+  if (sInput && fb.schedule.startTime) sInput.value = fb.schedule.startTime;
+  if (eInput && fb.schedule.endTime) eInput.value = fb.schedule.endTime;
+
+  document.querySelectorAll('.day-chip').forEach(chip => {
+    const day = chip.dataset.day;
+    chip.classList.toggle('active', Boolean(fb.schedule.days && fb.schedule.days.includes(day)));
+  });
+
+  if (dot) {
+    dot.className = `schedule-indicator-dot ${isSchedActive ? 'active' : (fb.schedule.enabled ? 'waiting' : 'off')}`;
+  }
+  if (statusText) {
+    if (isSchedActive) {
+      statusText.innerHTML = `<strong>⚡ ACTIVE NOW:</strong> Restricting apps (${fb.schedule.startTime} &ndash; ${fb.schedule.endTime})`;
+    } else if (fb.schedule.enabled) {
+      statusText.innerHTML = `Schedule Ready &bull; Active ${fb.schedule.days.join(', ')} (${fb.schedule.startTime} &ndash; ${fb.schedule.endTime})`;
+    } else {
+      statusText.textContent = 'Scheduled Block Paused';
+    }
+  }
+
+  // Distraction Targets UI
+  const targetYt = document.getElementById('target-yt-shorts');
+  const targetGames = document.getElementById('target-games');
+  const targetIg = document.getElementById('target-ig-reels');
+  const targetTiktok = document.getElementById('target-tiktok');
+  const countPill = document.getElementById('dt-active-count');
+
+  if (targetYt) targetYt.checked = fb.targets.youtubeShorts !== false;
+  if (targetGames) targetGames.checked = fb.targets.games !== false;
+  if (targetIg) targetIg.checked = fb.targets.instagramReels !== false;
+  if (targetTiktok) targetTiktok.checked = fb.targets.tiktok !== false;
+
+  let activeCount = 0;
+  if (fb.targets.youtubeShorts) activeCount++;
+  if (fb.targets.games) activeCount++;
+  if (fb.targets.instagramReels) activeCount++;
+  if (fb.targets.tiktok) activeCount++;
+  if (Array.isArray(fb.targets.customApps)) activeCount += fb.targets.customApps.length;
+
+  if (countPill) {
+    countPill.textContent = `${activeCount} App${activeCount === 1 ? '' : 's'} Restricted`;
+  }
+
+  const tagsContainer = document.getElementById('dt-custom-tags-container');
+  if (tagsContainer) {
+    tagsContainer.innerHTML = (fb.targets.customApps || []).map(app => `
+      <span class="custom-app-tag">
+        <span>${escapeHtml(app)}</span>
+        <span class="custom-app-tag-del" onclick="removeCustomDistractionTarget('${escapeHtml(app)}')">&times;</span>
+      </span>
+    `).join('');
+  }
+}
+window.updateFocusBlockUI = updateFocusBlockUI;
+
+// --- FAQ & Knowledge Base Logic ---
+window.toggleFaqItem = function(id) {
+  const item = document.getElementById(id);
+  if (item) {
+    item.classList.toggle('open');
+    triggerHaptic([25]);
+  }
+};
+
+window.selectFaqCategory = function(cat) {
+  document.querySelectorAll('.faq-cat-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === cat);
+  });
+  document.querySelectorAll('.faq-item').forEach(item => {
+    if (cat === 'all' || item.dataset.cat === cat) {
+      item.style.display = 'block';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+  triggerHaptic([20]);
+};
+
+window.filterFaqSearch = function(query) {
+  const q = (query || '').toLowerCase().trim();
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    const matches = !q || text.includes(q);
+    item.style.display = matches ? 'block' : 'none';
+    if (q && matches) {
+      item.classList.add('open');
+    }
+  });
+};
+
+window.navigateToSettingsFaq = function(category) {
+  switchTab('settings');
+  if (category && typeof window.selectFaqCategory === 'function') {
+    window.selectFaqCategory(category);
+  }
+  setTimeout(() => {
+    const el = document.getElementById('settings-faq-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 120);
+};
+
+window.askCoachFromFaq = function(promptText) {
+  openAICoachModal();
+  setTimeout(() => {
+    if (typeof window.askCoachPrompt === 'function') {
+      window.askCoachPrompt(promptText);
+    }
+  }, 150);
+};
 
 async function installPcBrowserBlocker() {
   let extPath = 'c:\\Users\\nurvi\\Downloads\\PortableGit\\fitness_tracker_app\\moon_antiscroll_extension';
@@ -2729,15 +3132,38 @@ window.closeScrollLock = function() {
 // Tell the PC server how much scroll time is live so the iOS Shortcut / Userscript can enforce DM-only mode.
 function syncScrollToServer() {
   ensureScrollState();
+  ensureFocusBlockState();
   const s = AppState.scroll;
+  const fb = AppState.focusBlock;
   const remaining = s && s.sessionEndsAt ? scrollRemaining() : 0;
   const dmOnly = AppState.settings && AppState.settings.dmOnlyMode !== false;
   const antiScrollActive = Boolean(s && s.antiScrollActive);
+  const instantActive = Boolean(fb && fb.instantActive);
+  const scheduledActive = typeof isScheduledBlockActiveNow === 'function' ? isScheduledBlockActiveNow() : false;
+  const focusBlocked = instantActive || scheduledActive;
+
+  const blockedApps = [];
+  if (fb && fb.targets) {
+    if (fb.targets.youtubeShorts) blockedApps.push('youtube_shorts');
+    if (fb.targets.games) blockedApps.push('games');
+    if (fb.targets.instagramReels) blockedApps.push('instagram_reels');
+    if (fb.targets.tiktok) blockedApps.push('tiktok');
+    if (Array.isArray(fb.targets.customApps)) blockedApps.push(...fb.targets.customApps);
+  }
+
   try {
     fetch('/api/scroll', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ remainingSeconds: remaining, dmOnly, antiScrollActive })
+      body: JSON.stringify({
+        remainingSeconds: remaining,
+        dmOnly,
+        antiScrollActive,
+        instantActive,
+        scheduledActive,
+        focusBlocked,
+        blockedApps
+      })
     }).catch(() => {});
   } catch (e) {}
 }
@@ -3323,7 +3749,19 @@ function escapeHtml(str) {
 // --- DOM Initialization & Event Handlers ---
 // --- Colour Theme ---
 const THEME_KEY = 'moon_theme';
-const THEME_BAR_COLORS = { maroon: '#0B0709', lime: '#08090C', ocean: '#070B10', violet: '#0A0810', gold: '#0B0A07' };
+const THEME_BAR_COLORS = {
+  maroon: '#0B0709',
+  lime: '#08090C',
+  ocean: '#070B10',
+  violet: '#0A0810',
+  gold: '#0B0A07',
+  crimson: '#0A0406',
+  cyan: '#040A0F',
+  emerald: '#040B07',
+  orange: '#0F0804',
+  rose: '#0F050A',
+  silver: '#0A0A0A'
+};
 
 function applyTheme(id) {
   if (!THEME_BAR_COLORS[id]) id = 'maroon';
@@ -3333,11 +3771,16 @@ function applyTheme(id) {
   if (meta) meta.setAttribute('content', THEME_BAR_COLORS[id]);
   document.querySelectorAll('.theme-swatch').forEach(b =>
     b.classList.toggle('active', b.dataset.themeId === id));
+  document.querySelectorAll('.rs-theme-swatch').forEach(b =>
+    b.classList.toggle('active', b.dataset.themeId === id));
 }
+window.applyTheme = applyTheme;
 
 document.addEventListener('DOMContentLoaded', () => {
-  applyTheme(document.documentElement.getAttribute('data-theme') || 'maroon');
+  applyTheme(document.documentElement.getAttribute('data-theme') || localStorage.getItem(THEME_KEY) || 'maroon');
   document.querySelectorAll('.theme-swatch').forEach(b =>
+    b.addEventListener('click', () => applyTheme(b.dataset.themeId)));
+  document.querySelectorAll('.rs-theme-swatch').forEach(b =>
     b.addEventListener('click', () => applyTheme(b.dataset.themeId)));
 });
 
@@ -4145,7 +4588,7 @@ window.askCoachPrompt = function(promptText) {
   const coachMsgDiv = document.createElement('div');
   coachMsgDiv.className = 'coach-msg assistant';
   coachMsgDiv.innerHTML = `
-    <div class="coach-msg-avatar" style="background:${coach.accentColor || '#E0506A'}">${coach.sigilText || 'Nurv'}</div>
+    <div class="coach-msg-avatar" style="border-color:${coach.accentColor || '#E0506A'}"><img src="${coach.avatarImg || 'image_7.png'}" alt="${coach.name || 'Coach'}" class="coach-avatar-img"></div>
     <div class="coach-msg-bubble">${escapeHtml(reply)}</div>
   `;
   stream.appendChild(coachMsgDiv);

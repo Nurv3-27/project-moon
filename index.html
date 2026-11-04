@@ -823,8 +823,8 @@
       <section id="view-focus" class="tab-view">
         <div class="section-hero">
           <div class="hero-text">
-            <span class="greeting-subtitle">ANTI-DOOMSCROLL SHIELD</span>
-            <h1 class="hero-title">Focus &amp; Scroll Bank</h1>
+            <span class="greeting-subtitle">DISTRACTION FIREWALL &amp; APP RESTRICTIONS</span>
+            <h1 class="hero-title">Focus &amp; App Blocker</h1>
           </div>
         </div>
 
@@ -857,6 +857,178 @@
           <span class="antiscroll-hero-pill" id="antiscroll-hero-pill">ACTIVATE</span>
         </button>
 
+        <!-- Focus Tab Controls: Instant Block & Scheduled Block -->
+        <div class="focus-controls-grid">
+          <!-- Card 1: Instant Block -->
+          <div class="focus-control-card instant-block-card" id="card-instant-block">
+            <div class="focus-card-header">
+              <div class="focus-card-title-row">
+                <span class="focus-card-icon">⚡</span>
+                <div>
+                  <h3>Instant Block</h3>
+                  <span class="focus-card-subtitle">Lock designated apps immediately</span>
+                </div>
+              </div>
+              <span class="focus-status-pill idle" id="instant-block-pill">IDLE</span>
+            </div>
+            
+            <p class="focus-card-desc">Immediately enforce lockdown for YouTube Shorts, games, and distracting feeds for your chosen duration.</p>
+            
+            <div class="instant-duration-selector" id="instant-duration-selector">
+              <button type="button" class="duration-chip active" data-mins="15" onclick="selectInstantDuration(15)">15m</button>
+              <button type="button" class="duration-chip" data-mins="30" onclick="selectInstantDuration(30)">30m</button>
+              <button type="button" class="duration-chip" data-mins="45" onclick="selectInstantDuration(45)">45m</button>
+              <button type="button" class="duration-chip" data-mins="60" onclick="selectInstantDuration(60)">1h</button>
+              <button type="button" class="duration-chip" data-mins="120" onclick="selectInstantDuration(120)">2h</button>
+              <button type="button" class="duration-chip" data-mins="0" onclick="selectInstantDuration(0)">Indefinite</button>
+            </div>
+
+            <div class="instant-timer-display hidden" id="instant-timer-display">
+              <span class="instant-timer-countdown mono" id="instant-countdown-digits">30:00</span>
+              <span class="instant-timer-label">Lockdown Time Remaining</span>
+            </div>
+
+            <div class="focus-card-actions">
+              <button type="button" id="btn-toggle-instant-block" class="primary-glow-btn full-width" onclick="toggleInstantBlock()">
+                <span>⚡ Start Instant Block</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: Scheduled Block -->
+          <div class="focus-control-card scheduled-block-card" id="card-scheduled-block">
+            <div class="focus-card-header">
+              <div class="focus-card-title-row">
+                <span class="focus-card-icon">⏰</span>
+                <div>
+                  <h3>Scheduled Block</h3>
+                  <span class="focus-card-subtitle">Automated daily focus windows</span>
+                </div>
+              </div>
+              <label class="ios-switch">
+                <input type="checkbox" id="setting-scheduled-block" checked onchange="toggleScheduledBlockEnabled(this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <p class="focus-card-desc">Auto-restricts distracting apps during your recurring gym training, work, or bedtime hours.</p>
+
+            <div class="schedule-times-row">
+              <div class="schedule-time-box">
+                <label>Start Time</label>
+                <input type="time" id="schedule-start-time" class="ios-time-input" value="09:00" onchange="updateScheduledBlockTimes()">
+              </div>
+              <span class="schedule-arrow">to</span>
+              <div class="schedule-time-box">
+                <label>End Time</label>
+                <input type="time" id="schedule-end-time" class="ios-time-input" value="17:00" onchange="updateScheduledBlockTimes()">
+              </div>
+            </div>
+
+            <div class="schedule-days-row" id="schedule-days-selector">
+              <button type="button" class="day-chip active" data-day="Mon" onclick="toggleScheduleDay('Mon')">M</button>
+              <button type="button" class="day-chip active" data-day="Tue" onclick="toggleScheduleDay('Tue')">T</button>
+              <button type="button" class="day-chip active" data-day="Wed" onclick="toggleScheduleDay('Wed')">W</button>
+              <button type="button" class="day-chip active" data-day="Thu" onclick="toggleScheduleDay('Thu')">T</button>
+              <button type="button" class="day-chip active" data-day="Fri" onclick="toggleScheduleDay('Fri')">F</button>
+              <button type="button" class="day-chip" data-day="Sat" onclick="toggleScheduleDay('Sat')">S</button>
+              <button type="button" class="day-chip" data-day="Sun" onclick="toggleScheduleDay('Sun')">S</button>
+            </div>
+
+            <div class="schedule-status-banner" id="schedule-status-banner">
+              <span class="schedule-indicator-dot" id="schedule-indicator-dot"></span>
+              <span id="schedule-status-text">Schedule Active &bull; Mon-Fri 09:00 - 17:00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Designated Distracting Apps Restrictions Manager -->
+        <div class="distraction-targets-card">
+          <div class="dt-header">
+            <div class="dt-header-left">
+              <span class="dt-icon">🛡️</span>
+              <div>
+                <h3>Designated Distracting Apps</h3>
+                <span class="dt-subtitle">Enforced during Instant &amp; Scheduled blocks</span>
+              </div>
+            </div>
+            <span class="dt-count-pill" id="dt-active-count">4 Apps Restricted</span>
+          </div>
+
+          <div class="dt-apps-list">
+            <!-- App 1: YouTube Shorts -->
+            <div class="dt-app-item">
+              <div class="dt-app-info">
+                <span class="dt-app-emoji">🎬</span>
+                <div>
+                  <strong>YouTube Shorts</strong>
+                  <small>Blocks /shorts, mobile shorts player &amp; algorithmic video shelves</small>
+                </div>
+              </div>
+              <label class="ios-switch">
+                <input type="checkbox" id="target-yt-shorts" checked onchange="toggleDistractionTarget('youtubeShorts', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- App 2: Games & Gaming Apps -->
+            <div class="dt-app-item">
+              <div class="dt-app-info">
+                <span class="dt-app-emoji">🎮</span>
+                <div>
+                  <strong>Mobile &amp; PC Games</strong>
+                  <small>Restricts launching mobile games, web games &amp; gaming feeds</small>
+                </div>
+              </div>
+              <label class="ios-switch">
+                <input type="checkbox" id="target-games" checked onchange="toggleDistractionTarget('games', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- App 3: Instagram Reels & Explore -->
+            <div class="dt-app-item">
+              <div class="dt-app-info">
+                <span class="dt-app-emoji">📱</span>
+                <div>
+                  <strong>Instagram Reels &amp; Explore</strong>
+                  <small>Locks infinite scroll; preserves DM Chat Inbox &amp; friend reels</small>
+                </div>
+              </div>
+              <label class="ios-switch">
+                <input type="checkbox" id="target-ig-reels" checked onchange="toggleDistractionTarget('instagramReels', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- App 4: TikTok & Fast Feeds -->
+            <div class="dt-app-item">
+              <div class="dt-app-info">
+                <span class="dt-app-emoji">🎵</span>
+                <div>
+                  <strong>TikTok &amp; Fast Feeds</strong>
+                  <small>Locks rapid algorithmic short-form video streaming</small>
+                </div>
+              </div>
+              <label class="ios-switch">
+                <input type="checkbox" id="target-tiktok" checked onchange="toggleDistractionTarget('tiktok', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Custom Distracting Apps & Sites -->
+            <div class="dt-custom-section">
+              <div class="dt-custom-input-row">
+                <input type="text" id="input-custom-distraction" class="ios-input" placeholder="Add custom app or URL (e.g. reddit, twitter, roblox)...">
+                <button type="button" class="secondary-btn small-btn" onclick="addCustomDistractionTarget()">+ Add</button>
+              </div>
+              <div class="dt-custom-tags" id="dt-custom-tags-container">
+                <!-- Custom tags dynamically rendered -->
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Doomscroll Bank Card -->
         <div class="scroll-card" id="scroll-card">
           <div class="scroll-card-top">
@@ -874,6 +1046,7 @@
             <button type="button" class="cam-quick-mode-btn" onclick="openCameraCoach('plank')">&#9201;&#65039; Plank</button>
           </div>
           <label class="scroll-toggle-row"><input type="checkbox" id="setting-require-camera" checked> Only camera-verified reps earn scroll time</label>
+          <button type="button" class="faq-link-pill-btn" onclick="navigateToSettingsFaq('camera')">📖 How Camera AI Pose Tracking &amp; Bank Work &rarr;</button>
         </div>
 
         <!-- Non-Scrolling Messenger Shield: Chat Inbox & Friend-Sent Reels Allowed -->
@@ -884,7 +1057,7 @@
               <h2 class="noscroll-title">Chat Inbox &amp; Friend Reels Only</h2>
               <p class="noscroll-desc">Stops endless feed doomscrolling while letting you open Instagram Messenger DMs and watch the specific Reels your friends sent you.</p>
             </div>
-            <label class="ios-switch" title="Allow Chat Inbox & Friend Reels without scrolling">
+            <label class="ios-switch" title="Allow Chat Inbox &amp; Friend Reels without scrolling">
               <input type="checkbox" id="setting-dm-only-mode" checked>
               <span class="slider"></span>
             </label>
@@ -971,24 +1144,9 @@
             </div>
           </div>
 
-          <details class="scroll-help" style="margin-top:14px;" open>
-            <summary>How to block Instagram &amp; YouTube Shorts outside Moon (PC &amp; iPhone)</summary>
-            <ol>
-              <li><strong>On PC Browser (Chrome / Edge / Brave):</strong> Tap <strong>"&#129513; Enable Browser Blocker"</strong> above &rarr; open <code>chrome://extensions</code> &rarr; enable <strong>Developer mode</strong> &rarr; click <strong>Load unpacked</strong> and select the <code>moon_antiscroll_extension</code> folder. It automatically blocks <strong>YouTube Shorts</strong> (<code>/shorts</code>) and redirects <strong>Instagram Feeds</strong> to <code>/direct/inbox/</code> (DMs &amp; 1 Friend Reel only)!</li>
-              <li><strong>On iPhone (iOS Shortcuts Automation for Instagram + YouTube Apps):</strong>
-                <ul>
-                  <li>Keep <code>run_app.bat</code> / <code>serve.py</code> running on your PC (same Wi-Fi).</li>
-                  <li>In iPhone <strong>Shortcuts &rarr; Automation &rarr; + &rarr; App</strong>: select <strong>YouTube</strong> (Is Opened, Run Immediately):<br>
-                    Action 1: <strong>Get Contents of URL</strong> <code id="scroll-status-url">/api/scroll</code><br>
-                    Action 2: <strong>If</strong> result <em>contains</em> <code>blocked</code> &rarr; <strong>Go to Home Screen</strong>.</li>
-                  <li>For <strong>Instagram (Is Opened, Run Immediately)</strong>:<br>
-                    Action 1: <strong>Get Contents of URL</strong> <code>/api/scroll</code><br>
-                    Action 2: <strong>If</strong> result <em>contains</em> <code>dm_only</code> &rarr; <strong>Open URLs</strong> <code>instagram://direct-inbox</code> (forces Instagram straight into your Chat Inbox, skipping Reels &amp; Home!).</li>
-                </ul>
-              </li>
-              <li><strong>Safari / Tampermonkey Userscript (iOS &amp; PC):</strong> Install <a href="/ig-noscroll.user.js" target="_blank" style="color:var(--accent-lime);font-weight:700;">ig-noscroll.user.js</a> to block YouTube Shorts &amp; lock Instagram to DMs + 1 Friend Reel in Safari.</li>
-            </ol>
-          </details>
+          <button type="button" class="faq-link-pill-btn" style="margin-top:14px;" onclick="navigateToSettingsFaq('blocker')">
+            📖 View Blocker Setup Guide (PC, iPhone &amp; Safari) in Settings &rarr;
+          </button>
         </div>
       </section>
 
@@ -1087,6 +1245,12 @@
             <button class="theme-swatch" data-theme-id="ocean"><span class="swatch-dot" style="background:linear-gradient(135deg,#5CCBFA,#0A2A44)"></span>Ocean</button>
             <button class="theme-swatch" data-theme-id="violet"><span class="swatch-dot" style="background:linear-gradient(135deg,#B79EFB,#2A1060)"></span>Violet</button>
             <button class="theme-swatch" data-theme-id="gold"><span class="swatch-dot" style="background:linear-gradient(135deg,#FBC85A,#4A2E00)"></span>Gold</button>
+            <button class="theme-swatch" data-theme-id="crimson"><span class="swatch-dot" style="background:linear-gradient(135deg,#FF2A55,#5A0618)"></span>Crimson</button>
+            <button class="theme-swatch" data-theme-id="cyan"><span class="swatch-dot" style="background:linear-gradient(135deg,#00F0FF,#004880)"></span>Cyan</button>
+            <button class="theme-swatch" data-theme-id="emerald"><span class="swatch-dot" style="background:linear-gradient(135deg,#00E676,#004D25)"></span>Emerald</button>
+            <button class="theme-swatch" data-theme-id="orange"><span class="swatch-dot" style="background:linear-gradient(135deg,#FF6D00,#661800)"></span>Orange</button>
+            <button class="theme-swatch" data-theme-id="rose"><span class="swatch-dot" style="background:linear-gradient(135deg,#FF3377,#660024)"></span>Rose</button>
+            <button class="theme-swatch" data-theme-id="silver"><span class="swatch-dot" style="background:linear-gradient(135deg,#FFFFFF,#444444)"></span>Silver</button>
           </div>
         </div>
 
@@ -1158,6 +1322,238 @@
               <input type="checkbox" id="setting-demo-mode">
               <span class="slider"></span>
             </label>
+          </div>
+        </div>
+
+        <!-- Knowledge Base & Frequently Asked Questions (FAQ Page) -->
+        <div class="settings-group" id="settings-faq-section">
+          <div class="settings-faq-card">
+            <div class="faq-top-row">
+              <div class="dt-header-left">
+                <span class="dt-icon">📖</span>
+                <div>
+                  <h3 style="margin:0; font-size:1.1rem; color:#FFF; font-weight:800;">Knowledge Base &amp; FAQs</h3>
+                  <span class="dt-subtitle">AI Guidance, Prompt Library, Camera Vision &amp; Blocker Setup</span>
+                </div>
+              </div>
+              <span class="faq-badge">OFFICIAL OS GUIDE</span>
+            </div>
+
+            <!-- Instant Search Field -->
+            <div class="faq-search-box">
+              <span class="faq-search-icon">🔍</span>
+              <input type="text" id="faq-search-input" placeholder="Search FAQs, AI Prompts &amp; Setup instructions..." oninput="filterFaqSearch(this.value)">
+            </div>
+
+            <!-- Category Pills -->
+            <div class="faq-category-nav" id="faq-category-nav">
+              <button type="button" class="faq-cat-btn active" data-cat="all" onclick="selectFaqCategory('all')">All FAQs</button>
+              <button type="button" class="faq-cat-btn" data-cat="ai-coach" onclick="selectFaqCategory('ai-coach')">🤖 AI Coaches &amp; Prompts</button>
+              <button type="button" class="faq-cat-btn" data-cat="blocker" onclick="selectFaqCategory('blocker')">🛑 App Blocker Setup</button>
+              <button type="button" class="faq-cat-btn" data-cat="camera" onclick="selectFaqCategory('camera')">📷 Camera Vision</button>
+              <button type="button" class="faq-cat-btn" data-cat="leaderboard" onclick="selectFaqCategory('leaderboard')">🏆 PRs &amp; Citadel</button>
+            </div>
+
+            <!-- FAQ Accordion Items List -->
+            <div class="faq-list" id="faq-accordion-container">
+              <!-- Item 1: Who are the AI Coaches -->
+              <div class="faq-item" id="faq-item-1" data-cat="ai-coach">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-1')">
+                  <span>🤖 Who are Coach Nurv and Coach Maryam, and what are their coaching styles?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Moon Fitness OS integrates two specialized AI assistants designed around distinct biomechanical disciplines:</p>
+                  <ul>
+                    <li><strong>Coach Nurv (Male AI Assistant):</strong> The Titan Bio-Strategist. Focused on absolute mechanical overload, pause-rep hypertrophy, heavy barbell technique, and progressive overload law. Tone is intense, stoic, and relentlessly biomechanical.</li>
+                    <li><strong>Coach Maryam (Female AI Assistant):</strong> The Valkyrie Precision Architect. Focused on posterior-chain kinetic torque, explosive hip drive, high-density cadence, and glute/quad anatomical mastery. Tone is sharp, disciplined, and uncompromising.</li>
+                  </ul>
+                  <p>You can choose either coach freely during onboarding or switch anytime via Settings or the floating chat bubble!</p>
+                </div>
+              </div>
+
+              <!-- Item 2: 6 Hardcoded Domains & Prompts -->
+              <div class="faq-item open" id="faq-item-2" data-cat="ai-coach">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-2')">
+                  <span>📐 What are the 6 hardcoded fitness &amp; nutrition domains the AI can answer?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Both Coach Nurv and Coach Maryam have hardcoded system guardrails strictly limiting responses to 6 specialized domains. Tap any card below to immediately query your assigned coach:</p>
+                  <div class="faq-prompt-grid">
+                    <div class="faq-prompt-card" onclick="askCoachFromFaq('How do I optimize my bench press and squat form cues?')">
+                      <span class="faq-prompt-title">1. Form Development</span>
+                      <span class="faq-prompt-desc">Bar path, scapular retraction, hip hinge geometry, foot rooting.</span>
+                      <span class="faq-prompt-action">Ask Coach &rarr;</span>
+                    </div>
+                    <div class="faq-prompt-card" onclick="askCoachFromFaq('How do I fix knee caving during squats and lower back rounding on deadlifts?')">
+                      <span class="faq-prompt-title">2. Form Correction</span>
+                      <span class="faq-prompt-desc">Fixing butt wink, elbow flare, valgus collapse, and rib flare.</span>
+                      <span class="faq-prompt-action">Ask Coach &rarr;</span>
+                    </div>
+                    <div class="faq-prompt-card" onclick="askCoachFromFaq('I have unknown shoulder and knee pain during lifting, how should I triage and modify?')">
+                      <span class="faq-prompt-title">3. Unknown Pain Queries</span>
+                      <span class="faq-prompt-desc">Red-flag triage, load modification, tempo reduction, medical disclaimer.</span>
+                      <span class="faq-prompt-action">Ask Coach &rarr;</span>
+                    </div>
+                    <div class="faq-prompt-card" onclick="askCoachFromFaq('How much protein and calories should I eat for my bodyweight and strength goals?')">
+                      <span class="faq-prompt-title">4. Diet &amp; Macros</span>
+                      <span class="faq-prompt-desc">Protein targets (1.6-2.2g/kg), caloric surplus/deficit, peri-workout carbs.</span>
+                      <span class="faq-prompt-action">Ask Coach &rarr;</span>
+                    </div>
+                    <div class="faq-prompt-card" onclick="askCoachFromFaq('How should I structure a 4-day Upper Lower or 6-day Push Pull Legs split?')">
+                      <span class="faq-prompt-title">5. Workout Splits</span>
+                      <span class="faq-prompt-desc">PPL, Upper/Lower, Full Body frequency, weekly set volume (10-20 sets).</span>
+                      <span class="faq-prompt-action">Ask Coach &rarr;</span>
+                    </div>
+                    <div class="faq-prompt-card" onclick="askCoachFromFaq('Explain progressive overload double progression and RPE rate of perceived exertion')">
+                      <span class="faq-prompt-title">6. Gym Guidance</span>
+                      <span class="faq-prompt-desc">RIR (Reps in Reserve), double progression, warm-up pyramids, rest times.</span>
+                      <span class="faq-prompt-action">Ask Coach &rarr;</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 3: Guardrails & Declines -->
+              <div class="faq-item" id="faq-item-3" data-cat="ai-coach">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-3')">
+                  <span>🛡️ Why does the AI coach decline non-fitness questions?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>To keep you locked in and prevent distractions in the gym, our AI assistants are programmed with strict conversational boundaries. Questions concerning code, politics, homework, entertainment, or random chit-chat are politely declined with a redirect back to your training, nutrition, or biomechanics.</p>
+                </div>
+              </div>
+
+              <!-- Item 4: Instant Block & Scheduled Block -->
+              <div class="faq-item" id="faq-item-4" data-cat="blocker">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-4')">
+                  <span>⚡ How do Instant Block and Scheduled Block manage app restrictions?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>In the <strong>Focus</strong> tab, you have two master restriction controls:</p>
+                  <ul>
+                    <li><strong>Instant Block:</strong> Immediately locks down designated distracting apps (YouTube Shorts, games, Instagram feeds) for a set time (15m, 30m, 1h, 2h, or indefinite). Displays a live countdown timer and cuts off feed access on all linked devices and browsers.</li>
+                    <li><strong>Scheduled Block:</strong> Lets you automate recurring daily focus windows (e.g. Monday to Friday 09:00 to 17:00). The app automatically restricts YouTube Shorts, mobile games, and social media during those hours without manual intervention.</li>
+                  </ul>
+                  <p>You can toggle which apps are included under <em>Designated Distracting Apps</em>: YouTube Shorts, Mobile &amp; PC Games, Instagram Reels &amp; Explore, TikTok, or custom URLs!</p>
+                </div>
+              </div>
+
+              <!-- Item 5: PC Browser Blocker Setup -->
+              <div class="faq-item" id="faq-item-5" data-cat="blocker">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-5')">
+                  <span>💻 How do I set up the PC Browser Blocker (Chrome, Edge, Brave)?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <ol>
+                    <li>On the Focus tab, tap <strong>"🧩 Enable Browser Blocker"</strong> to copy the local extension path.</li>
+                    <li>In your browser (Chrome, Edge, or Brave), navigate to <code>chrome://extensions</code> or <code>edge://extensions</code>.</li>
+                    <li>Turn on the <strong>Developer mode</strong> switch in the top-right corner.</li>
+                    <li>Click <strong>"Load unpacked"</strong> and select the <code>moon_antiscroll_extension</code> folder located inside the app directory.</li>
+                    <li>Done! The extension automatically blocks YouTube Shorts (<code>/shorts/*</code>) and redirects Instagram feeds to your DM Inbox (<code>/direct/inbox/</code>) whenever Instant Block or zero scroll balance is active.</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 6: iPhone iOS Shortcuts Automation -->
+              <div class="faq-item" id="faq-item-6" data-cat="blocker">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-6')">
+                  <span>📱 How do I set up iPhone iOS Shortcuts to block YouTube and redirect Instagram?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>You can enforce app blocking natively on your iPhone using the built-in iOS Shortcuts app connected to Moon's local API:</p>
+                  <ol>
+                    <li>Ensure Moon server (<code>run_app.bat</code>) is running on your PC on the same Wi-Fi network.</li>
+                    <li>Open <strong>Shortcuts &rarr; Automation &rarr; + (New Automation) &rarr; App</strong> on iPhone.</li>
+                    <li>Choose <strong>YouTube</strong> (select "Is Opened", choose "Run Immediately"):
+                      <ul>
+                        <li>Action 1: <code>Get Contents of URL</code> &rarr; <code>http://&lt;PC_IP&gt;:8080/api/scroll</code></li>
+                        <li>Action 2: <code>If [Contents of URL] contains "blocked" or "dm_only"</code> &rarr; <code>Go to Home Screen</code></li>
+                      </ul>
+                    </li>
+                    <li>Repeat for <strong>Instagram</strong> (select "Is Opened", "Run Immediately"):
+                      <ul>
+                        <li>Action 1: <code>Get Contents of URL</code> &rarr; <code>http://&lt;PC_IP&gt;:8080/api/scroll</code></li>
+                        <li>Action 2: <code>If [Contents of URL] contains "dm_only"</code> &rarr; <code>Open URLs</code> &rarr; <code>instagram://direct-inbox</code> (skips Reels &amp; Home feeds completely!).</li>
+                      </ul>
+                    </li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 7: Safari Userscript -->
+              <div class="faq-item" id="faq-item-7" data-cat="blocker">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-7')">
+                  <span>🌐 How do I install the Safari / Tampermonkey userscript?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>If you use Safari on iOS (with Userscripts extension) or Tampermonkey on desktop, install our standalone script:</p>
+                  <p><a href="/ig-noscroll.user.js" target="_blank" style="color:var(--accent-lime); font-weight:700; text-decoration:underline;">ig-noscroll.user.js</a></p>
+                  <p>This script blocks YouTube Shorts and locks Instagram navigation to Direct Messages and single friend reels.</p>
+                </div>
+              </div>
+
+              <!-- Item 8: Camera Vision Rep Tracking -->
+              <div class="faq-item" id="faq-item-8" data-cat="camera">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-8')">
+                  <span>📷 How does the AI Camera Coach verify Push-Ups, Pull-Ups, and Planks?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>The Camera Coach uses client-side MediaPipe Pose Detection running directly in your browser with zero video uploaded to external servers:</p>
+                  <ul>
+                    <li><strong>Push-Ups:</strong> Tracks elbow angles (inflection past 90 degrees at bottom) and full arm extension at the top.</li>
+                    <li><strong>Pull-Ups:</strong> Tracks wrist-to-chin elevation and arm lockout at dead hang.</li>
+                    <li><strong>Planks:</strong> Measures spine, hip, and shoulder alignment, accumulating seconds in proper horizontal posture.</li>
+                  </ul>
+                  <p>Position your phone at waist height 6-8 feet away with your full body visible in the camera frame.</p>
+                </div>
+              </div>
+
+              <!-- Item 9: Doomscroll Bank Calculation -->
+              <div class="faq-item" id="faq-item-9" data-cat="camera">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-9')">
+                  <span>💰 How does the Doomscroll Bank reward system work?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>In Moon Fitness OS, screen time is earned through physical exertion:</p>
+                  <ul>
+                    <li><strong>+2 minutes</strong> of unblocked scroll time for every camera-verified push-up or pull-up rep.</li>
+                    <li><strong>+2 minutes</strong> for every 60 seconds of hold time in a camera-verified plank.</li>
+                  </ul>
+                  <p>When you start a scrolling session, the timer counts down. When it reaches <code>0:00</code>, feeds are locked immediately!</p>
+                </div>
+              </div>
+
+              <!-- Item 10: PR Leaderboards & Gender Brackets -->
+              <div class="faq-item" id="faq-item-10" data-cat="leaderboard">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-10')">
+                  <span>🏆 Why is gender selection mandatory during sign-up?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>During registration, selecting your gender bracket (Male ♂ or Female ♀) ensures the PR &amp; Ranks leaderboard automatically displays only your division without needing manual filtering. Male athletes compete on the Male Division leaderboard, and Female athletes compete on the Female Division leaderboard, with custom anatomy heatmaps corresponding to their physique.</p>
+                </div>
+              </div>
+
+              <!-- Item 11: Obsidian Citadel Admin Dashboard -->
+              <div class="faq-item" id="faq-item-11" data-cat="leaderboard">
+                <div class="faq-question" onclick="toggleFaqItem('faq-item-11')">
+                  <span>👑 What is the Obsidian Citadel Admin Dashboard?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">
+                  <p>The Obsidian Citadel is a restricted control center for admin tier accounts (such as @admin and @alex). Admins can view both male and female leaderboards side-by-side with gender filters completely bypassed, manage all registered athlete accounts, adjust tiers, and oversee platform updates.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1252,7 +1648,7 @@
       <!-- Floating AI Coach Chat Bubble (Positioned right above the Settings tab) -->
       <button type="button" id="tab-coach-chat-bubble" class="tab-coach-chat-bubble" onclick="openAICoachModal()" title="Talk to your AI Coach" aria-label="Talk to your AI Coach">
         <span class="coach-bubble-pulse-dot"></span>
-        <span class="coach-bubble-icon" id="coach-bubble-icon">⚡</span>
+        <span class="coach-bubble-icon" id="coach-bubble-icon"><img src="image_7.png" alt="Coach Avatar" class="coach-bubble-avatar-img"></span>
         <span class="coach-bubble-name" id="coach-bubble-name">Nurv</span>
         <span class="coach-bubble-tail"></span>
       </button>
@@ -1274,6 +1670,27 @@
           <button class="modal-close-btn" onclick="closeModal('modal-add-exercise')">&times;</button>
         </div>
         
+        <!-- Live Accent Theme Selector for Routine Search -->
+        <div class="routine-search-theme-bar">
+          <div class="rs-theme-header">
+            <span class="rs-theme-title">🎨 UI Accent Theme</span>
+            <span class="rs-theme-hint">Switch app color palette</span>
+          </div>
+          <div class="rs-theme-swatches-scroll" id="routine-search-theme-swatches">
+            <button type="button" class="rs-theme-swatch" data-theme-id="maroon" onclick="applyTheme('maroon')"><span class="rs-swatch-dot" style="background:#E0506A"></span>Maroon</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="lime" onclick="applyTheme('lime')"><span class="rs-swatch-dot" style="background:#CCFF00"></span>Lime</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="ocean" onclick="applyTheme('ocean')"><span class="rs-swatch-dot" style="background:#38BDF8"></span>Ocean</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="violet" onclick="applyTheme('violet')"><span class="rs-swatch-dot" style="background:#A78BFA"></span>Violet</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="gold" onclick="applyTheme('gold')"><span class="rs-swatch-dot" style="background:#F5B83D"></span>Gold</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="crimson" onclick="applyTheme('crimson')"><span class="rs-swatch-dot" style="background:#FF2A55"></span>Crimson</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="cyan" onclick="applyTheme('cyan')"><span class="rs-swatch-dot" style="background:#00F0FF"></span>Cyan</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="emerald" onclick="applyTheme('emerald')"><span class="rs-swatch-dot" style="background:#00E676"></span>Emerald</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="orange" onclick="applyTheme('orange')"><span class="rs-swatch-dot" style="background:#FF6D00"></span>Orange</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="rose" onclick="applyTheme('rose')"><span class="rs-swatch-dot" style="background:#FF3377"></span>Rose</button>
+            <button type="button" class="rs-theme-swatch" data-theme-id="silver" onclick="applyTheme('silver')"><span class="rs-swatch-dot" style="background:#E0E0E0"></span>Silver</button>
+          </div>
+        </div>
+
         <div class="search-input-wrap">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
@@ -1819,7 +2236,7 @@
     <div class="modal-card coach-modal-card">
       <div class="modal-header coach-modal-header" id="coach-modal-header">
         <div class="coach-header-left">
-          <div class="coach-avatar-circle" id="coach-avatar-circle">⚡</div>
+          <div class="coach-avatar-circle" id="coach-avatar-circle"><img src="image_7.png" alt="Coach Avatar" class="coach-avatar-img"></div>
           <div>
             <h3 id="coach-modal-title">Coach Nurv</h3>
             <span class="coach-status-tag" id="coach-modal-subtitle">Titan Bio-Strategist &bull; Active</span>
@@ -1851,7 +2268,7 @@
       <!-- Live Chat Transcript Stream -->
       <div class="coach-chat-stream" id="coach-chat-stream">
         <div class="coach-msg assistant">
-          <div class="coach-msg-avatar" id="coach-msg-avatar">Nurv</div>
+          <div class="coach-msg-avatar" id="coach-msg-avatar"><img src="image_7.png" alt="Coach Avatar" class="coach-avatar-img"></div>
           <div class="coach-msg-bubble" id="coach-welcome-bubble">
             Greetings, athlete. Coach Nurv locked in. Mechanical tension and progressive overload are the law. What's our target today?
           </div>
@@ -1886,10 +2303,10 @@
     </div>
   </div>
 
-  <script src="auth.js?v=54"></script>
-  <script src="app.js?v=54"></script>
-  <script src="camera.js?v=54"></script>
-  <script src="ranks.js?v=54"></script>
+  <script src="auth.js?v=55"></script>
+  <script src="app.js?v=55"></script>
+  <script src="camera.js?v=55"></script>
+  <script src="ranks.js?v=55"></script>
 </body>
 </html>
 

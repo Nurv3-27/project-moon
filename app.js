@@ -2882,7 +2882,21 @@ window.selectInstantDuration = selectInstantDuration;
 function toggleInstantBlock() {
   ensureFocusBlockState();
   if (AppState.focusBlock.instantActive) {
-    stopInstantBlock();
+    // Opal Gesture Rule: When active lockdown is in progress, simple accidental taps are rejected.
+    // User must perform the 3-second hold gesture on the Hold to Cancel button.
+    const holdContainer = document.getElementById('opal-hold-cancel-container');
+    const holdBtn = document.getElementById('opal-hold-cancel-btn');
+    if (holdContainer) holdContainer.classList.remove('hidden');
+    if (holdBtn) {
+      holdBtn.classList.remove('pulse-alert');
+      void holdBtn.offsetWidth; // trigger reflow
+      holdBtn.classList.add('pulse-alert');
+    }
+    triggerHaptic([35, 20]);
+    const alertMsg = window.t
+      ? window.t('hold_protected_alert')
+      : '⚠️ Active lockdown protected! Press and hold the Cancel button for 3 seconds.';
+    showToast(alertMsg);
   } else {
     startInstantBlock(AppState.focusBlock.instantDurationMinutes || 15);
   }
@@ -2925,6 +2939,157 @@ function stopInstantBlock() {
   showToast('⚡ Instant Block deactivated.');
 }
 window.stopInstantBlock = stopInstantBlock;
+
+// ==================== OPAL-STYLE FUTURISTIC HOLD-TO-CANCEL GESTURE ====================
+let holdCancelAnimId = null;
+let holdCancelStartTime = 0;
+let holdIsActive = false;
+const HOLD_CANCEL_DURATION_MS = 3000;
+const HOLD_RING_CIRCUMFERENCE = 314.16; // 2 * PI * 50
+
+function initHoldToCancel() {
+  const holdBtn = document.getElementById('opal-hold-cancel-btn');
+  const instantHeroBtn = document.getElementById('opal-btn-instant-block');
+  const targets = [holdBtn, instantHeroBtn].filter(Boolean);
+
+  const ringFill = document.getElementById('opal-hold-ring-fill');
+  const countdownEl = document.getElementById('opal-hold-countdown');
+  const holdWrapper = document.getElementById('opal-hold-btn-wrapper');
+
+  if (ringFill) {
+    ringFill.style.strokeDasharray = `${HOLD_RING_CIRCUMFERENCE}`;
+    ringFill.style.strokeDashoffset = `${HOLD_RING_CIRCUMFERENCE}`;
+  }
+
+  function resetHoldVisuals() {
+    if (holdCancelAnimId) {
+      cancelAnimationFrame(holdCancelAnimId);
+      holdCancelAnimId = null;
+    }
+    holdIsActive = false;
+    holdCancelStartTime = 0;
+
+    if (ringFill) {
+      ringFill.style.strokeDashoffset = `${HOLD_RING_CIRCUMFERENCE}`;
+    }
+    if (countdownEl) {
+      const isRTL = window.I18N && window.I18N.isRTL();
+      countdownEl.textContent = isRTL ? 'اضغط 3 ثوانٍ' : 'Hold 3s';
+    }
+    if (holdWrapper) {
+      holdWrapper.classList.remove('is-holding');
+    }
+    targets.forEach(el => el.classList.remove('is-holding'));
+  }
+
+  function onPointerDown(e) {
+    ensureFocusBlockState();
+    // Only engage hold-to-cancel if an active block or lockdown is running
+    if (!AppState.focusBlock.instantActive && !AppState.scroll.antiScrollActive) {
+      return;
+    }
+
+    // Only left click on mouse
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+    if (e.cancelable) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+
+    resetHoldVisuals();
+    holdIsActive = true;
+    holdCancelStartTime = performance.now();
+
+    if (holdWrapper) holdWrapper.classList.add('is-holding');
+    e.currentTarget.classList.add('is-holding');
+
+    triggerHaptic([35]);
+
+    let lastRemainingInteger = 3;
+
+    function animateHold(now) {
+      if (!holdIsActive) return;
+
+      const elapsed = now - holdCancelStartTime;
+      const progress = Math.min(1, elapsed / HOLD_CANCEL_DURATION_MS);
+
+      // Animate glowing maroon SVG progress ring filling up
+      if (ringFill) {
+        ringFill.style.strokeDashoffset = `${HOLD_RING_CIRCUMFERENCE * (1 - progress)}`;
+      }
+
+      // Live countdown display
+      const remainingSec = Math.max(0, (HOLD_CANCEL_DURATION_MS - elapsed) / 1000);
+      const isRTL = window.I18N && window.I18N.isRTL();
+      if (countdownEl) {
+        countdownEl.textContent = `${remainingSec.toFixed(1)}${isRTL ? ' ث' : 's'}`;
+      }
+
+      // Haptic pulse for each full second held
+      const currentInt = Math.ceil(remainingSec);
+      if (currentInt < lastRemainingInteger && currentInt > 0) {
+        lastRemainingInteger = currentInt;
+        triggerHaptic([25]);
+      }
+
+      // If held for the full 3 seconds, execute the pause/cancel function and trigger haptic feedback
+      if (progress >= 1) {
+        holdIsActive = false;
+        holdCancelAnimId = null;
+
+        // Rich haptic feedback + success ping
+        triggerHaptic([60, 40, 100, 50, 180]);
+        playSetCompletePing();
+
+        // Execute pause/cancel function
+        stopInstantBlock();
+        if (AppState.scroll.antiScrollActive) {
+          AppState.scroll.antiScrollActive = false;
+          saveState();
+        }
+
+        const successMsg = window.t
+          ? window.t('hold_cancelled_toast')
+          : '🛑 Lockdown successfully cancelled after 3s hold!';
+        showToast(successMsg);
+
+        resetHoldVisuals();
+        return;
+      }
+
+      holdCancelAnimId = requestAnimationFrame(animateHold);
+    }
+
+    holdCancelAnimId = requestAnimationFrame(animateHold);
+  }
+
+  function onPointerUp(e) {
+    if (!holdIsActive) return;
+    const heldTime = performance.now() - holdCancelStartTime;
+
+    resetHoldVisuals();
+
+    // If released early, instantly reset progress to zero and alert if user attempted hold
+    if (heldTime >= 350) {
+      triggerHaptic([15]);
+      const earlyMsg = window.t
+        ? window.t('hold_early_toast')
+        : '⚠️ Keep holding for full 3 seconds to break lockdown!';
+      showToast(earlyMsg);
+    }
+  }
+
+  // Bind pointer listeners across target elements
+  targets.forEach((target) => {
+    target.addEventListener('pointerdown', onPointerDown, { passive: false });
+    target.addEventListener('pointerup', onPointerUp, { passive: true });
+    target.addEventListener('pointercancel', onPointerUp, { passive: true });
+    target.addEventListener('pointerleave', onPointerUp, { passive: true });
+  });
+
+  window.addEventListener('pointerup', onPointerUp, { passive: true });
+  window.addEventListener('pointercancel', onPointerUp, { passive: true });
+}
+window.initHoldToCancel = initHoldToCancel;
 
 function toggleScheduledBlockEnabled(enabled) {
   ensureFocusBlockState();
@@ -3061,29 +3226,50 @@ function updateFocusBlockUI() {
     }
   }
 
+  // Update Futuristic Opal Hold-to-Cancel Container
+  const holdContainer = document.getElementById('opal-hold-cancel-container');
+  if (holdContainer) {
+    holdContainer.classList.toggle('hidden', !fb.instantActive);
+  }
+
   // Update Opal Instant Block Pill
   if (opalInstantBtn) {
     opalInstantBtn.classList.toggle('active-lockdown', Boolean(fb.instantActive));
   }
   if (opalInstantTitle) {
-    opalInstantTitle.textContent = fb.instantActive ? 'Instant Lockdown' : 'Instant Block';
+    const isRTL = window.I18N && window.I18N.isRTL();
+    if (fb.instantActive) {
+      opalInstantTitle.textContent = isRTL ? 'إغلاق فوري مشدد' : 'Instant Lockdown';
+    } else {
+      opalInstantTitle.textContent = isRTL ? 'حظر فوري' : 'Instant Block';
+    }
   }
   if (opalInstantSub) {
+    const isRTL = window.I18N && window.I18N.isRTL();
     if (fb.instantActive) {
-      opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} REMAINING • APPS LOCKED` : 'ACTIVE • APPS RESTRICTED';
+      if (isRTL) {
+        opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} متبقية • التطبيقات مقيدة` : 'نشط • التطبيقات مقيدة';
+      } else {
+        opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} REMAINING • APPS LOCKED` : 'ACTIVE • APPS RESTRICTED';
+      }
     } else {
       const mins = fb.instantDurationMinutes;
-      const durText = (mins === 0 || mins === '0') ? 'INDEFINITE' : (mins >= 60 ? `${mins / 60}H` : `${mins || 15}M`);
-      opalInstantSub.textContent = `${durText} LOCKDOWN • TAP TO BEGIN`;
+      const durText = (mins === 0 || mins === '0') ? (isRTL ? 'مفتوح' : 'INDEFINITE') : (mins >= 60 ? `${mins / 60}${isRTL ? 'س' : 'H'}` : `${mins || 15}${isRTL ? 'د' : 'M'}`);
+      if (isRTL) {
+        opalInstantSub.textContent = `حظر لمدة ${durText} • المس للبدء`;
+      } else {
+        opalInstantSub.textContent = `${durText} LOCKDOWN • TAP TO BEGIN`;
+      }
     }
   }
   if (opalInstantBadge) {
+    const isRTL = window.I18N && window.I18N.isRTL();
     if (fb.instantActive) {
       opalInstantBadge.className = 'opal-badge-pill lockdown';
-      opalInstantBadge.textContent = 'END';
+      opalInstantBadge.textContent = isRTL ? 'إنهاء' : 'END';
     } else {
       opalInstantBadge.className = 'opal-badge-pill';
-      opalInstantBadge.textContent = 'START';
+      opalInstantBadge.textContent = isRTL ? 'بدء' : 'START';
     }
   }
 
@@ -4028,6 +4214,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAntiScrollUI();
   }
 
+  // Initialize Opal Futuristic Hold-to-Cancel gesture for active blocks
+  if (typeof initHoldToCancel === 'function') {
+    initHoldToCancel();
+  }
+
   // Rest time selector (per workout)
   document.getElementById('active-rest-select').addEventListener('change', (e) => {
     if (AppState.activeWorkout) {
@@ -4345,6 +4536,13 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.remove('active');
     }
   });
+
+  // Settings: Language Switcher Toggle Sync
+  const currentAppLang = (window.I18N && window.I18N.getLanguage()) || localStorage.getItem('moon_app_lang') || 'en';
+  const langBtnEn = document.getElementById('btn-lang-en');
+  const langBtnAr = document.getElementById('btn-lang-ar');
+  if (langBtnEn) langBtnEn.classList.toggle('active', currentAppLang === 'en');
+  if (langBtnAr) langBtnAr.classList.toggle('active', currentAppLang === 'ar');
 
   // Settings: Default Rest Select
   const restSelect = document.getElementById('default-rest-select');

@@ -222,9 +222,13 @@
       legacyId: 'N',
       gender: 'male',
       name: 'Coach Nurv',
+      nameAr: 'المدرب نيرف',
       shortName: 'Nurv',
+      shortNameAr: 'نيرف',
       title: 'Titan Bio-Strategist & Mechanical Overload Engine',
+      titleAr: 'خبير الحمل الميكانيكي الحيوي ومحرك الزيادة التدريجية',
       tagline: 'Absolute tension. Biomechanical perfection. Relentless progression.',
+      taglineAr: 'توتر عضلي مطلق. كمال ميكانيكي حيوي. تقدم بلا هوادة.',
       accentColor: '#E0506A',
       badgeBg: 'linear-gradient(135deg, #2E0B14, #4A0E1C)',
       avatarIcon: '⚡',
@@ -233,6 +237,7 @@
       voicePitch: 0.82,
       voiceRate: 1.0,
       greeting: "Greetings, athlete. Coach Nurv locked in. Mechanical tension and progressive overload are the law. What's our target today?",
+      greetingAr: "أهلاً بك أيها البطل. المدرب نيرف معك بكامل التركيز. التوتر العضلي والزيادة التدريجية هما القانون هنا. ما هو هدفنا اليوم؟",
       style: 'intense, stoic, mechanical, hyper-focused on form and overload'
     },
     M: {
@@ -240,9 +245,13 @@
       legacyId: 'M',
       gender: 'female',
       name: 'Coach Maryam',
+      nameAr: 'المدربة مريم',
       shortName: 'Maryam',
+      shortNameAr: 'مريم',
       title: 'Valkyrie Precision Architect & High-Density Master',
+      titleAr: 'مهندسة الدقة والتوافق العضلي وخبير الكثافة التدريبية العالية',
       tagline: 'Kinetic elegance. Glute-posterior torque. Unstoppable cadence.',
+      taglineAr: 'أناقة حركية. عزم السلسلة الخلفية. وتيرة تدريبية لا تتوقف.',
       accentColor: '#F56E8A',
       badgeBg: 'linear-gradient(135deg, #3A0D22, #5C1336)',
       avatarIcon: '👑',
@@ -251,6 +260,7 @@
       voicePitch: 1.16,
       voiceRate: 1.04,
       greeting: "Welcome, warrior. Coach Maryam active. We sculpt symmetry through explosive torque and uncompromising discipline. Let's move.",
+      greetingAr: "مرحباً بكِ أيتها المحاربة. المدربة مريم جاهزة. ننحت التناسق العضلي بالقوة الحركية والانضباط الصارم. لنبدأ فوراً.",
       style: 'sharp, disciplined, high-cadence, anatomical mastery'
     }
   };
@@ -455,6 +465,12 @@
 
     updateCoachModalUI: function () {
       const coach = this.getCoach();
+      const isRTL = window.I18N && window.I18N.isRTL();
+      const coachName = isRTL ? (coach.nameAr || coach.name) : coach.name;
+      const coachTitle = isRTL ? (coach.titleAr || coach.title) : coach.title;
+      const coachTagline = isRTL ? (coach.taglineAr || coach.tagline) : coach.tagline;
+      const coachGreeting = isRTL ? (coach.greetingAr || coach.greeting) : coach.greeting;
+
       const avatarCircle = document.getElementById('coach-avatar-circle');
       const title = document.getElementById('coach-modal-title');
       const subtitle = document.getElementById('coach-modal-subtitle');
@@ -466,20 +482,26 @@
       const modalHeader = document.getElementById('coach-modal-header');
 
       if (avatarCircle) {
-        avatarCircle.innerHTML = `<img src="${coach.avatarImg || (coach.gender === 'female' ? 'coach_blackcat.png' : 'coach_spiderman.png')}" alt="${coach.name}" class="coach-avatar-img">`;
+        avatarCircle.innerHTML = `<img src="${coach.avatarImg || (coach.gender === 'female' ? 'coach_blackcat.png' : 'coach_spiderman.png')}" alt="${coachName}" class="coach-avatar-img">`;
         avatarCircle.style.background = coach.badgeBg;
         avatarCircle.style.borderColor = coach.accentColor;
       }
-      if (title) title.textContent = coach.name;
-      if (subtitle) subtitle.innerHTML = `${coach.title} &bull; Active`;
-      if (tagline) tagline.innerHTML = `&ldquo;${coach.tagline}&rdquo;`;
-      if (welcome) welcome.textContent = coach.greeting;
+      if (title) title.textContent = coachName;
+      if (subtitle) subtitle.innerHTML = isRTL ? `${coachTitle} &bull; نشط` : `${coachTitle} &bull; Active`;
+      if (tagline) tagline.innerHTML = `&ldquo;${coachTagline}&rdquo;`;
+      if (welcome) welcome.textContent = coachGreeting;
       if (msgAvatar) {
-        msgAvatar.innerHTML = `<img src="${coach.avatarImg || (coach.gender === 'female' ? 'coach_blackcat.png' : 'coach_spiderman.png')}" alt="${coach.name}" class="coach-avatar-img">`;
+        msgAvatar.innerHTML = `<img src="${coach.avatarImg || (coach.gender === 'female' ? 'coach_blackcat.png' : 'coach_spiderman.png')}" alt="${coachName}" class="coach-avatar-img">`;
         msgAvatar.style.background = 'transparent';
         msgAvatar.style.borderColor = coach.accentColor;
       }
-      if (voiceLabel) voiceLabel.textContent = this.voiceEnabled ? 'Voice: ON' : 'Voice: OFF';
+      if (voiceLabel) {
+        if (isRTL) {
+          voiceLabel.textContent = this.voiceEnabled ? 'الصوت: مفعّل' : 'الصوت: معطّل';
+        } else {
+          voiceLabel.textContent = this.voiceEnabled ? 'Voice: ON' : 'Voice: OFF';
+        }
+      }
       if (voiceIcon) voiceIcon.textContent = this.voiceEnabled ? '🔊' : '🔇';
       if (modalHeader) modalHeader.style.borderBottomColor = coach.accentColor;
     },
@@ -850,9 +872,21 @@ Frequency: 3-day (PPL-Rest-Rest) or 6-day (PPL-Rest-PPL).`;
 
     // Polite Decline for Queries Outside Fitness, Pain Management, and Nutrition
     declineOutOfScope: function (coach) {
+      const isRTL = window.I18N && window.I18N.isRTL();
       let reply = '';
       if (coach.gender === 'female') {
-        reply = `I am Coach Maryam, your high-density precision fitness and nutrition architect. My directives are strictly hardcoded to physical training. I exclusively assist with:
+        if (isRTL) {
+          reply = `أنا المدربة مريم، مهندسة اللياقة البدنية والتغذية الدقيقة. تعليماتي مبرمجة حصرياً للتدريب البدني والتغذية، وتوجيهاتي تقتصر على:
+• 📐 تطوير الأداء والتكنيك الحركي
+• 🛠️ تصحيح التكنيك وتعديل التوازن العضلي
+• ⚠️ تحليل آلام التمرين والتعديل الحركي
+• 🥗 التغذية والماكروز والسعرات الحرارية
+• 📅 تصميم جداول التمارين وتقسيم الأيام
+• ⚡ إرشادات الجيم العامة والشدة التدريبية
+
+أعتذر بكل لطف عن الإجابة على أي أسئلة خارج هذه الحدود الرياضية للحفاظ على تركيزنا وطاقتك. كيف يمكنني مساعدتك في تمرينك أو غذائك اليوم؟`;
+        } else {
+          reply = `I am Coach Maryam, your high-density precision fitness and nutrition architect. My directives are strictly hardcoded to physical training. I exclusively assist with:
 • 📐 Form development & kinetic setup
 • 🛠️ Form correction & symmetry adjustments
 • ⚠️ Unknown gym pain analysis & range regressions
@@ -861,8 +895,20 @@ Frequency: 3-day (PPL-Rest-Rest) or 6-day (PPL-Rest-PPL).`;
 • ⚡ General gym guidance & progressive tension
 
 I politely decline inquiries outside of these physical performance boundaries to keep our energy focused on your results. How can I assist your lifts, split, or nutrition today?`;
+        }
       } else {
-        reply = `I am Coach Nurv, your specialized biomechanical fitness and nutrition guide. My operational directives strictly mandate that I exclusively answer queries regarding:
+        if (isRTL) {
+          reply = `أنا المدرب نيرف، دليلك المتخصص في الميكانيكا الحيوية والتغذية الرياضية. تعليماتي الصارمة تلزمني حصرياً بالإجابة عن:
+• 📐 أسس الأداء والتمركز الميكانيكي
+• 🛠️ تصحيح التكنيك وتعديل مسار البار
+• ⚠️ تقييم آلام التمرين وتعديل الحركات
+• 🥗 تنظيم الماكروز وتوزيع البروتين
+• 📅 هيكلة جداول التمرين (Upper/Lower أو PPL)
+• ⚡ الزيادة التدريجية والتحكم في RPE
+
+لا يمكنني المساعدة في أي استفسارات خارج هذا النطاق الرياضي والغذائي المحدد. لنعد بتركيزنا نحو أدائك البدني—ما هو هدفك الرياضي الذي تريد تحقيقه الآن؟`;
+        } else {
+          reply = `I am Coach Nurv, your specialized biomechanical fitness and nutrition guide. My operational directives strictly mandate that I exclusively answer queries regarding:
 • 📐 Form development & setup cues
 • 🛠️ Form correction & biomechanical fixes
 • ⚠️ Unknown gym pain triage & movement modifications
@@ -871,6 +917,7 @@ I politely decline inquiries outside of these physical performance boundaries to
 • ⚡ General gym guidance & progressive overload
 
 I cannot assist with queries outside of these specific training and nutritional boundaries. Let's direct our focus back to your performance—what lifting or nutrition goal can I help you tackle right now?`;
+        }
       }
 
       this.speak(reply);

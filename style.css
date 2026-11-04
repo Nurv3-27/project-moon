@@ -7565,3 +7565,404 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   margin-top: 2px;
 }
 
+/* ==========================================================
+   FUTURISTIC OPAL HOLD-TO-CANCEL GESTURE COMPONENT
+   Pitch-Black & Glowing Neon-Maroon Architecture
+   ========================================================== */
+.opal-hold-cancel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 16px;
+  width: 100%;
+  animation: opalHoldEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes opalHoldEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.opal-hold-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opal-hold-cancel-btn {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  background: radial-gradient(circle at 35% 35%, #1F070E 0%, #0D0206 70%, #000000 100%);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 25px rgba(224, 80, 106, 0.25);
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.opal-hold-cancel-btn:hover {
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.9), 0 0 35px rgba(224, 80, 106, 0.45);
+}
+
+.opal-hold-btn-wrapper.is-holding .opal-hold-cancel-btn,
+.opal-hold-cancel-btn.is-holding {
+  transform: scale(0.94);
+  box-shadow: 0 0 45px rgba(255, 42, 85, 0.75), 0 0 80px rgba(168, 39, 65, 0.5), inset 0 0 20px rgba(255, 42, 85, 0.4);
+}
+
+.opal-hold-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* Starts fill from top (12 o'clock) */
+  pointer-events: none;
+}
+
+.hold-glow-backdrop {
+  fill: url(#opalGlowCore);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.opal-hold-btn-wrapper.is-holding .hold-glow-backdrop {
+  opacity: 1;
+}
+
+.hold-ring-bg {
+  fill: none;
+  stroke: rgba(224, 80, 106, 0.16);
+  stroke-width: 6;
+}
+
+.hold-ring-fill {
+  fill: none;
+  stroke: url(#opalHoldGradient);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 314.16;
+  stroke-dashoffset: 314.16;
+  filter: drop-shadow(0 0 8px rgba(255, 42, 85, 0.85));
+  transition: stroke-dashoffset 0.05s linear;
+}
+
+.opal-hold-core {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  pointer-events: none;
+  text-align: center;
+  padding: 8px;
+}
+
+.opal-hold-glyph {
+  font-size: 1.55rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 42, 85, 0.6));
+  transition: transform 0.2s ease;
+}
+
+.opal-hold-btn-wrapper.is-holding .opal-hold-glyph {
+  transform: scale(1.18);
+}
+
+.opal-hold-label {
+  font-family: 'Outfit', 'Space Grotesk', -apple-system, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #FFF;
+  text-transform: uppercase;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.opal-hold-countdown {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #FF859C;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 8px rgba(255, 77, 115, 0.6);
+}
+
+.opal-hold-hint {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 10px;
+  max-width: 280px;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.opal-hold-cancel-btn.pulse-alert {
+  animation: holdAlertPulse 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes holdAlertPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(224, 80, 106, 0.25); }
+  25% { transform: scale(1.06) rotate(-3deg); box-shadow: 0 0 45px rgba(255, 42, 85, 0.85); border-color: #FF2A55; }
+  50% { transform: scale(0.96) rotate(3deg); }
+  75% { transform: scale(1.04) rotate(-2deg); }
+}
+
+/* ==========================================================
+   FUTURISTIC VISUALS & TACTILE MICRO-INTERACTIONS
+   Enhanced Glassmorphism & Neon-Maroon Glowing States
+   ========================================================== */
+
+/* Enhanced Glassmorphism for Bottom Navigation */
+.bottom-tab-bar {
+  background: rgba(8, 9, 14, 0.76) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border-top: 1px solid rgba(224, 80, 106, 0.24) !important;
+  box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.85), 0 0 25px rgba(168, 39, 65, 0.12) !important;
+}
+
+/* Enhanced Glassmorphism for Modals */
+.modal-overlay {
+  background: rgba(3, 4, 7, 0.84) !important;
+  backdrop-filter: blur(18px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+}
+
+.modal-card,
+.coach-modal-card,
+.admin-modal-card {
+  background: rgba(14, 16, 24, 0.88) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  border: 1.5px solid rgba(224, 80, 106, 0.38) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.94), 0 0 40px rgba(224, 80, 106, 0.28) !important;
+}
+
+/* Enhanced Glassmorphism for App Header */
+.app-header {
+  background: rgba(8, 9, 14, 0.78) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(224, 80, 106, 0.2) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Glowing Neon-Maroon Active States */
+.nav-tab.active {
+  color: #FF4D73 !important;
+  text-shadow: 0 0 14px rgba(255, 77, 115, 0.65);
+}
+.nav-tab.active .tab-icon {
+  stroke: #FF4D73 !important;
+  filter: drop-shadow(0 0 8px rgba(255, 77, 115, 0.75));
+}
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 18px;
+  height: 3px;
+  background: linear-gradient(90deg, #FF4D73, #E0506A);
+  border-radius: 999px;
+  box-shadow: 0 0 10px #FF4D73, 0 0 20px rgba(255, 77, 115, 0.8);
+}
+
+.opal-pill-btn.active-lockdown {
+  border-color: #FF2A55 !important;
+  background: linear-gradient(135deg, rgba(168, 39, 65, 0.42) 0%, rgba(60, 10, 22, 0.7) 100%) !important;
+  box-shadow: 0 0 35px rgba(255, 42, 85, 0.55), 0 8px 30px rgba(0, 0, 0, 0.85), inset 0 0 18px rgba(255, 42, 85, 0.25) !important;
+  animation: neonLockdownPulse 2.4s infinite alternate ease-in-out;
+}
+
+@keyframes neonLockdownPulse {
+  0% { box-shadow: 0 0 25px rgba(255, 42, 85, 0.4), inset 0 0 12px rgba(255, 42, 85, 0.2); }
+  100% { box-shadow: 0 0 45px rgba(255, 42, 85, 0.75), 0 0 20px rgba(224, 80, 106, 0.5), inset 0 0 22px rgba(255, 42, 85, 0.35); }
+}
+
+.opal-micro-chip.active,
+.unit-btn.active,
+.theme-swatch.active,
+.gender-card.active {
+  border-color: #FF4D73 !important;
+  box-shadow: 0 0 18px rgba(255, 77, 115, 0.5), inset 0 0 8px rgba(255, 77, 115, 0.25) !important;
+}
+
+/* Snappy Scale-Down Transitions across all interactive elements */
+button,
+.nav-tab,
+.opal-pill-btn,
+.opal-hold-cancel-btn,
+.routine-item,
+.featured-routine-card,
+.theme-swatch,
+.unit-btn,
+.coach-quick-btn,
+.gender-card,
+.opal-micro-chip,
+.primary-glow-btn,
+.secondary-btn,
+.danger-ghost-btn,
+.faq-item,
+.celestial-node {
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease !important;
+  will-change: transform;
+}
+
+button:active,
+.nav-tab:active,
+.opal-pill-btn:active,
+.routine-item:active,
+.featured-routine-card:active,
+.theme-swatch:active,
+.unit-btn:active,
+.coach-quick-btn:active,
+.gender-card:active,
+.opal-micro-chip:active,
+.primary-glow-btn:active,
+.secondary-btn:active,
+.danger-ghost-btn:active,
+.celestial-node:active {
+  transform: scale(0.96) !important;
+}
+
+/* ==========================================================
+   ARABIC LOCALIZATION & STRICT RTL LAYOUT ENGINE
+   [dir="rtl"] and .rtl-mode overrides
+   ========================================================== */
+[dir="rtl"], [dir="rtl"] body {
+  font-family: 'Tajawal', 'Cairo', 'Amiri', 'Outfit', -apple-system, sans-serif !important;
+  direction: rtl !important;
+  text-align: right;
+}
+
+[dir="rtl"] .hero-title,
+[dir="rtl"] .brand-name,
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
+[dir="rtl"] .splash-dest-heading,
+[dir="rtl"] .modal-header h3 {
+  font-family: 'Cairo', 'Tajawal', 'Cinzel', sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+/* Numerical & LTR Isolations */
+[dir="rtl"] .mono,
+[dir="rtl"] input[type="time"],
+[dir="rtl"] .sw-digits,
+[dir="rtl"] .ring-time-text,
+[dir="rtl"] .sw-pill-digits,
+[dir="rtl"] .stat-val,
+[dir="rtl"] .streak-number,
+[dir="rtl"] .opal-hold-countdown {
+  direction: ltr !important;
+  display: inline-block;
+  unicode-bidi: isolate;
+}
+
+/* Flipped Arrows for RTL */
+[dir="rtl"] .dest-btn-arrow,
+[dir="rtl"] .splash-auth-arrow,
+[dir="rtl"] .faq-arrow,
+[dir="rtl"] .routine-arrow,
+[dir="rtl"] .opal-time-sep,
+[dir="rtl"] .primary-glow-btn span::after {
+  transform: scaleX(-1) !important;
+}
+
+/* Floating AI Coach Chat Bubble in RTL (Anchors to left above Settings) */
+[dir="rtl"] .tab-coach-chat-bubble {
+  right: auto !important;
+  left: 18px !important;
+  border-radius: 18px 18px 18px 4px !important;
+}
+[dir="rtl"] .tab-coach-chat-bubble .coach-bubble-tail {
+  right: auto !important;
+  left: 12px !important;
+}
+[dir="rtl"] body.has-active-rest-bar .tab-coach-chat-bubble {
+  bottom: calc(var(--tab-bar-height) + 84px) !important;
+}
+
+/* Section Heroes, Headings & Content Alignments */
+[dir="rtl"] .section-hero,
+[dir="rtl"] .hero-text,
+[dir="rtl"] .setting-label-col,
+[dir="rtl"] .athlete-profile-meta,
+[dir="rtl"] .faq-question,
+[dir="rtl"] .faq-answer,
+[dir="rtl"] .opal-pill-center,
+[dir="rtl"] .coach-tagline,
+[dir="rtl"] .antiscroll-hero-copy,
+[dir="rtl"] .dest-btn-text,
+[dir="rtl"] .splash-auth-text,
+[dir="rtl"] .gc-info {
+  text-align: right !important;
+}
+
+/* Form Inputs in RTL */
+[dir="rtl"] .ios-input,
+[dir="rtl"] .search-input,
+[dir="rtl"] .notes-textarea,
+[dir="rtl"] .opal-time-input {
+  text-align: right !important;
+}
+
+/* Coach Chat Stream in RTL */
+[dir="rtl"] .coach-msg.assistant {
+  flex-direction: row !important;
+}
+[dir="rtl"] .coach-msg.user {
+  flex-direction: row-reverse !important;
+}
+[dir="rtl"] .coach-msg-bubble {
+  text-align: right !important;
+}
+
+/* Language Switcher Styling */
+.lang-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  gap: 4px;
+}
+.lang-toggle .unit-btn {
+  padding: 6px 14px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  border-radius: 9px;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.lang-toggle .unit-btn.active {
+  background: linear-gradient(135deg, rgba(224, 80, 106, 0.35), rgba(74, 14, 28, 0.6));
+  color: #FFF;
+  border-color: rgba(224, 80, 106, 0.6);
+  box-shadow: 0 0 16px rgba(224, 80, 106, 0.45);
+}
+

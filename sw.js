@@ -1,8 +1,9 @@
-const CACHE_NAME = 'moon-v58';
+const CACHE_NAME = 'moon-v59';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
+  './i18n.js',
   './auth.js',
   './app.js',
   './camera.js',

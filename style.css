@@ -357,7 +357,7 @@ html, body {
 /* Main Content Area */
 .main-content {
   flex: 1;
-  padding: 16px 16px var(--tab-bar-height);
+  padding: 16px 16px calc(var(--tab-bar-height) + 64px);
 }
 
 .tab-view {
@@ -4580,6 +4580,148 @@ header + #antiscroll-live-banner,
   }
 }
 
+/* Startup Initial Auth Buttons (Sign Up vs Login) */
+.splash-auth-startup-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.splash-auth-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 13px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  color: #fff;
+}
+
+.splash-auth-btn:hover,
+.splash-auth-btn:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.splash-auth-btn:active {
+  transform: scale(0.98);
+}
+
+.splash-signup-btn {
+  background: linear-gradient(135deg, rgba(168, 39, 65, 0.35) 0%, rgba(74, 14, 28, 0.5) 100%);
+  border-color: rgba(224, 80, 106, 0.6);
+  box-shadow: 0 4px 24px rgba(168, 39, 65, 0.35);
+}
+
+.splash-signup-btn:hover {
+  border-color: rgba(245, 110, 138, 0.85);
+  box-shadow: 0 8px 30px rgba(224, 80, 106, 0.55);
+}
+
+.splash-login-btn {
+  background: rgba(20, 22, 28, 0.6);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.splash-login-btn:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.12);
+}
+
+.splash-auth-icon {
+  font-size: 1.55rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.splash-auth-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.splash-auth-title {
+  font-family: 'Outfit', 'Space Grotesk', -apple-system, sans-serif;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.splash-auth-sub {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.splash-auth-arrow {
+  color: var(--text-dim);
+  font-size: 1.15rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.splash-auth-btn:hover .splash-auth-arrow {
+  transform: translateX(4px);
+  color: #fff;
+}
+
+/* Secondary Quick Guest Links */
+.splash-guest-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.splash-guest-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 6px 14px;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.splash-guest-btn:hover {
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Coach Selection Avatar Image */
+.coach-choice-avatar-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  display: block;
+}
+
 /* Bottom-Right Corner Tribute: 'In the loving memory of 27' alongside Arabic 'من' */
 .splash-corner-tribute {
   position: absolute;
@@ -4785,7 +4927,7 @@ header + #antiscroll-live-banner,
 .tab-coach-chat-bubble {
   position: absolute;
   bottom: calc(var(--tab-bar-height) + 10px);
-  right: calc(10% - 24px);
+  right: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4798,13 +4940,17 @@ header + #antiscroll-live-banner,
   color: var(--text-main);
   box-shadow: 0 4px 18px rgba(224, 80, 106, 0.45), 0 2px 8px rgba(0, 0, 0, 0.8);
   cursor: pointer;
-  z-index: 60;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  z-index: 75;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease, bottom 0.25s ease;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   text-decoration: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+body.has-active-rest-bar .tab-coach-chat-bubble {
+  bottom: calc(var(--tab-bar-height) + 84px);
 }
 
 .tab-coach-chat-bubble:hover {
@@ -7167,7 +7313,7 @@ header + #antiscroll-live-banner,
   z-index: 2;
   display: flex;
   flex-direction: column-reverse; /* Earth at bottom (Start), Moon at top (Destination) */
-  gap: 32px;
+  gap: 52px; /* Generous spacing ensuring rocket indicator never overlaps the node above */
 }
 
 .cosmic-node-row {
@@ -7191,6 +7337,7 @@ header + #antiscroll-live-banner,
 /* Individual Celestial Node (Earth, Asteroid, Moon) */
 .celestial-node {
   position: relative;
+  z-index: 2;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -7386,19 +7533,19 @@ header + #antiscroll-live-banner,
 /* Progress Indicator Rocket Marker */
 .cosmic-rocket-indicator {
   position: absolute;
-  top: -40px;
+  top: -34px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   pointer-events: none;
-  z-index: 10;
+  z-index: 5;
   animation: rocketHover 2.2s ease-in-out infinite alternate;
 }
 @keyframes rocketHover {
-  0% { transform: translate(-50%, 0) rotate(-4deg); }
-  100% { transform: translate(-50%, -8px) rotate(4deg); }
+  0% { transform: translate(-50%, 0) rotate(-3deg); }
+  100% { transform: translate(-50%, -6px) rotate(3deg); }
 }
 .rocket-ship-emoji {
   font-size: 2.1rem;

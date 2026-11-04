@@ -671,6 +671,7 @@ function triggerRestTimer(seconds) {
 
   const bar = document.getElementById('rest-timer-bar');
   if (bar) bar.classList.remove('hidden');
+  document.body.classList.add('has-active-rest-bar');
 
   updateRestTimerUI();
 
@@ -782,6 +783,7 @@ function closeRestTimer() {
   restTimerInterval = null;
   const bar = document.getElementById('rest-timer-bar');
   if (bar) bar.classList.add('hidden');
+  document.body.classList.remove('has-active-rest-bar');
 }
 
 // --- High-Precision Stopwatch & Countdown Timer Engine ---
@@ -4454,36 +4456,8 @@ function setSplashSoundStatus(state, message) {
 }
 
 function handleSplashUserInteraction(e) {
-  if (splashDismissed) return;
-  // If user tapped directly on a destination button, let selectAppDestination handle it
-  if (e && e.target && e.target.closest && e.target.closest('.splash-dest-btn')) {
-    return;
-  }
-
-  // Direct un-mute and playback inside synchronous user gesture (unlocks iOS/Safari/Chrome)
-  if (splashAudio && (splashAudio.paused || splashAudio.currentTime === 0)) {
-    try {
-      splashAudio.muted = false;
-      splashAudio.volume = 1.0;
-      const p = splashAudio.play();
-      if (p !== undefined) {
-        p.then(() => {
-          setSplashSoundStatus('playing', 'Intro sound active 🔊');
-        }).catch((err) => {
-          console.warn('[Splash Audio] Tap play failed:', err);
-        });
-      }
-    } catch (err) {
-      console.warn('[Splash Audio] Tap error:', err);
-    }
-  }
-
-  try {
-    const ctx = getAudioContext();
-    if (ctx && ctx.state === 'suspended') {
-      ctx.resume().catch(() => {});
-    }
-  } catch (err) {}
+  // Splash screen interaction handler - auto-play on random screen taps removed.
+  // Intro MP3 audio is strictly attached to the Sign Up / Login buttons.
 }
 
 function stopSplashAudio() {
@@ -4495,10 +4469,10 @@ function stopSplashAudio() {
   }
 }
 
-function playSplashAudio() {
-  stopSplashAudio();
-
+// Requirement 3: Dedicated Startup Intro Audio Trigger attached strictly to Sign Up / Login onClick
+window.playStartupAudio = function() {
   try {
+    stopSplashAudio();
     splashAudio = document.getElementById('splash-audio');
     if (!splashAudio) {
       splashAudio = new Audio('startup.mp3');
@@ -4508,59 +4482,51 @@ function playSplashAudio() {
     splashAudio.currentTime = 0;
     splashAudio.muted = false;
 
-    // Listen for full completion of the intro audio
     splashAudio.onended = () => {
-      console.log('[Splash Audio] Intro sound completed fully.');
-      const picker = document.getElementById('splash-dest-picker');
-      if (picker) {
-        picker.classList.add('pulse-ready');
-      }
-      try { triggerHaptic([20, 20]); } catch (e) {}
-
-      // Fallback: if user leaves it unattended for 30s after audio finishes, default to routines
-      if (splashIdleSafetyTimer) clearTimeout(splashIdleSafetyTimer);
-      splashIdleSafetyTimer = setTimeout(() => {
-        if (!splashDismissed) {
-          selectAppDestination('routines');
-        }
-      }, 30000);
+      console.log('[Splash Audio] Intro startup sound completed fully.');
     };
 
-    // Direct automated unmuted playback attempt
     const p = splashAudio.play();
     if (p !== undefined) {
       p.then(() => {
         setSplashSoundStatus('playing', 'Sound active 🔊');
       }).catch((err) => {
-        console.warn('[Splash Audio] Autoplay blocked, awaiting tap:', err);
-        setSplashSoundStatus('blocked', 'Tap anywhere for sound 🔊');
-
-        try {
-          const ctx = getAudioContext();
-          if (ctx && ctx.state === 'suspended') {
-            ctx.resume().catch(() => {});
-          }
-        } catch (e) {}
+        console.warn('[Splash Audio] Audio playback pending or blocked:', err);
       });
-    } else {
-      setSplashSoundStatus('playing', 'Sound active 🔊');
     }
   } catch (e) {
-    console.warn('[Splash Audio] Initialization error:', e);
-    setSplashSoundStatus('blocked', 'Tap anywhere for sound 🔊');
+    console.warn('[Splash Audio] Startup audio error:', e);
+  }
+};
+
+window.playSplashAudio = window.playStartupAudio;
+
+// Handle initial startup options: Sign Up / Login
+window.handleStartupAuth = function(mode, e) {
+  if (e && e.stopPropagation) {
+    e.stopPropagation();
   }
 
-  // Attach gesture handlers across window & splash screen so any tap unlocks sound if autoplay was blocked
-  ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
-    window.addEventListener(evt, handleSplashUserInteraction, { passive: true, capture: true });
-  });
+  // Play startup MP3 audio strictly on user click
+  window.playStartupAudio();
 
-  const splashEl = document.getElementById('app-splash-screen');
-  if (splashEl) {
-    splashEl.addEventListener('pointerdown', handleSplashUserInteraction, { passive: true });
-    splashEl.addEventListener('touchstart', handleSplashUserInteraction, { passive: true });
+  // Dismiss splash screen smoothly while preserving audio playback
+  dismissSplashScreen(e, true);
+
+  // Switch auth tab to requested mode
+  if (typeof window.switchAuthTab === 'function') {
+    window.switchAuthTab(mode);
   }
-}
+
+  // Open the auth modal for user interaction
+  setTimeout(() => {
+    window.openModal('modal-auth');
+  }, 250);
+
+  try {
+    triggerHaptic([30, 45]);
+  } catch (err) {}
+};
 
 window.selectAppDestination = function(destination, e) {
   if (e && e.stopPropagation) {
@@ -4587,7 +4553,7 @@ window.selectAppDestination = function(destination, e) {
   } catch (err) {}
 };
 
-function dismissSplashScreen(e) {
+function dismissSplashScreen(e, keepAudio) {
   if (e && e.stopPropagation) {
     e.stopPropagation();
   }
@@ -4599,8 +4565,10 @@ function dismissSplashScreen(e) {
     splashIdleSafetyTimer = null;
   }
 
-  // Ensure audio stops completely
-  stopSplashAudio();
+  // Stop audio unless user explicitly clicked Sign Up / Login (keepAudio = true)
+  if (!keepAudio) {
+    stopSplashAudio();
+  }
 
   ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
     window.removeEventListener(evt, handleSplashUserInteraction, { capture: true });
@@ -4628,8 +4596,8 @@ function initSplashScreenTimer() {
   const splash = document.getElementById('app-splash-screen');
   if (!splash) return;
 
-  // Play full intro sound
-  playSplashAudio();
+  // Requirement 3: onMount auto-play audio removed from splash screen.
+  // Audio playback logic is strictly attached to onClick of Sign Up / Login buttons.
 }
 
 window.dismissSplashScreen = dismissSplashScreen;
@@ -4802,7 +4770,7 @@ window.askCoachPrompt = function(promptText) {
   const coachMsgDiv = document.createElement('div');
   coachMsgDiv.className = 'coach-msg assistant';
   coachMsgDiv.innerHTML = `
-    <div class="coach-msg-avatar" style="border-color:${coach.accentColor || '#E0506A'}"><img src="${coach.avatarImg || 'image_7.png'}" alt="${coach.name || 'Coach'}" class="coach-avatar-img"></div>
+    <div class="coach-msg-avatar" style="border-color:${coach.accentColor || '#E0506A'}"><img src="${coach.avatarImg || (coach.gender === 'female' ? 'coach_blackcat.png' : 'coach_spiderman.png')}" alt="${coach.name || 'Coach'}" class="coach-avatar-img"></div>
     <div class="coach-msg-bubble">${escapeHtml(reply)}</div>
   `;
   stream.appendChild(coachMsgDiv);

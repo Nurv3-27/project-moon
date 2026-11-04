@@ -26,19 +26,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=57">
+  <link rel="stylesheet" href="style.css?v=58">
 </head>
 <body>
-  <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + CUSTOM IMAGE_7.PNG + FULL INTRO SOUND) -->
+  <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
   <div id="app-splash-screen" class="splash-screen-overlay" aria-label="Loading Moon OS">
-    <audio id="splash-audio" src="startup.mp3" preload="auto" autoplay playsinline webkit-playsinline></audio>
+    <audio id="splash-audio" src="startup.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
     <div class="splash-center-content">
-      <!-- Central Custom Logo Asset: image_7.png (Maroon crescent moon with two figures & dumbbell) -->
+      <!-- Central Custom Logo Asset: moon_logo.png (Maroon crescent moon with two figures & dumbbell) -->
       <div class="splash-logo-container">
         <div class="splash-img-glow"></div>
         <img
-          src="image_7.png"
+          src="moon_logo.png"
           alt="Moon Logo"
           class="splash-custom-logo"
           onerror="this.onerror=null; this.src='app_icon.png';"
@@ -50,25 +50,36 @@
         <p class="splash-quote-text">&ldquo;Are you ready to take it to the moon?&rdquo;</p>
       </div>
 
-      <!-- Destination Choice: Workout Hub vs Focus -->
+      <!-- Initial Startup Options: Sign Up vs Login (Triggers Intro MP3 Audio) -->
       <div class="splash-dest-picker" id="splash-dest-picker">
-        <span class="splash-dest-heading">WHERE DO YOU WANT TO START?</span>
-        <div class="splash-dest-grid">
-          <button type="button" class="splash-dest-btn dest-btn-routines" onclick="selectAppDestination('workout', event)">
-            <span class="dest-btn-icon">&#127947;&#65039;</span>
-            <div class="dest-btn-text">
-              <strong class="dest-btn-title">Workout Hub</strong>
-              <span class="dest-btn-sub">Start workout &bull; Saved splits</span>
+        <span class="splash-dest-heading">START YOUR ODYSSEY</span>
+        <div class="splash-auth-startup-grid">
+          <button type="button" class="splash-auth-btn splash-signup-btn" id="splash-btn-signup" onclick="handleStartupAuth('signup', event)">
+            <span class="splash-auth-icon">✨</span>
+            <div class="splash-auth-text">
+              <strong class="splash-auth-title">Sign Up</strong>
+              <span class="splash-auth-sub">New Athlete • Select Coach</span>
             </div>
-            <span class="dest-btn-arrow">&rarr;</span>
+            <span class="splash-auth-arrow">&rarr;</span>
           </button>
-          <button type="button" class="splash-dest-btn dest-btn-focus" onclick="selectAppDestination('focus', event)">
-            <span class="dest-btn-icon">&#128737;&#65039;</span>
-            <div class="dest-btn-text">
-              <strong class="dest-btn-title">Anti-Scroll Focus</strong>
-              <span class="dest-btn-sub">Doomscroll shield &bull; Bank</span>
+          
+          <button type="button" class="splash-auth-btn splash-login-btn" id="splash-btn-login" onclick="handleStartupAuth('signin', event)">
+            <span class="splash-auth-icon">🔑</span>
+            <div class="splash-auth-text">
+              <strong class="splash-auth-title">Login</strong>
+              <span class="splash-auth-sub">Existing Athlete • Sign In</span>
             </div>
-            <span class="dest-btn-arrow">&rarr;</span>
+            <span class="splash-auth-arrow">&rarr;</span>
+          </button>
+        </div>
+
+        <!-- Secondary Quick Guest Destinations -->
+        <div class="splash-guest-row">
+          <button type="button" class="splash-guest-btn" onclick="selectAppDestination('workout', event)">
+            <span>🏋️ Workout Hub &rarr;</span>
+          </button>
+          <button type="button" class="splash-guest-btn" onclick="selectAppDestination('focus', event)">
+            <span>🛡️ Anti-Scroll Focus &rarr;</span>
           </button>
         </div>
       </div>
@@ -554,11 +565,6 @@
           </div>
           <div id="ranks-overall" class="ranks-overall"></div>
           <div id="ranks-body" class="anatomy-card-frame">
-          <!-- Top-Right Corner Male / Lady Body Option -->
-          <div class="anatomy-gender-toggle card-gender-toggle" role="group" aria-label="Select Male or Lady Body">
-            <button type="button" class="anatomy-gender-btn active" data-gender="male">&#9794; Male</button>
-            <button type="button" class="anatomy-gender-btn" data-gender="female">&#9792; Lady</button>
-          </div>
           <div class="anatomy-viewport">
             <svg id="ranks-body-svg" class="anatomy-svg" viewBox="75 0 330 835" xmlns="http://www.w3.org/2000/svg" aria-label="Bodybuilder Muscle Anatomy Map">
               <defs>
@@ -1805,7 +1811,7 @@
       <!-- Floating AI Coach Chat Bubble (Positioned right above the Settings tab) -->
       <button type="button" id="tab-coach-chat-bubble" class="tab-coach-chat-bubble" onclick="openAICoachModal()" title="Talk to your AI Coach" aria-label="Talk to your AI Coach">
         <span class="coach-bubble-pulse-dot"></span>
-        <span class="coach-bubble-icon" id="coach-bubble-icon"><img src="image_7.png" alt="Coach Avatar" class="coach-bubble-avatar-img"></span>
+        <span class="coach-bubble-icon" id="coach-bubble-icon"><img src="coach_spiderman.png" alt="Coach Avatar" class="coach-bubble-avatar-img"></span>
         <span class="coach-bubble-name" id="coach-bubble-name">Nurv</span>
         <span class="coach-bubble-tail"></span>
       </button>
@@ -2356,7 +2362,7 @@
           <p class="gender-help-text">Free choice: pick either coach regardless of gender. Both specialize strictly in form, pain management, splits &amp; nutrition.</p>
           <div class="gender-select-cards-grid coach-select-cards-grid">
             <div class="gender-card active coach-choice-card" id="card-coach-n" onclick="selectSignupCoach('Nurv')">
-              <span class="gc-icon coach-n-icon">⚡</span>
+              <span class="gc-icon coach-n-icon"><img src="coach_spiderman.png" alt="Coach Nurv" class="coach-choice-avatar-img"></span>
               <div class="gc-info">
                 <strong>Coach 'N' (Nurv) &bull; Male AI Assistant</strong>
                 <span>Titan Bio-Strategist &bull; Hypertrophy, Mechanical Tension &amp; Overload Cues</span>
@@ -2364,7 +2370,7 @@
               <span class="gc-radio-dot"></span>
             </div>
             <div class="gender-card coach-choice-card" id="card-coach-m" onclick="selectSignupCoach('Maryam')">
-              <span class="gc-icon coach-m-icon">👑</span>
+              <span class="gc-icon coach-m-icon"><img src="coach_blackcat.png" alt="Coach Maryam" class="coach-choice-avatar-img"></span>
               <div class="gc-info">
                 <strong>Coach 'M' (Maryam) &bull; Female AI Assistant</strong>
                 <span>Valkyrie Precision Architect &bull; Posterior Chain, Symmetry &amp; Density Cues</span>
@@ -2393,7 +2399,7 @@
     <div class="modal-card coach-modal-card">
       <div class="modal-header coach-modal-header" id="coach-modal-header">
         <div class="coach-header-left">
-          <div class="coach-avatar-circle" id="coach-avatar-circle"><img src="image_7.png" alt="Coach Avatar" class="coach-avatar-img"></div>
+          <div class="coach-avatar-circle" id="coach-avatar-circle"><img src="coach_spiderman.png" alt="Coach Avatar" class="coach-avatar-img"></div>
           <div>
             <h3 id="coach-modal-title">Coach Nurv</h3>
             <span class="coach-status-tag" id="coach-modal-subtitle">Titan Bio-Strategist &bull; Active</span>
@@ -2425,7 +2431,7 @@
       <!-- Live Chat Transcript Stream -->
       <div class="coach-chat-stream" id="coach-chat-stream">
         <div class="coach-msg assistant">
-          <div class="coach-msg-avatar" id="coach-msg-avatar"><img src="image_7.png" alt="Coach Avatar" class="coach-avatar-img"></div>
+          <div class="coach-msg-avatar" id="coach-msg-avatar"><img src="coach_spiderman.png" alt="Coach Avatar" class="coach-avatar-img"></div>
           <div class="coach-msg-bubble" id="coach-welcome-bubble">
             Greetings, athlete. Coach Nurv locked in. Mechanical tension and progressive overload are the law. What's our target today?
           </div>
@@ -2460,10 +2466,10 @@
     </div>
   </div>
 
-  <script src="auth.js?v=57"></script>
-  <script src="app.js?v=57"></script>
-  <script src="camera.js?v=57"></script>
-  <script src="ranks.js?v=57"></script>
+  <script src="auth.js?v=58"></script>
+  <script src="app.js?v=58"></script>
+  <script src="camera.js?v=58"></script>
+  <script src="ranks.js?v=58"></script>
 </body>
 </html>
 

@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=56">
+  <link rel="stylesheet" href="style.css?v=57">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + CUSTOM IMAGE_7.PNG + FULL INTRO SOUND) -->
@@ -1018,18 +1018,16 @@
 
         <!-- Focus Tab Controls: Opal-Inspired Minimalist Pill Layout -->
         <div class="opal-focus-stage">
-          <!-- 1. Opal Instant Block Pill -->
+          <!-- 1. Opal Instant Block Pill (Large, Centered, Tactile) -->
           <div class="opal-pill-wrap">
-            <button type="button" class="opal-pill-btn" id="opal-btn-instant-block" onclick="toggleInstantBlock()">
-              <div class="opal-pill-left">
-                <div class="opal-pill-icon">⚡</div>
-                <div class="opal-pill-text">
+            <button type="button" class="opal-pill-btn opal-hero-pill" id="opal-btn-instant-block" onclick="toggleInstantBlock()">
+              <div class="opal-pill-center">
+                <div class="opal-pill-headline">
+                  <span class="opal-pill-glyph">⚡</span>
                   <span class="opal-pill-title" id="opal-instant-title">Instant Block</span>
-                  <span class="opal-pill-sub" id="opal-instant-sub">TAP TO LOCK DISTRACTIONS</span>
+                  <span class="opal-badge-pill" id="opal-instant-badge">START</span>
                 </div>
-              </div>
-              <div class="opal-pill-right">
-                <span class="opal-badge-pill" id="opal-instant-badge">START</span>
+                <span class="opal-pill-sub" id="opal-instant-sub">15M LOCKDOWN • TAP TO BEGIN</span>
               </div>
             </button>
 
@@ -1044,18 +1042,18 @@
             </div>
           </div>
 
-          <!-- 2. Opal Scheduled Block Pill -->
+          <!-- 2. Opal Scheduled Block Pill (Large, Centered, Tactile) -->
           <div class="opal-pill-wrap">
-            <div class="opal-pill-btn" id="opal-btn-scheduled-block" onclick="toggleOpalScheduleDrawer()">
-              <div class="opal-pill-left">
-                <div class="opal-pill-icon">⏰</div>
-                <div class="opal-pill-text">
+            <div class="opal-pill-btn opal-hero-pill" id="opal-btn-scheduled-block" onclick="toggleOpalScheduleDrawer()">
+              <div class="opal-pill-center">
+                <div class="opal-pill-headline">
+                  <span class="opal-pill-glyph">⏰</span>
                   <span class="opal-pill-title">Scheduled Block</span>
-                  <span class="opal-pill-sub" id="opal-sched-sub">MON-FRI • 09:00 - 17:00</span>
+                  <span class="opal-badge-pill active" id="opal-sched-badge">ACTIVE</span>
                 </div>
+                <span class="opal-pill-sub" id="opal-sched-sub">MON-FRI • 09:00 - 17:00</span>
               </div>
-              <div class="opal-pill-right" onclick="event.stopPropagation()">
-                <span class="opal-badge-pill active" id="opal-sched-badge">ACTIVE</span>
+              <div class="opal-pill-switch-anchor" onclick="event.stopPropagation()">
                 <label class="ios-switch" title="Toggle Scheduled Block">
                   <input type="checkbox" id="setting-scheduled-block" checked onchange="toggleScheduledBlockEnabled(this.checked)">
                   <span class="slider"></span>
@@ -2462,10 +2460,10 @@
     </div>
   </div>
 
-  <script src="auth.js?v=56"></script>
-  <script src="app.js?v=56"></script>
-  <script src="camera.js?v=56"></script>
-  <script src="ranks.js?v=56"></script>
+  <script src="auth.js?v=57"></script>
+  <script src="app.js?v=57"></script>
+  <script src="camera.js?v=57"></script>
+  <script src="ranks.js?v=57"></script>
 </body>
 </html>
 

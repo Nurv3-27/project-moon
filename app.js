@@ -3070,7 +3070,9 @@ function updateFocusBlockUI() {
     if (fb.instantActive) {
       opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} REMAINING • APPS LOCKED` : 'ACTIVE • APPS RESTRICTED';
     } else {
-      opalInstantSub.textContent = 'TAP TO LOCK DISTRACTIONS';
+      const mins = fb.instantDurationMinutes;
+      const durText = (mins === 0 || mins === '0') ? 'INDEFINITE' : (mins >= 60 ? `${mins / 60}H` : `${mins || 15}M`);
+      opalInstantSub.textContent = `${durText} LOCKDOWN • TAP TO BEGIN`;
     }
   }
   if (opalInstantBadge) {

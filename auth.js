@@ -304,16 +304,16 @@
         if (user && user.id) return user;
       }
     } catch (e) {}
-    // Default to Admin session on clean start for immediate evaluation
-    const users = loadUsersDB();
-    const admin = users.find(u => u.role === 'Admin') || users[0];
-    localStorage.setItem(STORAGE_SESSION, JSON.stringify(admin));
-    return admin;
+    return null;
   }
 
   function setActiveSession(user) {
     try {
-      localStorage.setItem(STORAGE_SESSION, JSON.stringify(user));
+      if (user) {
+        localStorage.setItem(STORAGE_SESSION, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(STORAGE_SESSION);
+      }
     } catch (e) {}
   }
 
@@ -328,6 +328,14 @@
       this.applyUserContext();
       this.updateHeaderUI();
       this.initVoiceSynthesis();
+    },
+
+    isLoggedIn: function () {
+      return Boolean(this.currentUser && this.currentUser.id);
+    },
+
+    getCurrentUser: function () {
+      return this.currentUser;
     },
 
     getCoach: function () {
@@ -392,7 +400,20 @@
 
     updateHeaderUI: function () {
       const u = this.currentUser;
-      if (!u) return;
+      if (!u) {
+        const userNameEl = document.getElementById('header-user-name');
+        const userRoleEl = document.getElementById('header-user-role');
+        const userAvatarEl = document.getElementById('header-user-avatar');
+        if (userNameEl) userNameEl.textContent = 'Sign In';
+        if (userRoleEl) {
+          userRoleEl.textContent = 'GUEST';
+          userRoleEl.className = 'user-role-badge guest';
+        }
+        if (userAvatarEl) userAvatarEl.textContent = '✨';
+        const adminBtn = document.querySelector('.header-admin-pill');
+        if (adminBtn) adminBtn.style.display = 'none';
+        return;
+      }
 
       const coach = this.getCoach();
 
@@ -586,6 +607,15 @@
         window.triggerHaptic([30, 45]);
       }
       window.closeModal('modal-auth');
+      // If already logged in / on auth completion: display session destination selector
+      if (typeof window.openModal === 'function') {
+        const greetingEl = document.getElementById('destination-user-greeting');
+        if (greetingEl) {
+          const name = user && (user.displayName || user.name || user.username) ? (user.displayName || user.name || user.username) : 'Athlete';
+          greetingEl.textContent = `Welcome back, ${name} \u2022 Select your initial destination for this session:`;
+        }
+        window.openModal('modal-session-destination');
+      }
     },
 
     logout: function () {

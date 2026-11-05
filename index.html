@@ -26,29 +26,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=64">
+  <link rel="stylesheet" href="style.css?v=65">
 </head>
 <body>
   <!-- ANIMATED THREE-STAGE INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
-  <div id="app-splash-screen" class="splash-screen-overlay splash-stage-1" aria-label="Loading Moon OS" onclick="handleSplashTap(event)">
+  <div id="app-splash-screen" class="splash-screen-overlay splash-phase-1" aria-label="Loading Moon OS" onclick="handleSplashTap(event)">
     <audio id="splash-audio" src="startup.mp3" preload="auto" playsinline webkit-playsinline></audio>
     <audio id="rest-timer-audio" src="startup.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
-    <!-- PHASE 1: Pitch-black screen showing ONLY the text 'Are you ready to take it to the moon?' in the center, and 'In the loving memory of 27 / من' pinned to the bottom right -->
-    <div id="splash-phase-1" class="splash-stage splash-stage-1-content">
-      <div class="splash-center-text-wrap">
-        <h1 class="splash-center-quote" data-i18n="splash_quote">&ldquo;Are you ready to take it to the moon?&rdquo;</h1>
-      </div>
-      <div class="splash-corner-tribute">
-        <span class="splash-tribute-en">In the loving memory of 27</span>
-        <span class="splash-tribute-sep">/</span>
-        <span class="splash-tribute-arabic">من</span>
-      </div>
-    </div>
-
-    <!-- PHASE 2: Fade out the text and fade in the central app logo (moon_logo.png) -->
-    <div id="splash-phase-2" class="splash-stage splash-stage-2-content">
-      <div class="splash-logo-container">
+    <div class="splash-center-content">
+      <!-- PHASE 1: Fade in the central app logo (moon_logo.png) on a pitch-black background -->
+      <div id="splash-logo-wrap" class="splash-logo-container">
         <div class="splash-img-glow"></div>
         <img
           src="moon_logo.png"
@@ -57,10 +45,33 @@
           onerror="this.onerror=null; this.src='app_icon.png';"
         >
       </div>
+
+      <!-- PHASE 2: While the logo is on screen, fade in the central quote -->
+      <div id="splash-quote-wrap" class="splash-quote-box">
+        <h1 class="splash-center-quote" data-i18n="splash_quote">&ldquo;Are you ready to take it to the moon?&rdquo;</h1>
+      </div>
+    </div>
+
+    <!-- PHASE 2: While the logo is on screen, fade in the bottom-right text 'In the loving memory of 27 / من' -->
+    <div id="splash-tribute-wrap" class="splash-corner-tribute">
+      <span class="splash-tribute-en">In the loving memory of 27</span>
+      <span class="splash-tribute-sep">/</span>
+      <span class="splash-tribute-arabic">من</span>
     </div>
   </div>
 
   <div id="app" class="app-root">
+    
+    <!-- DEDICATED SANDBOXED DEMO ENVIRONMENT BANNER -->
+    <div id="demo-sandbox-banner" class="demo-sandbox-banner hidden">
+      <div class="demo-sandbox-content">
+        <span class="demo-sandbox-badge">SANDBOX DEMO</span>
+        <span class="demo-sandbox-desc">Viewing sandboxed sample workouts &amp; PRs. Your real athlete profile is safe &amp; isolated.</span>
+      </div>
+      <button type="button" class="demo-sandbox-exit-btn" onclick="exitDemoSandbox()" title="Exit Sandbox &amp; Restore Real Profile">
+        Exit Demo ✕
+      </button>
+    </div>
     
     <!-- Top Status Bar & Header -->
     <header class="app-header">
@@ -1811,15 +1822,15 @@
             </label>
           </div>
 
-          <div class="setting-item">
+          <!-- Dedicated Sandboxed Demo Environment Button -->
+          <div class="setting-item" id="setting-item-demo-sandbox">
             <div class="setting-label-col">
-              <span class="setting-name">Demo Mode</span>
-              <span class="setting-desc">Show sample workouts, PRs, and muscle ranks</span>
+              <span class="setting-name">Sandboxed Demo Environment</span>
+              <span class="setting-desc">Explore sample workouts, PRs, and division leaderboards in an isolated sandbox without affecting your athlete profile.</span>
             </div>
-            <label class="ios-switch">
-              <input type="checkbox" id="setting-demo-mode">
-              <span class="slider"></span>
-            </label>
+            <button type="button" class="secondary-btn small-btn demo-access-btn" id="btn-access-demo" onclick="enterDemoSandbox()" title="Launch sandboxed demo environment">
+              🚀 Access Demo
+            </button>
           </div>
         </div>
 
@@ -2615,7 +2626,7 @@
       </div>
 
       <div class="auth-hero-copy">
-        <h2 id="auth-main-title">Athlete Authentication</h2>
+        <h2 id="auth-main-title" class="auth-odyssey-exact-title">Start your Odyssey with Moon now</h2>
         <p id="auth-main-sub">Access your customized biometric profile, gender division leaderboard, and dedicated AI Coach.</p>
       </div>
 
@@ -2769,6 +2780,52 @@
           <span>Create Account &amp; Assign Coach &rarr;</span>
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== SESSION DESTINATION ROUTING MODAL ==================== -->
+  <div id="modal-session-destination" class="modal-overlay hidden" onclick="handleDestinationOverlayClick(event)">
+    <div class="modal-card destination-modal-card">
+      <div class="modal-header destination-modal-header">
+        <div class="auth-brand-badge">
+          <span class="auth-brand-dot"></span>
+          <span>SESSION ROUTER</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-session-destination')">&times;</button>
+      </div>
+
+      <div class="destination-hero-copy">
+        <h2 class="destination-title" data-i18n="destination_modal_title">Choose Your Destination</h2>
+        <p class="destination-sub" id="destination-user-greeting">Welcome back, Athlete &bull; Select your initial destination for this session:</p>
+      </div>
+
+      <div class="destination-choice-grid">
+        <!-- FOCUS BUTTON: Large Interactive Button -->
+        <button type="button" class="dest-large-choice-btn dest-choice-focus" id="btn-dest-choice-focus" onclick="selectSessionDestination('focus')">
+          <div class="dest-icon-circle focus-icon-circle">
+            <span>🛡️</span>
+          </div>
+          <div class="dest-btn-info">
+            <span class="dest-kicker-tag">ANTI-SCROLL SHIELD</span>
+            <strong class="dest-name-title">Focus</strong>
+            <span class="dest-desc-text">Lock social feeds, build scroll bank &amp; stay disciplined</span>
+          </div>
+          <span class="dest-arrow-icon">&rarr;</span>
+        </button>
+
+        <!-- WORKOUT BUTTON: Large Interactive Button -->
+        <button type="button" class="dest-large-choice-btn dest-choice-workout" id="btn-dest-choice-workout" onclick="selectSessionDestination('workout')">
+          <div class="dest-icon-circle workout-icon-circle">
+            <span>🏋️</span>
+          </div>
+          <div class="dest-btn-info">
+            <span class="dest-kicker-tag">TRAINING &amp; PROGRESSION</span>
+            <strong class="dest-name-title">Workout</strong>
+            <span class="dest-desc-text">Log workouts, record PRs &amp; climb the Cosmic Roadmap</span>
+          </div>
+          <span class="dest-arrow-icon">&rarr;</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2972,11 +3029,11 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=63"></script>
-  <script src="auth.js?v=63"></script>
-  <script src="app.js?v=64"></script>
-  <script src="camera.js?v=63"></script>
-  <script src="ranks.js?v=63"></script>
+  <script src="i18n.js?v=65"></script>
+  <script src="auth.js?v=65"></script>
+  <script src="app.js?v=65"></script>
+  <script src="camera.js?v=65"></script>
+  <script src="ranks.js?v=65"></script>
 </body>
 </html>
 

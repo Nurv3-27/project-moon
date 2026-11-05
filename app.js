@@ -420,7 +420,7 @@ function syncDemoState(state) {
   const defaultIdSet = new Set(DEFAULT_ROUTINES.map(d => d.id));
   state.routines = (state.routines || []).filter(r => !r.isFeatured && !defaultIdSet.has(r.id));
 
-  const demoOn = state.settings.demoMode === true;
+  const demoOn = (window.isDemoSandboxActive === true);
   const realHistory = (state.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
   state.history = demoOn ? [...realHistory, ...DEMO_HISTORY] : realHistory;
   state.prs = rebuildPRsFromHistory(state.history);
@@ -5578,18 +5578,18 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleOledTrueBlack(true);
   }
 
-  const demoToggle = document.getElementById('setting-demo-mode');
-  if (demoToggle) {
-    demoToggle.checked = AppState.settings.demoMode === true;
-    demoToggle.addEventListener('change', (e) => {
-      AppState.settings.demoMode = e.target.checked;
-      syncDemoState(AppState);
-      saveState();
-      updateOverviewStats();
-      renderHistory();
-      renderPRs();
-      if (typeof renderRanks === 'function') renderRanks();
-      showToast(e.target.checked ? 'Demo mode enabled (sample data loaded)' : 'Demo mode disabled');
+  // Dedicated 'Access Demo' button inside Settings: routes to isolated sandbox
+  const btnAccessDemo = document.getElementById('btn-access-demo');
+  if (btnAccessDemo) {
+    btnAccessDemo.addEventListener('click', () => {
+      enterDemoSandbox();
+    });
+  }
+
+  const btnExitDemoSandbox = document.getElementById('btn-exit-demo-sandbox');
+  if (btnExitDemoSandbox) {
+    btnExitDemoSandbox.addEventListener('click', () => {
+      exitDemoSandbox();
     });
   }
 
@@ -5648,13 +5648,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================================================
-// THREE-STAGE INITIAL SPLASH ANIMATION
-// Phase 1: On launch, display a pitch-black screen showing ONLY the text
-//          'Are you ready to take it to the moon?' in the center, and
-//          'In the loving memory of 27 / من' pinned to the bottom right.
-// Phase 2: Fade out the text and fade in the central app logo (moon_logo.png).
-// Phase 3: Fade out the logo entirely and smoothly transition to the main
-//          interface featuring the 'Start Odyssey' button and Workout Hub.
+// REFACTORED THREE-STAGE INITIAL SPLASH ANIMATION & POST-SPLASH ROUTING
+// Phase 1: Fade in the central app logo (moon_logo.png) on a pitch-black background.
+// Phase 2: While the logo is on screen, fade in the central quote
+//          'Are you ready to take it to the moon?' and the bottom-right text
+//          'In the loving memory of 27 / من'.
+// Phase 3: Fade all elements out smoothly.
 // ==========================================================================
 
 let splashStage = 1;
@@ -5665,7 +5664,10 @@ let splashAudio = null;
 
 function runThreeStageSplashScreen() {
   const splash = document.getElementById('app-splash-screen');
-  if (!splash) return;
+  if (!splash) {
+    evaluatePostSplashAuthRouting();
+    return;
+  }
 
   splashDismissed = false;
   splashStage = 1;
@@ -5674,29 +5676,27 @@ function runThreeStageSplashScreen() {
   if (splashStageTimer2) clearTimeout(splashStageTimer2);
 
   splash.style.display = 'flex';
-  splash.classList.remove('hidden', 'fade-out', 'splash-stage-2');
-  splash.classList.add('splash-stage-1');
+  splash.classList.remove('hidden', 'fade-out', 'splash-phase-2', 'splash-phase-3');
+  // Phase 1: Fade in central logo on pitch-black background
+  splash.classList.add('splash-phase-1');
 
-  // PHASE 1: Pitch-black screen showing ONLY quote and bottom-right tribute
-  // Duration: 2400ms
+  // Phase 1 duration: 2200ms
   splashStageTimer1 = setTimeout(() => {
-    // Transition to Phase 2: Fade out text, fade in central logo (moon_logo.png)
+    // Transition to Phase 2: While logo is on screen, fade in quote & bottom-right tribute
     splashStage = 2;
-    splash.classList.remove('splash-stage-1');
-    splash.classList.add('splash-stage-2');
+    splash.classList.remove('splash-phase-1');
+    splash.classList.add('splash-phase-2');
 
-    // PHASE 2: Display central logo with ambient maroon glow
-    // Duration: 2200ms
+    // Phase 2 duration: 2500ms
     splashStageTimer2 = setTimeout(() => {
-      // Transition to Phase 3: Fade out logo entirely and smoothly reveal Workout Hub & Start Odyssey
-      splashStage = 3;
-      finishSplashToWorkoutHub();
-    }, 2200);
+      // Transition to Phase 3: Fade all elements out smoothly
+      finishSplashSequence();
+    }, 2500);
 
-  }, 2400);
+  }, 2200);
 }
 
-function finishSplashToWorkoutHub(keepAudio = false) {
+function finishSplashSequence(keepAudio = false) {
   if (splashDismissed) return;
   splashDismissed = true;
 
@@ -5709,9 +5709,10 @@ function finishSplashToWorkoutHub(keepAudio = false) {
 
   const splash = document.getElementById('app-splash-screen');
   if (splash) {
-    // Phase 3: Fade out logo entirely and smoothly transition
-    splash.classList.remove('splash-stage-1', 'splash-stage-2');
-    splash.classList.add('fade-out');
+    // Phase 3: Fade all elements out smoothly
+    splashStage = 3;
+    splash.classList.remove('splash-phase-1', 'splash-phase-2');
+    splash.classList.add('splash-phase-3', 'fade-out');
 
     try {
       triggerHaptic([25]);
@@ -5720,39 +5721,39 @@ function finishSplashToWorkoutHub(keepAudio = false) {
     setTimeout(() => {
       splash.classList.add('hidden');
       splash.style.display = 'none';
-    }, 800);
-  }
 
-  // Ensure Workout Hub is visible and active
-  if (typeof switchTab === 'function') {
-    switchTab('workout');
-  }
+      // Prompt OS notification permission if first login
+      promptNotificationPermissionOnFirstLogin();
 
-  // Prompt the user for OS-level Push Notification permissions immediately after splash screen on first login/session
-  promptNotificationPermissionOnFirstLogin();
+      // Evaluate auth state & route via high-fidelity glassmorphic modal
+      evaluatePostSplashAuthRouting();
+    }, 750);
+  } else {
+    evaluatePostSplashAuthRouting();
+  }
 }
 
 window.handleSplashTap = function(e) {
   if (e && e.stopPropagation) e.stopPropagation();
-  // Responsive tap interaction: advance or dismiss directly to Workout Hub
+  // Responsive tap to skip stages or dismiss
   if (splashStage === 1) {
     if (splashStageTimer1) clearTimeout(splashStageTimer1);
     splashStage = 2;
     const splash = document.getElementById('app-splash-screen');
     if (splash) {
-      splash.classList.remove('splash-stage-1');
-      splash.classList.add('splash-stage-2');
+      splash.classList.remove('splash-phase-1');
+      splash.classList.add('splash-phase-2');
     }
     if (splashStageTimer2) clearTimeout(splashStageTimer2);
     splashStageTimer2 = setTimeout(() => {
-      finishSplashToWorkoutHub();
-    }, 2000);
+      finishSplashSequence();
+    }, 2200);
   } else {
-    finishSplashToWorkoutHub();
+    finishSplashSequence();
   }
 };
 
-window.dismissSplashScreen = finishSplashToWorkoutHub;
+window.dismissSplashScreen = finishSplashSequence;
 window.showSplashScreen = function() {
   runThreeStageSplashScreen();
 };
@@ -5779,10 +5780,6 @@ window.playStartupAudio = function() {
     splashAudio.currentTime = 0;
     splashAudio.muted = false;
 
-    splashAudio.onended = () => {
-      console.log('[Splash Audio] Intro startup sound completed fully.');
-    };
-
     const p = splashAudio.play();
     if (p !== undefined) {
       p.catch((err) => {
@@ -5795,12 +5792,129 @@ window.playStartupAudio = function() {
 };
 window.playSplashAudio = window.playStartupAudio;
 
-// Handle initial startup options: Sign Up / Login
+// ==========================================================================
+// POST-SPLASH AUTHENTICATION & ROUTING EVALUATION
+// ==========================================================================
+window.evaluatePostSplashAuthRouting = function() {
+  const isLoggedIn = window.AuthSystem && typeof window.AuthSystem.isLoggedIn === 'function' && window.AuthSystem.isLoggedIn();
+
+  if (!isLoggedIn) {
+    // If not logged in: Display a premium modal titled exactly 'Start your Odyssey with Moon now'
+    // Include the Sign Up and Login input fields directly in this pop-up
+    const titleEl = document.getElementById('auth-main-title');
+    if (titleEl) {
+      titleEl.textContent = 'Start your Odyssey with Moon now';
+    }
+    if (typeof openModal === 'function') {
+      openModal('modal-auth');
+    }
+  } else {
+    // If already logged in: Display a sleek modal asking user to choose their initial destination for the session:
+    // Large interactive buttons: 'Focus' and 'Workout'
+    const user = window.AuthSystem.getCurrentUser();
+    const greetingEl = document.getElementById('destination-user-greeting');
+    if (greetingEl) {
+      const name = user && (user.displayName || user.name || user.username) ? (user.displayName || user.name || user.username) : 'Athlete';
+      greetingEl.textContent = `Welcome back, ${name} \u2022 Select your initial destination for this session:`;
+    }
+    if (typeof openModal === 'function') {
+      openModal('modal-session-destination');
+    }
+  }
+};
+
+window.selectSessionDestination = function(destination) {
+  closeModal('modal-session-destination');
+  try {
+    triggerHaptic([25]);
+  } catch (e) {}
+
+  if (destination === 'focus') {
+    switchTab('focus');
+    showToast('Routed to Anti-Scroll Focus Shield', 'info');
+  } else {
+    switchTab('workout');
+    showToast('Routed to Workout Hub', 'info');
+  }
+};
+
+window.handleDestinationOverlayClick = function(e) {
+  if (e.target && e.target.id === 'modal-session-destination') {
+    closeModal('modal-session-destination');
+    switchTab('workout');
+  }
+};
+
+// ==========================================================================
+// DEDICATED SANDBOXED DEMO ENVIRONMENT
+// ==========================================================================
+window.isDemoSandboxActive = false;
+
+window.enterDemoSandbox = function() {
+  try {
+    localStorage.setItem('moon_real_production_backup', JSON.stringify({
+      history: AppState.history || [],
+      prs: AppState.prs || {},
+      overview: AppState.overview || {}
+    }));
+  } catch (e) {}
+
+  window.isDemoSandboxActive = true;
+  AppState.history = JSON.parse(JSON.stringify(DEMO_HISTORY));
+  AppState.prs = rebuildPRsFromHistory(AppState.history);
+
+  const banner = document.getElementById('demo-sandbox-banner');
+  if (banner) banner.classList.remove('hidden');
+
+  closeModal('modal-settings');
+  switchTab('workout');
+  updateOverviewStats();
+  renderHistory();
+  renderPRs();
+  if (typeof renderRanks === 'function') renderRanks();
+  showToast('Entered Isolated Demo Sandbox', 'info');
+  try {
+    triggerHaptic([20, 40, 20]);
+  } catch (e) {}
+};
+
+window.exitDemoSandbox = function() {
+  window.isDemoSandboxActive = false;
+  const banner = document.getElementById('demo-sandbox-banner');
+  if (banner) banner.classList.add('hidden');
+
+  try {
+    const backupRaw = localStorage.getItem('moon_real_production_backup');
+    if (backupRaw) {
+      const backup = JSON.parse(backupRaw);
+      if (backup.history) AppState.history = backup.history;
+      if (backup.prs) AppState.prs = backup.prs;
+    } else {
+      AppState.history = (AppState.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
+      AppState.prs = rebuildPRsFromHistory(AppState.history);
+    }
+  } catch (e) {
+    AppState.history = (AppState.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
+    AppState.prs = rebuildPRsFromHistory(AppState.history);
+  }
+
+  saveState();
+  updateOverviewStats();
+  renderHistory();
+  renderPRs();
+  if (typeof renderRanks === 'function') renderRanks();
+  showToast('Restored Live Production Data', 'success');
+  try {
+    triggerHaptic([25]);
+  } catch (e) {}
+};
+
+// Handle initial startup options: Sign Up / Login (with startup sound attached)
 window.handleStartupAuth = function(mode, e) {
   if (e && e.stopPropagation) e.stopPropagation();
 
   window.playStartupAudio();
-  finishSplashToWorkoutHub(true);
+  finishSplashSequence(true);
 
   if (typeof window.switchAuthTab === 'function') {
     window.switchAuthTab(mode);
@@ -5817,15 +5931,7 @@ window.handleStartupAuth = function(mode, e) {
 
 window.selectAppDestination = function(destination, e) {
   if (e && e.stopPropagation) e.stopPropagation();
-  if (destination === 'focus') {
-    switchTab('focus');
-  } else {
-    switchTab('workout');
-  }
-  finishSplashToWorkoutHub();
-  try {
-    triggerHaptic([30, 45]);
-  } catch (err) {}
+  window.selectSessionDestination(destination);
 };
 
 // ==========================================================================

@@ -145,6 +145,46 @@
   --on-accent: #0A0A0A; --meta-theme: #0A0A0A;
   --text-muted: #A0A0A0; --text-dim: #666666;
 }
+:root[data-theme="obsidian"] {
+  --bg-dark: #050608; --bg-deep: #020304; --bg-card: #0D0F14; --bg-card-hover: #151820;
+  --bg-input: #1C202B; --bg-raised: #12151D;
+  --accent-lime: #8A99AD; --accent-rgb: 138, 153, 173;
+  --accent-grad-a: #A0AEC0; --accent-grad-b: #4A5568;
+  --accent-cyan: #CBD5E1; --accent2: #CBD5E1; --accent2-rgb: 203, 213, 225;
+  --accent2-grad-a: #E2E8F0; --accent2-grad-b: #64748B;
+  --on-accent: #050608; --meta-theme: #050608;
+  --text-muted: #94A3B8; --text-dim: #64748B;
+}
+:root[data-theme="lunar"], :root[data-theme="lunar_white"] {
+  --bg-dark: #07080B; --bg-deep: #030406; --bg-card: #101217; --bg-card-hover: #171A22;
+  --bg-input: #1E222D; --bg-raised: #13161F;
+  --accent-lime: #F8FAFC; --accent-rgb: 248, 250, 252;
+  --accent-grad-a: #FFFFFF; --accent-grad-b: #CBD5E1;
+  --accent-cyan: #E2E8F0; --accent2: #E2E8F0; --accent2-rgb: 226, 232, 240;
+  --accent2-grad-a: #FFFFFF; --accent2-grad-b: #94A3B8;
+  --on-accent: #050505; --meta-theme: #07080B;
+  --text-muted: #CBD5E1; --text-dim: #8899A6;
+}
+:root[data-theme="cosmic_purple"] {
+  --bg-dark: #090510; --bg-deep: #05020A; --bg-card: #130B22; --bg-card-hover: #1C1032;
+  --bg-input: #261642; --bg-raised: #170E28;
+  --accent-lime: #C084FC; --accent-rgb: 192, 132, 252;
+  --accent-grad-a: #D946EF; --accent-grad-b: #7C3AED;
+  --accent-cyan: #E879F9; --accent2: #E879F9; --accent2-rgb: 232, 121, 249;
+  --accent2-grad-a: #F0ABFC; --accent2-grad-b: #A21CAF;
+  --on-accent: #FFFFFF; --meta-theme: #090510;
+  --text-muted: #D8B4FE; --text-dim: #9333EA;
+}
+:root[data-theme="neon_mint"] {
+  --bg-dark: #030D08; --bg-deep: #010704; --bg-card: #081A11; --bg-card-hover: #0D2619;
+  --bg-input: #123322; --bg-raised: #0A2015;
+  --accent-lime: #00FFA3; --accent-rgb: 0, 255, 163;
+  --accent-grad-a: #34D399; --accent-grad-b: #059669;
+  --accent-cyan: #2DD4BF; --accent2: #2DD4BF; --accent2-rgb: 45, 212, 191;
+  --accent2-grad-a: #5EEAD4; --accent2-grad-b: #0F766E;
+  --on-accent: #021B11; --meta-theme: #030D08;
+  --text-muted: #6EE7B7; --text-dim: #059669;
+}
 
 * {
   margin: 0;
@@ -7344,7 +7384,7 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
 .streak-roadmap-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: -200px; left: 0; right: 0; bottom: -200px;
   background-image: 
     radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
     radial-gradient(1.5px 1.5px at 100px 80px, #fff, rgba(0,0,0,0)),
@@ -7356,8 +7396,37 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
     radial-gradient(1px 1px at 50px 520px, #7de3d0, rgba(0,0,0,0));
   background-repeat: repeat;
   background-size: 350px 600px;
-  opacity: 0.55;
+  opacity: 0.65;
   pointer-events: none;
+  animation: cosmicStarscapeDrift 38s linear infinite;
+  will-change: background-position;
+}
+
+.streak-roadmap-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(1.2px 1.2px at 60px 50px, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(2px 2px at 160px 180px, rgba(255, 215, 0, 0.75), transparent),
+    radial-gradient(1.5px 1.5px at 290px 310px, rgba(224, 80, 106, 0.9), transparent),
+    radial-gradient(1.2px 1.2px at 110px 440px, rgba(0, 240, 255, 0.7), transparent);
+  background-repeat: repeat;
+  background-size: 400px 700px;
+  opacity: 0.45;
+  pointer-events: none;
+  animation: cosmicStarscapeParallaxLayer 60s linear infinite reverse;
+  will-change: background-position;
+}
+
+@keyframes cosmicStarscapeDrift {
+  0% { background-position: 0 0; }
+  100% { background-position: 80px 600px; }
+}
+
+@keyframes cosmicStarscapeParallaxLayer {
+  0% { background-position: 0 0; }
+  100% { background-position: -70px 700px; }
 }
 .cosmic-map-header {
   display: flex;
@@ -7527,22 +7596,35 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
 
 /* Custom Maroon Moon Body */
 .maroon-moon-body {
-  width: 82px;
-  height: 82px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #9E1B34 0%, #4A0E1C 55%, #180308 100%);
-  box-shadow: 0 0 38px rgba(224, 80, 106, 0.75), inset -8px -8px 22px rgba(0, 0, 0, 0.88);
+  background: radial-gradient(circle at 35% 35%, #B8133E 0%, #4A0E1C 55%, #180308 100%);
+  box-shadow: 0 0 45px rgba(224, 80, 106, 0.85), 0 0 80px rgba(184, 12, 52, 0.45), inset -8px -8px 22px rgba(0, 0, 0, 0.88);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  border: 2.5px solid rgba(245, 110, 138, 0.75);
-  animation: moonGlow 3s infinite alternate ease-in-out;
+  border: 2.5px solid rgba(255, 128, 153, 0.85);
+  animation: moonCitadelAuraPulse 3s infinite ease-in-out;
 }
-@keyframes moonGlow {
-  0% { box-shadow: 0 0 25px rgba(224, 80, 106, 0.5), inset -8px -8px 18px rgba(0, 0, 0, 0.85); }
-  100% { box-shadow: 0 0 50px rgba(224, 80, 106, 0.9), inset -8px -8px 24px rgba(0, 0, 0, 0.95); }
+@keyframes moonCitadelAuraPulse {
+  0%, 100% {
+    box-shadow: 0 0 35px rgba(224, 80, 106, 0.7),
+                0 0 70px rgba(184, 12, 52, 0.4),
+                inset -8px -8px 20px rgba(0, 0, 0, 0.85);
+    border-color: rgba(255, 128, 153, 0.75);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 65px rgba(255, 77, 115, 1.0),
+                0 0 110px rgba(224, 80, 106, 0.8),
+                0 0 150px rgba(224, 80, 106, 0.4),
+                inset -8px -8px 24px rgba(0, 0, 0, 0.95);
+    border-color: #FFA8BA;
+    transform: scale(1.06);
+  }
 }
 .moon-crater-texture {
   font-size: 2.3rem;
@@ -7585,14 +7667,50 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
 }
 .celestial-node.active-station .asteroid-rock-body {
-  border-color: #FFF;
-  box-shadow: 0 0 26px currentColor;
-  transform: scale(1.15);
-  animation: stationPulse 2s infinite ease-in-out;
+  border-color: #FFFFFF !important;
+  animation: activeAsteroidAuraPulse 2.2s infinite ease-in-out !important;
+  position: relative;
+  z-index: 5;
 }
-@keyframes stationPulse {
-  0%, 100% { transform: scale(1.15); }
-  50% { transform: scale(1.22); }
+@keyframes activeAsteroidAuraPulse {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.9),
+                0 0 35px currentColor,
+                0 0 55px rgba(var(--accent-rgb, 224, 80, 106), 0.55);
+    filter: drop-shadow(0 0 12px currentColor);
+    transform: scale(1.16);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(255, 255, 255, 1.0),
+                0 0 60px currentColor,
+                0 0 95px rgba(var(--accent-rgb, 224, 80, 106), 0.85);
+    filter: drop-shadow(0 0 22px currentColor);
+    transform: scale(1.25);
+  }
+}
+
+/* Dynamic outward radar pulse ring for active asteroid */
+.celestial-node.active-station::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin-top: -26px;
+  margin-left: -26px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  box-shadow: 0 0 16px currentColor;
+  pointer-events: none;
+  animation: asteroidRadarWave 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  z-index: 1;
+}
+
+@keyframes asteroidRadarWave {
+  0% { transform: scale(0.95); opacity: 0.95; }
+  70% { transform: scale(1.8); opacity: 0.15; }
+  100% { transform: scale(2.1); opacity: 0; }
 }
 .celestial-node.locked .asteroid-rock-body {
   opacity: 0.38;
@@ -8880,6 +8998,154 @@ img,
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 4px;
+}
+
+/* ==========================================================================
+   STRICT FOCUS LOCK BANNER
+   ========================================================================== */
+.strict-lock-banner {
+  background: linear-gradient(135deg, rgba(138, 0, 34, 0.35) 0%, rgba(20, 0, 8, 0.95) 100%);
+  border: 1.5px solid #FF2A55;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  color: #FFF;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(255, 42, 85, 0.25), inset 0 0 12px rgba(255, 42, 85, 0.15);
+  animation: strictLockPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes strictLockPulse {
+  0%, 100% { border-color: #FF2A55; box-shadow: 0 0 14px rgba(255, 42, 85, 0.3); }
+  50% { border-color: #FF6688; box-shadow: 0 0 28px rgba(255, 42, 85, 0.6); }
+}
+
+/* ==========================================================================
+   OLED TRUE BLACK MODE (Pure #000000 for OLED Displays)
+   ========================================================================== */
+:root.oled-true-black,
+body.oled-true-black {
+  --bg-dark: #000000 !important;
+  --bg-deep: #000000 !important;
+  --bg-card: #000000 !important;
+  --bg-card-hover: #080808 !important;
+  --bg-input: #080808 !important;
+  --bg-raised: #040404 !important;
+  background-color: #000000 !important;
+}
+
+body.oled-true-black .app-container,
+body.oled-true-black .main-content,
+body.oled-true-black .tab-view,
+body.oled-true-black .workout-idle-hub,
+body.oled-true-black .app-header,
+body.oled-true-black .bottom-tab-bar,
+body.oled-true-black .workout-card,
+body.oled-true-black .settings-card,
+body.oled-true-black .setting-item,
+body.oled-true-black .settings-group,
+body.oled-true-black .stat-pill,
+body.oled-true-black .routine-card,
+body.oled-true-black .routine-card-compact,
+body.oled-true-black .history-card,
+body.oled-true-black .goal-card-futuristic,
+body.oled-true-black .streak-roadmap-card,
+body.oled-true-black .admin-stats-card,
+body.oled-true-black .modal-card,
+body.oled-true-black .section-hero,
+body.oled-true-black .opal-focus-stage,
+body.oled-true-black .dedicated-ig-body,
+body.oled-true-black .stats-overview-bar {
+  background-color: #000000 !important;
+  background-image: none !important;
+}
+
+body.oled-true-black .modal-card,
+body.oled-true-black .routine-card,
+body.oled-true-black .history-card,
+body.oled-true-black .goal-card-futuristic,
+body.oled-true-black .streak-roadmap-card {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.98), 0 0 15px rgba(var(--accent-rgb, 224, 80, 106), 0.18) !important;
+}
+
+/* ==========================================================================
+   CONSISTENT 16px PADDING & 12px BORDER RADIUS ACROSS ALL CARDS
+   ========================================================================== */
+.workout-card,
+.routine-card,
+.routine-card-compact,
+.history-card,
+.stat-pill,
+.setting-item,
+.settings-group,
+.settings-faq-card,
+.faq-prompt-card,
+.admin-stats-card,
+.admin-badge-card,
+.pr-card,
+.exercise-card,
+.exercise-item,
+.cosmic-status-bar,
+.streak-roadmap-card,
+.goal-card-futuristic,
+.edit-history-card,
+.stats-overview-bar {
+  padding: 16px !important;
+  border-radius: 12px !important;
+}
+
+/* Stat pills internal alignment with 16px padding and 12px radius */
+.stat-pill {
+  padding: 16px 12px !important;
+  border-radius: 12px !important;
+}
+
+/* Modal cards keep generous padding but clean 16px border-radius */
+.modal-card {
+  padding: 20px 16px !important;
+  border-radius: 16px !important;
+}
+
+/* ==========================================================================
+   GLASSMORPHISM: backdrop-filter: blur(15px) ON NAVIGATION & POP-UP MENUS
+   ========================================================================== */
+.bottom-tab-bar,
+.app-header,
+.modal-overlay,
+.modal-card,
+.coach-chat-bubble,
+.floating-stopwatch-pill,
+.floating-active-banner,
+.dedicated-ig-header,
+.ios-select,
+.dropdown-menu,
+.ranks-prs-segment,
+.streak-roadmap-card {
+  backdrop-filter: blur(15px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+}
+
+/* ==========================================================================
+   HIGH-PERFORMANCE HARDWARE-ACCELERATED SCROLLING (60FPS LOCKED)
+   ========================================================================== */
+.theme-picker,
+.rs-theme-swatches-scroll,
+.cosmic-roadmap-stage,
+.main-content,
+.history-list,
+.routines-grid,
+.modal-overlay,
+.dedicated-ig-body,
+.exercise-list-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
 }
 
 

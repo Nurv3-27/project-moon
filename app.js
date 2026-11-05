@@ -446,7 +446,10 @@ function getInitialState() {
       sound: true,
       haptics: true,
       demoMode: false,
-      dmOnlyMode: true
+      dmOnlyMode: true,
+      strictFocusLock: false,
+      oledTrueBlack: false,
+      theme: 'maroon'
     },
     exercises: [...DEFAULT_EXERCISES],
     routines: [], // Custom saved routines only (featured ones are in template library)
@@ -458,6 +461,10 @@ function getInitialState() {
 }
 
 let AppState = getInitialState();
+if (AppState && AppState.settings) {
+  if (typeof AppState.settings.strictFocusLock !== 'boolean') AppState.settings.strictFocusLock = false;
+  if (typeof AppState.settings.oledTrueBlack !== 'boolean') AppState.settings.oledTrueBlack = false;
+}
 saveState();
 
 // Doomscroll bank: balance (seconds earned), session (ms epoch when the current scroll session ends)
@@ -3343,6 +3350,11 @@ window.selectInstantDuration = selectInstantDuration;
 function toggleInstantBlock() {
   ensureFocusBlockState();
   if (AppState.focusBlock.instantActive) {
+    if (AppState.settings && AppState.settings.strictFocusLock) {
+      showToast('🔒 Strict Focus Lock is active! You cannot cancel or pause an active lockdown.');
+      triggerHaptic([60, 40, 60]);
+      return;
+    }
     // Opal Gesture Rule: When active lockdown is in progress, simple accidental taps are rejected.
     // User must perform the 3-second hold gesture on the Hold to Cancel button.
     const holdContainer = document.getElementById('opal-hold-cancel-container');
@@ -3389,8 +3401,13 @@ function startInstantBlock(mins) {
 }
 window.startInstantBlock = startInstantBlock;
 
-function stopInstantBlock() {
+function stopInstantBlock(force = false) {
   ensureFocusBlockState();
+  if (!force && AppState.settings && AppState.settings.strictFocusLock && AppState.focusBlock.instantActive) {
+    showToast('🔒 Strict Focus Lock is active! Lockdown cannot be cancelled.');
+    triggerHaptic([60, 40, 60]);
+    return;
+  }
   AppState.focusBlock.instantActive = false;
   AppState.focusBlock.instantEndsAt = null;
   triggerHaptic([30]);
@@ -3445,6 +3462,11 @@ function initHoldToCancel() {
 
   function onPointerDown(e) {
     ensureFocusBlockState();
+    if (AppState.settings && AppState.settings.strictFocusLock) {
+      showToast('🔒 Strict Focus Lock is active! You cannot cancel an active lockdown.');
+      triggerHaptic([60, 40, 60]);
+      return;
+    }
     // Only engage hold-to-cancel if an active block or lockdown is running
     if (!AppState.focusBlock.instantActive && !AppState.scroll.antiScrollActive) {
       return;
@@ -3689,8 +3711,28 @@ function updateFocusBlockUI() {
 
   // Update Futuristic Opal Hold-to-Cancel Container
   const holdContainer = document.getElementById('opal-hold-cancel-container');
+  const isStrict = Boolean(AppState.settings && AppState.settings.strictFocusLock);
   if (holdContainer) {
-    holdContainer.classList.toggle('hidden', !fb.instantActive);
+    if (isStrict) {
+      holdContainer.classList.add('hidden');
+    } else {
+      holdContainer.classList.toggle('hidden', !fb.instantActive);
+    }
+  }
+
+  // Strict Focus Lock Banner
+  let strictBanner = document.getElementById('strict-lock-banner');
+  if (isStrict && fb.instantActive) {
+    if (!strictBanner && holdContainer && holdContainer.parentNode) {
+      strictBanner = document.createElement('div');
+      strictBanner.id = 'strict-lock-banner';
+      strictBanner.className = 'strict-lock-banner';
+      strictBanner.innerHTML = '🔒 <strong>Strict Focus Lock Active</strong> &bull; Active lockdown cannot be cancelled';
+      holdContainer.parentNode.insertBefore(strictBanner, holdContainer);
+    }
+    if (strictBanner) strictBanner.classList.remove('hidden');
+  } else if (strictBanner) {
+    strictBanner.classList.add('hidden');
   }
 
   // Update Opal Instant Block Pill
@@ -4883,13 +4925,131 @@ const THEME_BAR_COLORS = {
   emerald: '#040B07',
   orange: '#0F0804',
   rose: '#0F050A',
-  silver: '#0A0A0A'
+  silver: '#0A0A0A',
+  obsidian: '#050608',
+  lunar: '#07080B',
+  cosmic_purple: '#090510',
+  neon_mint: '#030D08'
 };
 
+// ==========================================================================
+// UTILITY FEATURE: WORKOUT DATA EXPORT (CSV GENERATOR)
+// ==========================================================================
+function exportWorkoutDataCSV() {
+  const history = AppState.history || [];
+  const prs = AppState.prs || {};
+  const rows = [];
+
+  // CSV Headers
+  rows.push(['Record Type', 'Date', 'Workout Title', 'Duration (min)', 'Volume (kg)', 'Exercise Name', 'Set Number', 'Set Type', 'Weight (kg)', 'Reps', '1RM Best', 'Notes']);
+
+  // Export Workout History
+  history.forEach(item => {
+    const dateStr = item.date ? new Date(item.date).toISOString().replace('T', ' ').slice(0, 19) : '';
+    const title = (item.title || 'Workout Session').replace(/"/g, '""');
+    const duration = item.duration || 0;
+    const volume = item.volume || 0;
+    const notes = (item.notes || '').replace(/"/g, '""');
+
+    if (Array.isArray(item.exercises) && item.exercises.length > 0) {
+      item.exercises.forEach(ex => {
+        const exName = (ex.name || 'Exercise').replace(/"/g, '""');
+        if (Array.isArray(ex.sets) && ex.sets.length > 0) {
+          ex.sets.forEach((set, sIdx) => {
+            rows.push([
+              'WORKOUT_SET',
+              `"${dateStr}"`,
+              `"${title}"`,
+              duration,
+              volume,
+              `"${exName}"`,
+              sIdx + 1,
+              `"${set.isWarmup ? 'Warmup' : 'Working'}"`,
+              set.weight || 0,
+              set.reps || 0,
+              '',
+              `"${notes}"`
+            ]);
+          });
+        } else {
+          rows.push(['WORKOUT_EXERCISE', `"${dateStr}"`, `"${title}"`, duration, volume, `"${exName}"`, '', '', '', '', '', `"${notes}"`]);
+        }
+      });
+    } else {
+      rows.push(['WORKOUT_LOG', `"${dateStr}"`, `"${title}"`, duration, volume, '', '', '', '', '', '', `"${notes}"`]);
+    }
+  });
+
+  // Export Personal Records (PRs)
+  Object.keys(prs).forEach(exId => {
+    const pr = prs[exId];
+    if (!pr) return;
+    const exName = (pr.exerciseName || exId).replace(/"/g, '""');
+    const prDate = pr.date ? new Date(pr.date).toISOString().slice(0, 10) : '';
+    rows.push([
+      'PERSONAL_RECORD',
+      `"${prDate}"`,
+      'Personal Record Milestone',
+      '',
+      '',
+      `"${exName}"`,
+      '',
+      'PR',
+      pr.weight || 0,
+      pr.reps || 0,
+      pr.oneRepMax || pr.weight || 0,
+      `"All-time personal record achieved"`
+    ]);
+  });
+
+  const csvContent = rows.map(r => r.join(',')).join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `moon_workout_data_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('📥 Workout logs and PRs downloaded as CSV!');
+  triggerHaptic([30, 20, 30]);
+}
+window.exportWorkoutDataCSV = exportWorkoutDataCSV;
+
+// ==========================================================================
+// UTILITY FEATURE: OLED TRUE BLACK MODE
+// ==========================================================================
+function toggleOledTrueBlack(enabled) {
+  if (typeof enabled !== 'boolean') {
+    enabled = !document.documentElement.classList.contains('oled-true-black');
+  }
+  AppState.settings.oledTrueBlack = enabled;
+  saveState();
+
+  if (enabled) {
+    document.documentElement.classList.add('oled-true-black');
+    document.body.classList.add('oled-true-black');
+  } else {
+    document.documentElement.classList.remove('oled-true-black');
+    document.body.classList.remove('oled-true-black');
+  }
+
+  const toggle = document.getElementById('setting-oled-black');
+  if (toggle) toggle.checked = enabled;
+}
+window.toggleOledTrueBlack = toggleOledTrueBlack;
+
 function applyTheme(id) {
+  if (id === 'lunar_white') id = 'lunar';
   if (!THEME_BAR_COLORS[id]) id = 'maroon';
   document.documentElement.setAttribute('data-theme', id);
   try { localStorage.setItem(THEME_KEY, id); } catch (e) {}
+  if (AppState && AppState.settings) {
+    AppState.settings.theme = id;
+    saveState();
+  }
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', THEME_BAR_COLORS[id]);
   document.querySelectorAll('.theme-swatch').forEach(b =>
@@ -5294,6 +5454,41 @@ document.addEventListener('DOMContentLoaded', () => {
     saveState();
     if (e.target.checked) triggerHaptic([50]);
   });
+
+  // Settings: Utility Feature 1 - Strict Focus Lock
+  const strictFocusToggle = document.getElementById('setting-strict-focus');
+  if (strictFocusToggle) {
+    strictFocusToggle.checked = Boolean(AppState.settings.strictFocusLock);
+    strictFocusToggle.addEventListener('change', (e) => {
+      AppState.settings.strictFocusLock = e.target.checked;
+      saveState();
+      updateFocusBlockUI();
+      showToast(e.target.checked ? '🔒 Strict Focus Lock enabled (blocks cannot be cancelled)' : 'Strict Focus Lock disabled');
+      triggerHaptic([35]);
+    });
+  }
+
+  // Settings: Utility Feature 2 - Workout Data CSV Export
+  const exportCsvBtn = document.getElementById('btn-export-workout-csv');
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', () => {
+      exportWorkoutDataCSV();
+    });
+  }
+
+  // Settings: Utility Feature 3 - OLED True Black Toggle
+  const oledToggle = document.getElementById('setting-oled-black');
+  if (oledToggle) {
+    oledToggle.checked = Boolean(AppState.settings.oledTrueBlack);
+    oledToggle.addEventListener('change', (e) => {
+      toggleOledTrueBlack(e.target.checked);
+      showToast(e.target.checked ? '🌑 OLED True Black enabled (#000000)' : 'Standard theme backgrounds restored');
+      triggerHaptic([25]);
+    });
+  }
+  if (AppState.settings && AppState.settings.oledTrueBlack) {
+    toggleOledTrueBlack(true);
+  }
 
   const demoToggle = document.getElementById('setting-demo-mode');
   if (demoToggle) {

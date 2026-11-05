@@ -43,6 +43,16 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _send_json(self, payload, status=200):
+        data = json.dumps(payload).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(data)))
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(data)
+
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -52,6 +62,7 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         state = load_state()
+        qs = {}
 
         # Allow query parameters for quick testing/setting (e.g. /api/scroll?set=10 or /api/scroll?reset=0)
         try:
@@ -78,8 +89,22 @@ class handler(BaseHTTPRequestHandler):
         else:
             effective_balance = current_bank
 
+        is_focus_blocked = state.get('focus_blocked', False)
+        is_allowed = (effective_balance > 0) and (not is_focus_blocked)
+
+        if 'format' in qs and qs['format'][0] == 'json':
+            return self._send_json({
+                'allowed': is_allowed,
+                'dmOnly': state.get('dm_only', True),
+                'remainingSeconds': max(0, int(effective_balance * 60)),
+                'scrollBankMinutes': max(0.0, round(effective_balance, 2)),
+                'focusBlocked': is_focus_blocked,
+                'instantBlock': state.get('instant_block', False),
+                'blockedApps': state.get('blocked_apps', ['youtube_shorts', 'games', 'instagram_reels'])
+            })
+
         # Requirement 3: if scroll_bank balance > 0 -> 'allowed', if <= 0 -> 'dm_only'
-        if effective_balance > 0:
+        if is_allowed:
             return self._send_text('allowed')
         else:
             return self._send_text('dm_only')

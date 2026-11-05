@@ -7966,3 +7966,127 @@ button:active,
   box-shadow: 0 0 16px rgba(224, 80, 106, 0.45);
 }
 
+/* ==========================================================================
+   MODDED INSTAGRAM LOCKOUT SCREEN (Pitch Black & Dark Maroon Aesthetic)
+   ========================================================================== */
+.ig-webview-lockout-placeholder {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.ig-webview-lockout-placeholder.hidden {
+  display: none !important;
+}
+
+.ig-lockout-pitch-black {
+  max-width: 440px;
+  width: 100%;
+  background: #000000;
+  border: 1px solid rgba(224, 80, 106, 0.25);
+  border-radius: 28px;
+  padding: 36px 24px 28px;
+  text-align: center;
+  box-shadow: 0 0 50px rgba(74, 14, 28, 0.6), 0 0 100px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.moon-logo-glow-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moon-radial-aura {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(224, 80, 106, 0.45) 0%, rgba(74, 14, 28, 0.2) 50%, transparent 75%);
+  filter: blur(12px);
+  animation: pulse-moon-aura 3s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes pulse-moon-aura {
+  0% { transform: scale(0.92); opacity: 0.6; }
+  100% { transform: scale(1.12); opacity: 1; }
+}
+
+.moon-lock-logo {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  border-radius: 24px;
+  object-fit: cover;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9), 0 0 20px rgba(224, 80, 106, 0.35);
+  border: 1.5px solid rgba(224, 80, 106, 0.4);
+}
+
+.time-up-badge {
+  display: inline-block;
+  background: rgba(224, 80, 106, 0.15);
+  color: #ff6b87;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 5px 14px;
+  border-radius: 99px;
+  border: 1px solid rgba(224, 80, 106, 0.35);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px rgba(224, 80, 106, 0.2);
+}
+
+.time-up-heading {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0 0 10px;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.time-up-sub {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.45;
+  margin: 0 0 20px;
+  max-width: 340px;
+}
+
+.time-up-sub strong {
+  color: #ff7b94;
+}
+
+.ig-lockout-pitch-black .ig-lockout-reward-info {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 22px;
+  line-height: 1.35;
+}
+
+.ig-lockout-pitch-black .ig-lockout-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+

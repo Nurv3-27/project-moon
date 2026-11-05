@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v60';
+const CACHE_NAME = 'moon-v61';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -65,6 +65,43 @@ self.addEventListener('fetch', (event) => {
           return caches.match('./index.html');
         }
       });
+    })
+  );
+});
+
+// OS-Level Push / Local Rest Timer Notifications (fires even when screen is off or in other app)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SCHEDULE_REST_TIMER') {
+    const delayMs = event.data.delayMs || 90000;
+    const title = event.data.title || 'Moon Fitness - Rest Target Reached! 🔔';
+    const body = event.data.body || 'Rest period complete! Step up for your next set.';
+    setTimeout(() => {
+      self.registration.showNotification(title, {
+        body: body,
+        icon: './app_icon_192.png',
+        badge: './apple-touch-icon.png',
+        vibrate: [500, 200, 500, 200, 500],
+        tag: 'rest-timer-done',
+        renotify: true,
+        requireInteraction: true,
+        data: { url: './#workout' }
+      });
+    }, delayMs);
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('./');
+      }
     })
   );
 });

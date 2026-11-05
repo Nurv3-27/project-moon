@@ -23,6 +23,7 @@ import {
   Platform,
   Vibration,
   Animated,
+  PanResponder,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -186,6 +187,8 @@ export default function ModdedInstagramScreen({
   initialSeconds = 180,
   onTimeExpired,
   onExit,
+  onSwipeLeft,
+  onSwipeRight,
 }) {
   const webViewRef = useRef(null);
 
@@ -198,6 +201,24 @@ export default function ModdedInstagramScreen({
 
   // Pulse Animation for the pitch-black Time Up screen
   const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  // Horizontal Swipe Gestures to transition smoothly between screens
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dx) > 30 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 1.5;
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx < -50 && onSwipeLeft) {
+          Vibration.vibrate(20);
+          onSwipeLeft(); // Slide finger left -> Focus Tab
+        } else if (gestureState.dx > 50 && onSwipeRight) {
+          Vibration.vibrate(20);
+          onSwipeRight(); // Slide finger right -> Previous Tab
+        }
+      },
+    })
+  ).current;
 
   // ---------------------------------------------------------------------------
   // 1. Backend Timer Integration & Scroll Bank Polling
@@ -438,7 +459,7 @@ export default function ModdedInstagramScreen({
   // 6. RENDER: Active Modded Instagram WebView Screen
   // ---------------------------------------------------------------------------
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...panResponder.panHandlers}>
       <StatusBar barStyle="light-content" backgroundColor="#0A0B10" />
 
       {/* Top Header: Live Scroll Bank Countdown & Anti-Scroll Shield Pill */}
@@ -490,6 +511,14 @@ export default function ModdedInstagramScreen({
           thirdPartyCookiesEnabled={true}
           sharedCookiesEnabled={true}
           allowsBackForwardNavigationGestures={false}
+          setSupportMultipleWindows={false}
+          onOpenWindow={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            const targetUrl = nativeEvent ? nativeEvent.targetUrl : '';
+            if (isAllowedUrl(targetUrl)) {
+              webViewRef.current?.injectJavaScript(`window.location.href = '${targetUrl}'; true;`);
+            }
+          }}
           onLoadStart={() => setIsLoading(true)}
           onLoadEnd={() => setIsLoading(false)}
           startInLoadingState={true}

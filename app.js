@@ -573,10 +573,24 @@ function playSetCompletePing() {
 }
 
 function playRestTimerChime() {
-  // Triple boxing bell alert chime
-  playTone(587.33, 'triangle', 0.3, 0);
-  playTone(880, 'sine', 0.4, 0.15);
-  playTone(1174.66, 'sine', 0.8, 0.3);
+  // Triple athletic boxing bell alert chime with high-resonance harmonics
+  try {
+    playTone(784.0, 'sine', 0.35, 0);       // G5
+    playTone(1568.0, 'triangle', 0.25, 0);   // G6
+    playTone(880.0, 'sine', 0.45, 0.18);     // A5
+    playTone(1760.0, 'triangle', 0.3, 0.18);  // A6
+    playTone(1174.66, 'sine', 0.9, 0.38);    // D6 long ringing chime
+    playTone(2349.32, 'triangle', 0.5, 0.38);// D7 chime harmonic
+  } catch (e) {}
+
+  // HTML Audio element trigger
+  try {
+    const audioEl = document.getElementById('rest-timer-audio');
+    if (audioEl) {
+      audioEl.currentTime = 0;
+      audioEl.play().catch(() => {});
+    }
+  } catch (e) {}
 }
 
 function triggerHaptic(pattern = [40]) {
@@ -595,15 +609,26 @@ let restTotalDuration = 90;
 let restEndsAt = 0;
 
 function notifyRestOver() {
-  const title = 'Rest over!';
-  const body = 'Time for your next set \uD83D\uDCAA';
+  const title = 'Moon Fitness - Rest Target Reached! 🔔';
+  const body = 'Rest period complete! Step up for your next set.';
   try {
     if ('Notification' in window && Notification.permission === 'granted') {
       if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-        navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, icon: 'app_icon_192.png', vibrate: [200, 100, 200], tag: 'rest-over' }))
-          .catch(() => new Notification(title, { body }));
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(title, {
+            body: body,
+            icon: 'app_icon_192.png',
+            badge: 'apple-touch-icon.png',
+            vibrate: [500, 200, 500, 200, 500],
+            tag: 'rest-timer-done',
+            renotify: true,
+            requireInteraction: true,
+            silent: false,
+            data: { url: './#workout' }
+          }).catch(() => new Notification(title, { body, icon: 'app_icon_192.png' }));
+        });
       } else {
-        new Notification(title, { body });
+        new Notification(title, { body, icon: 'app_icon_192.png' });
       }
     }
   } catch (e) {}
@@ -611,7 +636,13 @@ function notifyRestOver() {
 
 function requestNotifyPermission() {
   try {
-    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(perm => {
+        if (perm === 'granted') {
+          showToast('🔔 Rest timer push notifications enabled');
+        }
+      });
+    }
   } catch (e) {}
 }
 
@@ -674,6 +705,19 @@ function triggerRestTimer(seconds) {
   document.body.classList.add('has-active-rest-bar');
 
   updateRestTimerUI();
+
+  // Ensure notification permission and schedule background wake with Service Worker
+  requestNotifyPermission();
+  try {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SCHEDULE_REST_TIMER',
+        delayMs: restTotalDuration * 1000,
+        title: 'Moon Fitness - Rest Target Reached! 🔔',
+        body: 'Time for your next set! Mechanical tension awaits.'
+      });
+    }
+  } catch (e) {}
 
   if (restTimerInterval) clearInterval(restTimerInterval);
   restTimerInterval = setInterval(tickRestTimer, 1000);
@@ -1415,14 +1459,68 @@ document.addEventListener('visibilitychange', () => {
 
 // --- Tab Switching Navigation ---
 let activeRanksSubTab = 'ranks';
+let currentActiveTab = 'workout';
+const SWIPE_TAB_ORDER = ['instagram', 'focus', 'workout', 'history', 'ranks', 'settings'];
 
-window.switchTab = function(tabName) {
+function renderInstagramTab() {
+  ensureScrollState();
+  const s = AppState.scroll;
+  const mount = document.getElementById('dedicated-ig-mount');
+  const lockout = document.getElementById('dedicated-ig-lockout');
+  const timerDigits = document.getElementById('d-ig-timer-digits');
+
+  const hasActiveSession = Boolean(s.sessionEndsAt && Date.now() < s.sessionEndsAt);
+  const hasBankedTime = (s.balance > 0);
+
+  // If no banked time and no active session, show the lockout immediately
+  if (!hasActiveSession && !hasBankedTime) {
+    if (lockout) lockout.classList.remove('hidden');
+    if (mount) mount.innerHTML = '';
+    if (timerDigits) timerDigits.textContent = '00:00';
+    return;
+  }
+
+  // If banked time is present and no active session was ticking, activate it
+  if (!hasActiveSession && hasBankedTime) {
+    const durationMs = s.balance * 1000;
+    s.sessionEndsAt = Date.now() + durationMs;
+    igSessionStartDurationMs = durationMs;
+    s.balance = 0;
+    s.antiScrollActive = true;
+    saveState();
+    renderScroll();
+    syncScrollToServer();
+    requestNotifyPermission();
+  }
+
+  if (lockout) lockout.classList.add('hidden');
+
+  // Mount strictly contained iframe if not already mounted
+  if (mount && !document.getElementById('dedicated-ig-iframe')) {
+    mount.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.id = 'dedicated-ig-iframe';
+    iframe.className = 'dedicated-ig-iframe';
+    iframe.src = 'https://www.instagram.com/direct/inbox/';
+    // Strictly contained: NO popups, NO new windows escaping sandbox
+    iframe.allow = 'camera; microphone; fullscreen; clipboard-read; clipboard-write; autoplay';
+    iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-modals';
+    mount.appendChild(iframe);
+  }
+
+  startIgCountdownTicker();
+}
+window.renderInstagramTab = renderInstagramTab;
+
+window.switchTab = function(tabName, slideDirection = null) {
   let targetTab = tabName;
   if (tabName === 'routines') {
     targetTab = 'workout';
   } else if (tabName === 'prs') {
     targetTab = 'ranks';
   }
+
+  currentActiveTab = targetTab;
 
   const tabs = document.querySelectorAll('.nav-tab');
   const views = document.querySelectorAll('.tab-view');
@@ -1436,8 +1534,13 @@ window.switchTab = function(tabName) {
   });
 
   views.forEach(view => {
+    view.classList.remove('sliding-left', 'sliding-right');
     if (view.id === `view-${targetTab}`) {
       view.classList.add('active');
+      if (slideDirection) {
+        view.classList.add(`sliding-${slideDirection}`);
+        setTimeout(() => view.classList.remove(`sliding-${slideDirection}`), 280);
+      }
     } else {
       view.classList.remove('active');
     }
@@ -1461,6 +1564,7 @@ window.switchTab = function(tabName) {
     renderRoutines();
     updateOverviewStats();
   }
+  if (targetTab === 'instagram') renderInstagramTab();
   if (targetTab === 'focus') renderScroll();
   if (targetTab === 'history') renderHistory();
   if (targetTab === 'ranks') {
@@ -2013,31 +2117,60 @@ function renderActiveWorkout() {
             <span>${AppState.settings.unit.toUpperCase()}</span>
             <span>REPS</span>
             <span>DONE</span>
+            <span>DEL</span>
           </div>
 
-          ${ex.sets.map((set, setIndex) => `
-            <div class="set-row ${set.completed ? 'completed' : ''}" data-set-index="${setIndex}">
-              <span class="set-index-badge">${setIndex + 1}</span>
-              <span class="prev-set-text">${prevText}</span>
-              <input type="number" class="set-input set-weight-input" 
-                     value="${set.weight}" 
-                     placeholder="0" 
-                     step="0.5" 
-                     onchange="updateActiveSet(${exIndex}, ${setIndex}, 'weight', this.value)">
-              <input type="number" class="set-input set-reps-input" 
-                     value="${set.reps}" 
-                     placeholder="0" 
-                     onchange="updateActiveSet(${exIndex}, ${setIndex}, 'reps', this.value)">
-              <button class="set-checkbox-btn ${set.completed ? 'checked' : ''}" 
-                      onclick="toggleSetComplete(${exIndex}, ${setIndex})">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-            </div>
-          `).join('')}
+          ${(() => {
+            let workingCount = 0;
+            let warmupCount = 0;
+            return ex.sets.map((set, setIndex) => {
+              let badgeHtml;
+              if (set.isWarmup) {
+                warmupCount++;
+                badgeHtml = `<span class="set-index-badge warmup-badge" title="Warm-up Set">W${warmupCount}</span>`;
+              } else {
+                workingCount++;
+                badgeHtml = `<span class="set-index-badge">${workingCount}</span>`;
+              }
 
-          <button class="add-set-btn" onclick="addSetToActiveExercise(${exIndex})">+ Add Set</button>
+              return `
+                <div class="set-row ${set.completed ? 'completed' : ''} ${set.isWarmup ? 'warmup-set-row' : ''}" data-set-index="${setIndex}">
+                  ${badgeHtml}
+                  <span class="prev-set-text">${prevText}</span>
+                  <input type="number" class="set-input set-weight-input" 
+                         value="${set.weight}" 
+                         placeholder="0" 
+                         step="0.5" 
+                         onchange="updateActiveSet(${exIndex}, ${setIndex}, 'weight', this.value)">
+                  <input type="number" class="set-input set-reps-input" 
+                         value="${set.reps}" 
+                         placeholder="0" 
+                         onchange="updateActiveSet(${exIndex}, ${setIndex}, 'reps', this.value)">
+                  <button class="set-checkbox-btn ${set.completed ? 'checked' : ''}" 
+                          onclick="toggleSetComplete(${exIndex}, ${setIndex})">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  <button type="button" class="delete-set-btn" 
+                          onclick="deleteSetFromActiveExercise(${exIndex}, ${setIndex})" 
+                          title="Delete this set (drop down to 2 sets)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
+              `;
+            }).join('');
+          })()}
+
+          <div class="sets-action-buttons-row">
+            <button type="button" class="add-set-btn" onclick="addSetToActiveExercise(${exIndex})">+ Working Set</button>
+            <button type="button" class="add-warmup-btn" onclick="addWarmupSetToActiveExercise(${exIndex})">+ Warm-up Set</button>
+          </div>
         </div>
       </div>
     `;
@@ -2089,14 +2222,55 @@ window.toggleSetComplete = function(exIndex, setIndex) {
   renderActiveWorkout();
 };
 
+window.deleteSetFromActiveExercise = function(exIndex, setIndex) {
+  if (!AppState.activeWorkout) return;
+  const ex = AppState.activeWorkout.exercises[exIndex];
+  if (!ex || !ex.sets) return;
+  if (ex.sets.length <= 1) {
+    if (!confirm('This is the only set for this exercise. Remove set?')) return;
+  }
+  ex.sets.splice(setIndex, 1);
+  saveState();
+  renderActiveWorkout();
+  triggerHaptic([25]);
+  showToast('Set removed');
+};
+
+window.addWarmupSetToActiveExercise = function(exIndex) {
+  if (!AppState.activeWorkout) return;
+  const ex = AppState.activeWorkout.exercises[exIndex];
+  if (!ex) return;
+  // Calculate sensible warmup weight (approx 40-50% of first working set or 20kg)
+  const baseWeight = (ex.sets && ex.sets[0]) ? Number(ex.sets[0].weight) : 50;
+  const warmupWeight = Math.max(10, Math.round((baseWeight * 0.5) / 2.5) * 2.5);
+  const warmupReps = 12;
+
+  // Insert before first working set so warm-ups come first in sequence
+  let insertIdx = 0;
+  while (insertIdx < ex.sets.length && ex.sets[insertIdx].isWarmup) {
+    insertIdx++;
+  }
+  ex.sets.splice(insertIdx, 0, {
+    weight: warmupWeight,
+    reps: warmupReps,
+    completed: false,
+    isWarmup: true
+  });
+  saveState();
+  renderActiveWorkout();
+  triggerHaptic([30]);
+  showToast('🔥 Warm-up set added');
+};
+
 window.addSetToActiveExercise = function(exIndex) {
   if (!AppState.activeWorkout) return;
   const ex = AppState.activeWorkout.exercises[exIndex];
-  const lastSet = ex.sets[ex.sets.length - 1];
+  const workingSets = ex.sets.filter(s => !s.isWarmup);
+  const lastSet = workingSets.length ? workingSets[workingSets.length - 1] : ex.sets[ex.sets.length - 1];
   const newWeight = lastSet ? lastSet.weight : 50;
   const newReps = lastSet ? lastSet.reps : 10;
 
-  ex.sets.push({ weight: newWeight, reps: newReps, completed: false });
+  ex.sets.push({ weight: newWeight, reps: newReps, completed: false, isWarmup: false });
   saveState();
   renderActiveWorkout();
   triggerHaptic([30]);
@@ -2136,7 +2310,10 @@ window.finishActiveWorkout = function() {
         const r = Number(set.reps) || 0;
         totalVolume += w * r;
 
-        if (w > bestWeight) {
+        if (!set.isWarmup && w > bestWeight) {
+          bestWeight = w;
+          bestReps = r;
+        } else if (bestWeight === 0 && w > bestWeight) {
           bestWeight = w;
           bestReps = r;
         }
@@ -2248,18 +2425,28 @@ function renderHistory() {
   }
 
   container.innerHTML = AppState.history.map(item => {
+    const itemId = item.id || item.date;
     const dateFormatted = new Date(item.date).toLocaleDateString(undefined, {
       weekday: 'short',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     });
 
     return `
-      <div class="history-card">
+      <div class="history-card" data-history-id="${escapeHtml(itemId)}">
         <div class="history-card-header">
           <div>
             <h3 class="history-title">${escapeHtml(item.title)}</h3>
             <span class="history-date">${dateFormatted}</span>
+          </div>
+          <div class="history-actions-row">
+            <button type="button" class="history-action-btn edit" onclick="openEditHistoryModal('${escapeHtml(itemId)}')" title="Edit logged workout data">
+              ✏️ Edit
+            </button>
+            <button type="button" class="history-action-btn delete" onclick="deleteHistoryWorkout('${escapeHtml(itemId)}')" title="Delete workout history">
+              🗑️ Delete
+            </button>
           </div>
         </div>
 
@@ -2270,14 +2457,89 @@ function renderHistory() {
         </div>
 
         <div class="history-ex-tags">
-          ${item.exercises.map(ex => `
-            <span class="history-tag">${escapeHtml(ex.name)} (${ex.bestWeight}${item.unit} × ${ex.bestReps})</span>
-          `).join('')}
+          ${item.exercises ? item.exercises.map(ex => `
+            <span class="history-tag">${escapeHtml(ex.name)} (${ex.bestWeight || 0}${item.unit} × ${ex.bestReps || 0})</span>
+          `).join('') : ''}
         </div>
+        ${item.notes ? `<div style="font-size:0.75rem;color:var(--text-muted);font-style:italic;margin-top:4px;">📝 ${escapeHtml(item.notes)}</div>` : ''}
       </div>
     `;
   }).join('');
 }
+
+window.deleteHistoryWorkout = function(id) {
+  const item = AppState.history.find(h => (h.id === id || h.date === id));
+  if (!item) return;
+  if (!confirm(`Are you sure you want to delete the workout "${item.title}" logged on ${new Date(item.date).toLocaleDateString()}? This will alter your logged data and streaks.`)) {
+    return;
+  }
+  AppState.history = AppState.history.filter(h => (h.id !== id && h.date !== id));
+  saveState();
+  updateOverviewStats();
+  renderHistory();
+  if (typeof renderPRs === 'function') renderPRs();
+  showToast('🗑️ Workout history entry permanently deleted.');
+  triggerHaptic([30, 40]);
+};
+
+window.openEditHistoryModal = function(id) {
+  const item = AppState.history.find(h => (h.id === id || h.date === id));
+  if (!item) return;
+
+  document.getElementById('edit-history-id').value = item.id || item.date;
+  document.getElementById('edit-history-title').value = item.title || 'Workout Session';
+  
+  // Format date for datetime-local input
+  try {
+    const d = new Date(item.date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    document.getElementById('edit-history-date').value = d.toISOString().slice(0, 16);
+  } catch (e) {
+    document.getElementById('edit-history-date').value = '';
+  }
+
+  const durationMin = Math.round((item.durationSeconds || 0) / 60) || 45;
+  document.getElementById('edit-history-duration').value = durationMin;
+  document.getElementById('edit-history-volume').value = item.volume || 0;
+  document.getElementById('edit-history-sets').value = item.setsCount || (item.exercises ? item.exercises.reduce((a, x) => a + (x.sets || 3), 0) : 10);
+  
+  const exSummary = item.exercises && item.exercises.length
+    ? item.exercises.map(e => `${e.name} (${e.bestWeight || 0}${item.unit} × ${e.bestReps || 0})`).join(', ')
+    : '';
+  document.getElementById('edit-history-notes').value = item.notes || exSummary || '';
+
+  openModal('modal-edit-history');
+};
+
+window.saveHistoryWorkoutEdit = function(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-history-id').value;
+  const item = AppState.history.find(h => (h.id === id || h.date === id));
+  if (!item) return;
+
+  const newTitle = document.getElementById('edit-history-title').value.trim();
+  const newDate = document.getElementById('edit-history-date').value;
+  const newDurationMin = Number(document.getElementById('edit-history-duration').value) || 45;
+  const newVolume = Number(document.getElementById('edit-history-volume').value) || 0;
+  const newSets = Number(document.getElementById('edit-history-sets').value) || 1;
+  const newNotes = document.getElementById('edit-history-notes').value.trim();
+
+  item.title = newTitle || item.title;
+  if (newDate) {
+    item.date = new Date(newDate).toISOString();
+  }
+  item.durationSeconds = newDurationMin * 60;
+  item.volume = Math.round(newVolume);
+  item.setsCount = newSets;
+  item.notes = newNotes;
+
+  saveState();
+  updateOverviewStats();
+  renderHistory();
+  closeModal('modal-edit-history');
+  showToast('✅ Workout history successfully updated.');
+  triggerHaptic([30]);
+};
 
 // --- PRs View ---
 let prCategoryFilter = 'all';
@@ -3601,6 +3863,11 @@ function updateIgCountdownOverlay() {
 
   if (digitsEl) digitsEl.textContent = formattedDigits;
 
+  const dedDigitsEl = document.getElementById('d-ig-timer-digits');
+  if (dedDigitsEl) {
+    dedDigitsEl.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+  }
+
   if (progressEl && igSessionStartDurationMs > 0) {
     const pct = Math.min(100, Math.max(0, (remainingMs / igSessionStartDurationMs) * 100));
     progressEl.style.width = pct.toFixed(1) + '%';
@@ -3673,6 +3940,13 @@ function unmountInstagramWebView(triggeredByExpiry = false) {
     mount.innerHTML = ''; // Physically unmount and purge WebView from DOM
   }
 
+  // Also purge dedicated tab iframe mount
+  const dedMount = document.getElementById('dedicated-ig-mount');
+  const dedLockout = document.getElementById('dedicated-ig-lockout');
+  const dedDigits = document.getElementById('d-ig-timer-digits');
+  if (dedMount) dedMount.innerHTML = '';
+  if (dedDigits) dedDigits.textContent = '00:00';
+
   const placeholder = document.getElementById('ig-webview-lockout-placeholder');
   const overlayEl = document.getElementById('ig-webview-countdown-overlay');
   const digitsEl = document.getElementById('ig-countdown-digits');
@@ -3699,6 +3973,7 @@ function unmountInstagramWebView(triggeredByExpiry = false) {
     syncScrollToServer();
 
     if (placeholder) placeholder.classList.remove('hidden');
+    if (dedLockout) dedLockout.classList.remove('hidden');
 
     playRestTimerChime();
     triggerHaptic([400, 120, 400]);
@@ -4148,6 +4423,70 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+// Global Horizontal Swipe Gestures (Smooth slide between Instagram, Focus, Workout, etc.)
+function initGlobalSwipeGestures() {
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let isSwiping = false;
+
+  const SWIPE_TABS = ['instagram', 'focus', 'workout', 'history', 'ranks', 'settings'];
+
+  document.addEventListener('touchstart', (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const target = e.target;
+    // Don't intercept swipe if user is interacting with form controls, sliders, range inputs, or iframe
+    if (target.closest('input, textarea, select, .slider, .opal-hold-cancel-btn, #avatar-cropper, iframe, .ig-webview-viewport, .dedicated-ig-mount')) {
+      return;
+    }
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
+    isSwiping = true;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!isSwiping || !e.changedTouches || e.changedTouches.length !== 1) {
+      isSwiping = false;
+      return;
+    }
+    isSwiping = false;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    const duration = Date.now() - touchStartTime;
+
+    // Must be a distinct horizontal swipe: > 45px distance, horizontal > vertical, duration < 600ms
+    if (Math.abs(deltaX) < 45 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25 || duration > 600) {
+      return;
+    }
+
+    // Determine current active tab
+    const activeTabBtn = document.querySelector('.nav-tab.active');
+    const currentTab = activeTabBtn ? activeTabBtn.dataset.tab : currentActiveTab || 'workout';
+    const currentIndex = SWIPE_TABS.indexOf(currentTab);
+    if (currentIndex === -1) return;
+
+    const isRtl = document.documentElement.dir === 'rtl';
+    const swipedLeft = isRtl ? (deltaX > 0) : (deltaX < 0);
+    const swipedRight = isRtl ? (deltaX < 0) : (deltaX > 0);
+
+    if (swipedLeft && currentIndex < SWIPE_TABS.length - 1) {
+      // Finger sliding left -> transition smoothly to next tab
+      const nextTab = SWIPE_TABS[currentIndex + 1];
+      switchTab(nextTab, 'left');
+      triggerHaptic([20]);
+    } else if (swipedRight && currentIndex > 0) {
+      // Finger sliding right -> transition smoothly to previous tab
+      const prevTab = SWIPE_TABS[currentIndex - 1];
+      switchTab(prevTab, 'right');
+      triggerHaptic([20]);
+    }
+  }, { passive: true });
+}
+window.initGlobalSwipeGestures = initGlobalSwipeGestures;
+
 // --- DOM Initialization & Event Handlers ---
 // --- Colour Theme ---
 const THEME_KEY = 'moon_theme';
@@ -4217,6 +4556,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Opal Futuristic Hold-to-Cancel gesture for active blocks
   if (typeof initHoldToCancel === 'function') {
     initHoldToCancel();
+  }
+
+  // Initialize Global Horizontal Swipe Gestures (Instagram <-> Focus <-> Workout)
+  if (typeof initGlobalSwipeGestures === 'function') {
+    initGlobalSwipeGestures();
   }
 
   // Rest time selector (per workout)

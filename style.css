@@ -34,7 +34,9 @@
   --text-muted: #A8979C;
   --text-dim: #6F5F64;
 
-  --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --safe-top: env(safe-area-inset-top, 0px);
@@ -949,7 +951,7 @@ html, body {
 
 .sets-header-row {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr 1fr 40px;
+  grid-template-columns: 32px 1fr 1fr 1fr 38px 30px;
   gap: 6px;
   font-size: 0.65rem;
   font-weight: 700;
@@ -960,16 +962,87 @@ html, body {
 
 .set-row {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr 1fr 40px;
+  grid-template-columns: 32px 1fr 1fr 1fr 38px 30px;
   gap: 6px;
   align-items: center;
-  padding: 4px 0;
+  padding: 4px 2px;
   border-radius: 8px;
-  transition: background 0.15s ease;
+  transition: all 0.18s ease;
 }
 
 .set-row.completed {
   background: rgba(var(--accent-rgb), 0.08);
+}
+
+.set-row.warmup-set-row {
+  background: rgba(255, 179, 0, 0.06);
+  border: 1px dashed rgba(255, 179, 0, 0.35);
+}
+
+.set-row.warmup-set-row.completed {
+  background: rgba(255, 179, 0, 0.12);
+}
+
+.delete-set-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 6px 2px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.delete-set-btn:hover {
+  color: #FF3B30;
+  background: rgba(255, 59, 48, 0.15);
+  transform: scale(1.1);
+}
+
+.set-index-badge.warmup-badge {
+  background: linear-gradient(135deg, #FFB300, #FF8F00);
+  color: #000000;
+  font-weight: 900;
+  font-size: 0.68rem;
+  border-radius: 6px;
+  padding: 2px 4px;
+  box-shadow: 0 0 10px rgba(255, 179, 0, 0.35);
+}
+
+.sets-action-buttons-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sets-action-buttons-row .add-set-btn {
+  flex: 1;
+}
+
+.add-warmup-btn {
+  flex: 1;
+  background: rgba(255, 179, 0, 0.09);
+  color: #FFB300;
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.add-warmup-btn:hover {
+  background: rgba(255, 179, 0, 0.18);
+  border-color: #FFB300;
+  box-shadow: 0 0 12px rgba(255, 179, 0, 0.25);
 }
 
 .set-index-badge {
@@ -1067,6 +1140,47 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12px;
+}
+
+.history-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.history-action-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.18s ease;
+}
+
+.history-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.history-action-btn.edit:hover {
+  border-color: rgba(224, 80, 106, 0.5);
+  color: #ff7b94;
+  background: rgba(224, 80, 106, 0.15);
+}
+
+.history-action-btn.delete:hover {
+  border-color: rgba(255, 59, 48, 0.5);
+  color: #FF3B30;
+  background: rgba(255, 59, 48, 0.15);
 }
 
 .history-title {
@@ -5277,31 +5391,67 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
 }
 
 .admin-citadel-cta-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
   background: linear-gradient(135deg, #1C0A11 0%, #2E0A17 100%);
   border: 1.5px solid #FFD60A;
-  border-radius: 20px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
+  border-radius: 22px;
+  padding: 24px 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(255, 214, 10, 0.12);
+  width: 100%;
+  box-sizing: border-box;
 }
 .admin-cta-badge {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 900;
   color: #FFD60A;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
+  letter-spacing: 1.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 214, 10, 0.12);
+  border: 1px solid rgba(255, 214, 10, 0.35);
+  padding: 4px 12px;
+  border-radius: 99px;
+  margin: 0;
+  text-transform: uppercase;
 }
-.admin-citadel-cta-card h3 {
-  font-size: 1.15rem;
+.admin-cta-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.admin-citadel-cta-card h3,
+.admin-cta-title {
+  font-family: var(--font-display);
+  font-size: 1.28rem;
   font-weight: 800;
-  color: #FFF;
-  margin: 0 0 6px 0;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  width: 100%;
+  text-align: left;
 }
-.admin-citadel-cta-card p {
-  font-size: 0.84rem;
-  color: var(--text-muted);
-  margin: 0 0 14px 0;
-  line-height: 1.4;
+.admin-citadel-cta-card p,
+.admin-cta-desc {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
+  line-height: 1.55;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  width: 100%;
+  text-align: left;
 }
 
 /* --- Auth Modal & Pitch-Black Pitch --- */
@@ -5903,22 +6053,27 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
 .admin-head-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 .admin-crown-icon {
   font-size: 1.8rem;
+  line-height: 1;
 }
 .admin-modal-header h3 {
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 900;
   color: #FFD60A;
   margin: 0;
+  line-height: 1.35;
 }
 .admin-badge-sub {
-  font-size: 0.74rem;
-  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.65);
   display: block;
-  margin-top: 2px;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 .admin-top-stats-row {
   display: grid;
@@ -8088,5 +8243,180 @@ button:active,
   flex-direction: column;
   gap: 8px;
 }
+
+/* ==========================================================================
+   DEDICATED MODDED INSTAGRAM TAB SCREEN (Strictly Contained, No Pop-outs)
+   ========================================================================== */
+.tab-instagram-dedicated {
+  display: none;
+  flex-direction: column;
+  min-height: calc(100vh - var(--tab-bar-height));
+  min-height: calc(100dvh - var(--tab-bar-height));
+  background: #000000;
+  padding: 0 0 16px 0;
+}
+
+.tab-instagram-dedicated.active {
+  display: flex !important;
+}
+
+.dedicated-ig-header {
+  height: 56px;
+  background: rgba(10, 11, 16, 0.96);
+  border-bottom: 1.5px solid rgba(224, 80, 106, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.d-ig-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.d-ig-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.d-ig-sub {
+  font-size: 0.68rem;
+  color: #E0506A;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  display: block;
+}
+
+.d-ig-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.d-ig-timer-pill {
+  background: rgba(224, 80, 106, 0.15);
+  border: 1px solid rgba(224, 80, 106, 0.4);
+  color: #ff6b87;
+  padding: 5px 10px;
+  border-radius: 99px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.d-ig-btn-bank {
+  background: linear-gradient(135deg, rgba(224, 80, 106, 0.4), rgba(74, 14, 28, 0.7));
+  border: 1px solid rgba(224, 80, 106, 0.6);
+  color: #FFF;
+  border-radius: 99px;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.d-ig-mini-action {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFF;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.dedicated-ig-body {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  min-height: calc(100vh - 120px);
+  min-height: calc(100dvh - 120px);
+}
+
+.dedicated-ig-mount {
+  width: 100%;
+  flex: 1;
+  min-height: calc(100vh - 120px);
+  min-height: calc(100dvh - 120px);
+  display: flex;
+  position: relative;
+}
+
+.dedicated-ig-mount iframe {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  border: none;
+  background: #000000;
+}
+
+.dedicated-ig-lockout {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.dedicated-ig-lockout.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   GLOBAL HORIZONTAL SWIPE GESTURE TRANSITIONS
+   ========================================================================== */
+.tab-view {
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.tab-view.sliding-left {
+  animation: tabSlideFromRight 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tab-view.sliding-right {
+  animation: tabSlideFromLeft 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tabSlideFromRight {
+  0% { transform: translateX(36px); opacity: 0.3; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes tabSlideFromLeft {
+  0% { transform: translateX(-36px); opacity: 0.3; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* ==========================================================================
+   EDIT WORKOUT HISTORY MODAL
+   ========================================================================== */
+.edit-history-modal-card {
+  max-width: 500px;
+  width: 94%;
+  background: #0D070A;
+  border: 1.5px solid rgba(224, 80, 106, 0.4);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(224, 80, 106, 0.15);
+}
+
 
 

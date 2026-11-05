@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v63';
+const CACHE_NAME = 'moon-v64';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -70,16 +70,34 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// OS-Level Push / Local Rest Timer Notifications (fires even when screen is off or in other app)
+// OS-Level Push / Local Notifications (fires even when screen is off or in other app)
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SCHEDULE_REST_TIMER') {
+  if (!event.data) return;
+
+  if (event.data.type === 'TRIGGER_PUSH_NOTIFICATION') {
+    const title = event.data.title || 'Moon Fitness OS 🚀';
+    const opts = event.data.options || {};
+    self.registration.showNotification(title, {
+      body: opts.body || '',
+      icon: opts.icon || './moon_logo.png',
+      badge: opts.badge || './apple-touch-icon.png',
+      vibrate: opts.vibrate || [400, 150, 400],
+      tag: opts.tag || 'moon-notification',
+      renotify: true,
+      requireInteraction: Boolean(opts.requireInteraction),
+      data: opts.data || { url: './#workout' }
+    });
+    return;
+  }
+
+  if (event.data.type === 'SCHEDULE_REST_TIMER') {
     const delayMs = event.data.delayMs || 90000;
     const title = event.data.title || 'Moon Fitness - Rest Target Reached! 🔔';
     const body = event.data.body || 'Rest period complete! Step up for your next set.';
     setTimeout(() => {
       self.registration.showNotification(title, {
         body: body,
-        icon: './app_icon_192.png',
+        icon: './moon_logo.png',
         badge: './apple-touch-icon.png',
         vibrate: [500, 200, 500, 200, 500],
         tag: 'rest-timer-done',

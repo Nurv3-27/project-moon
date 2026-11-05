@@ -44,6 +44,8 @@
       // Workout Tab
       workout_hero_subtitle: 'READY TO ASCEND?',
       workout_hero_title: 'Workout Hub',
+      btn_start_odyssey: 'Start Odyssey',
+      workout_split_title: 'Workout Split & Training Cadence',
       workout_btn_new_routine: '+ New Routine',
       workout_btn_empty_workout: '⚡ Quick Start Empty Workout',
       workout_search_placeholder: 'Search saved & featured routines...',
@@ -235,6 +237,8 @@
       // Workout Tab
       workout_hero_subtitle: 'مستعد للارتقاء؟',
       workout_hero_title: 'مركز التمارين',
+      btn_start_odyssey: 'ابدأ الرحلة',
+      workout_split_title: 'جدول التمارين وإيقاع التدريب',
       workout_btn_new_routine: '+ جدول جديد',
       workout_btn_empty_workout: '⚡ بدء تمرين فارغ سريع',
       workout_search_placeholder: 'ابحث في التمارين المحفوظة والمميزة...',

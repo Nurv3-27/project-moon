@@ -26,16 +26,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=63">
+  <link rel="stylesheet" href="style.css?v=64">
 </head>
 <body>
-  <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
-  <div id="app-splash-screen" class="splash-screen-overlay" aria-label="Loading Moon OS">
+  <!-- ANIMATED THREE-STAGE INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
+  <div id="app-splash-screen" class="splash-screen-overlay splash-stage-1" aria-label="Loading Moon OS" onclick="handleSplashTap(event)">
     <audio id="splash-audio" src="startup.mp3" preload="auto" playsinline webkit-playsinline></audio>
     <audio id="rest-timer-audio" src="startup.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
-    <div class="splash-center-content">
-      <!-- Central Custom Logo Asset: moon_logo.png (Maroon crescent moon with two figures & dumbbell) -->
+    <!-- PHASE 1: Pitch-black screen showing ONLY the text 'Are you ready to take it to the moon?' in the center, and 'In the loving memory of 27 / من' pinned to the bottom right -->
+    <div id="splash-phase-1" class="splash-stage splash-stage-1-content">
+      <div class="splash-center-text-wrap">
+        <h1 class="splash-center-quote" data-i18n="splash_quote">&ldquo;Are you ready to take it to the moon?&rdquo;</h1>
+      </div>
+      <div class="splash-corner-tribute">
+        <span class="splash-tribute-en">In the loving memory of 27</span>
+        <span class="splash-tribute-sep">/</span>
+        <span class="splash-tribute-arabic">من</span>
+      </div>
+    </div>
+
+    <!-- PHASE 2: Fade out the text and fade in the central app logo (moon_logo.png) -->
+    <div id="splash-phase-2" class="splash-stage splash-stage-2-content">
       <div class="splash-logo-container">
         <div class="splash-img-glow"></div>
         <img
@@ -45,51 +57,6 @@
           onerror="this.onerror=null; this.src='app_icon.png';"
         >
       </div>
-
-      <!-- Slow, Smooth Fade-In Quote Below Logo -->
-      <div class="splash-quote-box">
-        <p class="splash-quote-text" data-i18n="splash_quote">&ldquo;Are you ready to take it to the moon?&rdquo;</p>
-      </div>
-
-      <!-- Initial Startup Options: Sign Up vs Login (Triggers Intro MP3 Audio) -->
-      <div class="splash-dest-picker" id="splash-dest-picker">
-        <span class="splash-dest-heading" data-i18n="splash_start_heading">START YOUR ODYSSEY</span>
-        <div class="splash-auth-startup-grid">
-          <button type="button" class="splash-auth-btn splash-signup-btn" id="splash-btn-signup" onclick="handleStartupAuth('signup', event)">
-            <span class="splash-auth-icon">✨</span>
-            <div class="splash-auth-text">
-              <strong class="splash-auth-title" data-i18n="splash_btn_signup">Sign Up</strong>
-              <span class="splash-auth-sub" data-i18n="splash_btn_signup_sub">New Athlete • Select Coach</span>
-            </div>
-            <span class="splash-auth-arrow">&rarr;</span>
-          </button>
-          
-          <button type="button" class="splash-auth-btn splash-login-btn" id="splash-btn-login" onclick="handleStartupAuth('signin', event)">
-            <span class="splash-auth-icon">🔑</span>
-            <div class="splash-auth-text">
-              <strong class="splash-auth-title" data-i18n="splash_btn_login">Login</strong>
-              <span class="splash-auth-sub" data-i18n="splash_btn_login_sub">Existing Athlete • Sign In</span>
-            </div>
-            <span class="splash-auth-arrow">&rarr;</span>
-          </button>
-        </div>
-
-        <!-- Secondary Quick Guest Destinations -->
-        <div class="splash-guest-row">
-          <button type="button" class="splash-guest-btn" onclick="selectAppDestination('workout', event)">
-            <span data-i18n="splash_guest_workout">🏋️ Workout Hub &rarr;</span>
-          </button>
-          <button type="button" class="splash-guest-btn" onclick="selectAppDestination('focus', event)">
-            <span data-i18n="splash_guest_focus">🛡️ Anti-Scroll Focus &rarr;</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom-Right Pinned Tribute: 'In the loving memory of 27' alongside Arabic 'من' -->
-    <div class="splash-corner-tribute">
-      <span>In the loving memory of 27</span>
-      <span class="splash-tribute-arabic">من</span>
     </div>
   </div>
 
@@ -196,14 +163,14 @@
         <div id="workout-idle-state" class="workout-idle-hub">
           <div class="section-hero">
             <div class="hero-text">
-              <span class="greeting-subtitle">READY TO CRUSH IT?</span>
-              <h1 class="hero-title">Start a Workout</h1>
+              <span class="greeting-subtitle" data-i18n="workout_hero_subtitle">READY TO CRUSH IT?</span>
+              <h1 class="hero-title" data-i18n="workout_hero_title">Start a Workout</h1>
             </div>
-            <button id="btn-quick-workout" class="primary-glow-btn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M12 5v14M5 12h14"></path>
+            <button id="btn-quick-workout" class="primary-glow-btn start-odyssey-hero-btn" onclick="startBlankWorkout()">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
               </svg>
-              <span>Quick Blank Workout</span>
+              <span data-i18n="btn_start_odyssey">Start Odyssey</span>
             </button>
           </div>
 
@@ -1611,6 +1578,110 @@
           </div>
         </div>
 
+        <!-- WORKOUT SPLIT & TRAINING CADENCE CONFIGURATION -->
+        <div class="settings-group" id="settings-group-workout-split">
+          <div class="workout-split-card" id="card-workout-split">
+            <div class="split-card-header">
+              <div class="split-header-left">
+                <span class="split-badge-icon">🏋️</span>
+                <div>
+                  <h3 class="split-card-title" data-i18n="workout_split_title">Workout Split &amp; Training Cadence</h3>
+                  <span class="split-card-sub" id="split-card-summary">5 Days On / 2 Days Off &bull; Push / Pull / Legs</span>
+                </div>
+              </div>
+              <span class="split-today-pill" id="split-today-status-badge">TODAY: TRAINING DAY</span>
+            </div>
+
+            <!-- Dynamic Rest vs Training Day Status Banner -->
+            <div class="split-status-banner" id="split-status-banner">
+              <div class="split-banner-icon" id="split-banner-icon">🔥</div>
+              <div class="split-banner-info">
+                <strong id="split-banner-title">Today is a Scheduled Training Day</strong>
+                <p id="split-banner-desc">Push / Pull / Legs rotation active. Daily gym reminders are armed for 17:30.</p>
+              </div>
+            </div>
+
+            <!-- Split Presets Grid -->
+            <div class="split-section-block">
+              <label class="split-field-label">SELECT YOUR WORKOUT SPLIT</label>
+              <div class="split-presets-grid" id="split-presets-grid">
+                <button type="button" class="split-preset-btn active" data-split-type="PPL" onclick="selectWorkoutSplitPreset('PPL')">
+                  <span class="sp-name">Push / Pull / Legs (PPL)</span>
+                  <span class="sp-desc">Chest/Tri &bull; Back/Bi &bull; Legs</span>
+                </button>
+                <button type="button" class="split-preset-btn" data-split-type="UpperLower" onclick="selectWorkoutSplitPreset('UpperLower')">
+                  <span class="sp-name">Upper / Lower</span>
+                  <span class="sp-desc">Upper Body &bull; Lower Body Split</span>
+                </button>
+                <button type="button" class="split-preset-btn" data-split-type="FullBody" onclick="selectWorkoutSplitPreset('FullBody')">
+                  <span class="sp-name">Full Body (3x)</span>
+                  <span class="sp-desc">Mon / Wed / Fri Compound Hypertrophy</span>
+                </button>
+                <button type="button" class="split-preset-btn" data-split-type="Arnold" onclick="selectWorkoutSplitPreset('Arnold')">
+                  <span class="sp-name">Arnold Split (6x)</span>
+                  <span class="sp-desc">Chest/Back &bull; Shoulders/Arms &bull; Legs</span>
+                </button>
+                <button type="button" class="split-preset-btn" data-split-type="BroSplit" onclick="selectWorkoutSplitPreset('BroSplit')">
+                  <span class="sp-name">Bro Split (5x)</span>
+                  <span class="sp-desc">Chest &bull; Back &bull; Arms &bull; Shoulders &bull; Legs</span>
+                </button>
+                <button type="button" class="split-preset-btn" data-split-type="Custom" onclick="selectWorkoutSplitPreset('Custom')">
+                  <span class="sp-name">Custom Split</span>
+                  <span class="sp-desc">Personalized Training &amp; Rest Days</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Training Cadence: Days On vs Days Off -->
+            <div class="split-section-block">
+              <div class="split-cadence-header">
+                <label class="split-field-label">TRAINING CADENCE (DAYS ON VS REST)</label>
+                <span class="split-cadence-val" id="split-cadence-display">5 Days On &bull; 2 Days Off</span>
+              </div>
+              <div class="split-cadence-pills">
+                <button type="button" class="cadence-pill-btn active" data-cadence="5on2off" onclick="setSplitCadence(5, 2)">5 Days On / 2 Days Off</button>
+                <button type="button" class="cadence-pill-btn" data-cadence="4on3off" onclick="setSplitCadence(4, 3)">4 Days On / 3 Days Off</button>
+                <button type="button" class="cadence-pill-btn" data-cadence="6on1off" onclick="setSplitCadence(6, 1)">6 Days On / 1 Day Off</button>
+                <button type="button" class="cadence-pill-btn" data-cadence="3on4off" onclick="setSplitCadence(3, 4)">3 Days On / 4 Days Off</button>
+              </div>
+            </div>
+
+            <!-- Interactive 7-Day Week Schedule Strip -->
+            <div class="split-section-block">
+              <div class="split-week-header">
+                <label class="split-field-label">WEEKLY SCHEDULE (TAP DAY TO TOGGLE LIFT / REST)</label>
+                <span class="split-week-legend"><span class="legend-dot lift"></span> Lift &nbsp; <span class="legend-dot rest"></span> Rest</span>
+              </div>
+              <div class="split-week-grid" id="split-week-grid">
+                <!-- Days populated dynamically by JS: Mon, Tue, Wed, Thu, Fri, Sat, Sun -->
+              </div>
+            </div>
+
+            <!-- Daily Gym Reminder Controls -->
+            <div class="split-reminder-block">
+              <div class="split-reminder-top-row">
+                <div class="split-reminder-label-wrap">
+                  <span class="split-reminder-name">Daily Gym Push Reminders</span>
+                  <span class="split-reminder-desc">Rest Day Shield: Alerts are automatically suppressed on your designated rest days!</span>
+                </div>
+                <label class="ios-switch">
+                  <input type="checkbox" id="split-reminder-toggle" onchange="toggleWorkoutSplitReminders(this.checked)" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="split-reminder-bottom-row">
+                <div class="reminder-time-group">
+                  <span class="time-label">Preferred Reminder Time:</span>
+                  <input type="time" id="split-reminder-time-input" class="split-time-input" value="17:30" onchange="updateWorkoutSplitReminderTime(this.value)">
+                </div>
+                <button type="button" class="secondary-btn small-btn split-test-btn" onclick="testDailyGymReminder()" title="Test how push reminder reacts to today's schedule">
+                  🔔 Test Gym Reminder
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Appearance -->
         <div class="settings-group">
           <h3 class="settings-group-title">Appearance</h3>
@@ -2660,6 +2731,34 @@
           <input type="hidden" id="signup-coach" value="Nurv">
         </div>
 
+        <!-- STEP 3: WORKOUT SPLIT & TRAINING CADENCE -->
+        <div class="form-group onboarding-step-group" style="margin-top: 18px;">
+          <div class="onboarding-step-header">
+            <span class="step-badge split-step-badge">STEP 3</span>
+            <label class="required-label">Select Your Workout Split &amp; Cadence</label>
+          </div>
+          <p class="gender-help-text">Choose your training split and rest day balance. Daily gym reminders will automatically suppress on your designated rest days.</p>
+          
+          <div class="onboarding-split-field" style="margin-top: 10px;">
+            <select id="signup-split-type" class="ios-select" onchange="handleSignupSplitChange(this.value)">
+              <option value="PPL" selected>Push / Pull / Legs (PPL) &bull; 5 Days On / 2 Off</option>
+              <option value="UpperLower">Upper / Lower &bull; 4 Days On / 3 Off</option>
+              <option value="FullBody">Full Body (3x) &bull; 3 Days On / 4 Off</option>
+              <option value="Arnold">Arnold Split (6x) &bull; 6 Days On / 1 Off</option>
+              <option value="BroSplit">Bro Split (5x) &bull; 5 Days On / 2 Off</option>
+              <option value="Custom">Custom Athlete Split</option>
+            </select>
+          </div>
+
+          <div class="onboarding-reminder-time-row" style="margin-top: 12px; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+            <div style="display:flex; flex-direction:column;">
+              <span style="font-size:0.85rem; font-weight:600; color:#fff;">Daily Gym Alert Time</span>
+              <span style="font-size:0.72rem; color:var(--text-muted);">Auto-suppressed on rest days</span>
+            </div>
+            <input type="time" id="signup-reminder-time" class="split-time-input" value="17:30" style="padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.18); background:#111; color:#fff;">
+          </div>
+        </div>
+
         <!-- Optional Admin Key Toggle -->
         <div class="form-group admin-key-group">
           <label>Admin Access Key (Optional for Creator Access)</label>
@@ -2875,7 +2974,7 @@
 
   <script src="i18n.js?v=63"></script>
   <script src="auth.js?v=63"></script>
-  <script src="app.js?v=63"></script>
+  <script src="app.js?v=64"></script>
   <script src="camera.js?v=63"></script>
   <script src="ranks.js?v=63"></script>
 </body>

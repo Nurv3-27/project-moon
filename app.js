@@ -627,40 +627,88 @@ let restTimeRemaining = 0;
 let restTotalDuration = 90;
 let restEndsAt = 0;
 
-function notifyRestOver() {
-  const title = 'Moon Fitness - Rest Target Reached! 🔔';
-  const body = 'Rest period complete! Step up for your next set.';
+// Central Local & OS-Level Push Notification Dispatcher
+async function triggerLocalPushNotification(title, options = {}) {
   try {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-        navigator.serviceWorker.ready.then(reg => {
-          reg.showNotification(title, {
-            body: body,
-            icon: 'app_icon_192.png',
-            badge: 'apple-touch-icon.png',
-            vibrate: [500, 200, 500, 200, 500],
-            tag: 'rest-timer-done',
-            renotify: true,
-            requireInteraction: true,
-            silent: false,
-            data: { url: './#workout' }
-          }).catch(() => new Notification(title, { body, icon: 'app_icon_192.png' }));
-        });
-      } else {
-        new Notification(title, { body, icon: 'app_icon_192.png' });
+    if (!('Notification' in window)) {
+      console.warn('[Push Notification] Notification API not supported.');
+      return false;
+    }
+    if (Notification.permission !== 'granted') {
+      return false;
+    }
+
+    const defaultOptions = {
+      icon: 'moon_logo.png',
+      badge: 'app_icon_192.png',
+      vibrate: [400, 150, 400],
+      renotify: true,
+      tag: options.tag || 'moon-notification',
+      data: { url: './#workout' },
+      ...options
+    };
+
+    // Prefer Service Worker registration showNotification (fires even in background / screen off)
+    if ('serviceWorker' in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        if (reg && reg.showNotification) {
+          await reg.showNotification(title, defaultOptions);
+          return true;
+        }
+      } catch (swErr) {
+        console.warn('[Push Notification] ServiceWorker showNotification fallback:', swErr);
       }
     }
-  } catch (e) {}
+
+    // Window Notification fallback
+    new Notification(title, defaultOptions);
+    return true;
+  } catch (err) {
+    console.warn('[Push Notification] Trigger error:', err);
+    return false;
+  }
+}
+window.triggerLocalPushNotification = triggerLocalPushNotification;
+
+function notifyRestOver() {
+  const title = '⏱️ Rest Complete — Time to Lift!';
+  const body = 'Your rest period is over. Step up for the next set!';
+  
+  // Audio & Haptics
+  playRestTimerChime();
+  triggerHaptic([500, 200, 500, 200, 500]);
+
+  // Local Push Notification
+  triggerLocalPushNotification(title, {
+    body: body,
+    tag: 'rest-timer-done',
+    icon: 'moon_logo.png',
+    badge: 'apple-touch-icon.png',
+    vibrate: [500, 200, 500, 200, 500],
+    requireInteraction: true
+  });
 }
 
-function requestNotifyPermission() {
+function requestNotifyPermission(userTriggered = false) {
   try {
-    if ('Notification' in window && Notification.permission === 'default') {
+    if ('Notification' in window) {
       Notification.requestPermission().then(perm => {
         if (perm === 'granted') {
-          showToast('🔔 Rest timer push notifications enabled');
+          showToast('🔔 OS Push Notifications Enabled');
+          triggerLocalPushNotification('Moon Fitness OS 🚀', {
+            body: 'Mission alerts active! Rest timers, focus blocks, and daily gym reminders are set.',
+            tag: 'permission-granted-welcome'
+          });
+        } else if (userTriggered) {
+          showToast(`Push notifications permission: ${perm}`);
+        }
+        if (typeof updateWorkoutSplitUI === 'function') {
+          updateWorkoutSplitUI();
         }
       });
+    } else if (userTriggered) {
+      showToast('Push notifications not supported on this device/browser');
     }
   } catch (e) {}
 }
@@ -4027,6 +4075,46 @@ function scrollTick() {
     unmountInstagramWebView(true);
   }
   renderScroll();
+
+  // --- Notification Logic 1: Track Scheduled Focus Block Start & End ---
+  try {
+    const currentSchedActive = typeof isScheduledBlockActiveNow === 'function' ? isScheduledBlockActiveNow() : false;
+    if (AppState._lastScheduledBlockActive === undefined) {
+      AppState._lastScheduledBlockActive = currentSchedActive;
+    } else if (AppState._lastScheduledBlockActive !== currentSchedActive) {
+      const sched = AppState.focusBlock && AppState.focusBlock.schedule;
+      const timeWindow = sched && sched.startTime && sched.endTime ? ` (${sched.startTime} - ${sched.endTime})` : '';
+      if (currentSchedActive) {
+        // Scheduled block STARTED
+        triggerLocalPushNotification('🛡️ Scheduled Focus Block Started', {
+          body: `Your scheduled focus block has begun${timeWindow}. Feeds and distractions locked.`,
+          tag: 'focus-block-start',
+          icon: 'moon_logo.png'
+        });
+        showToast(`🛡️ Scheduled Focus Block Started${timeWindow}`);
+      } else {
+        // Scheduled block FINISHED
+        triggerLocalPushNotification('✨ Scheduled Focus Block Finished', {
+          body: 'Your scheduled focus session has concluded. Great job maintaining discipline!',
+          tag: 'focus-block-end',
+          icon: 'moon_logo.png'
+        });
+        showToast('✨ Scheduled Focus Block Finished');
+      }
+      AppState._lastScheduledBlockActive = currentSchedActive;
+    }
+  } catch (focusNotifErr) {
+    console.warn('[Focus Notification] Error:', focusNotifErr);
+  }
+
+  // --- Notification Logic 2: Daily Gym Reminder Linked to Workout Split ---
+  try {
+    if (typeof checkDailyGymReminder === 'function') {
+      checkDailyGymReminder();
+    }
+  } catch (gymReminderErr) {
+    console.warn('[Gym Reminder] Error:', gymReminderErr);
+  }
 }
 
 window.closeScrollLock = function() {
@@ -5550,34 +5638,124 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ensure Anti-Scroll Shield elements are strictly positioned inside focus tab
   updateAntiScrollUI();
 
-  // --- Initial App Splash Screen Auto-Routing (5s duration) ---
-  initSplashScreenTimer();
+  // Initialize Workout Split State & UI
+  ensureWorkoutSplitState();
+  updateWorkoutSplitUI();
+
+  // --- Initial App Splash Screen: Three-Stage Sequence ---
+  runThreeStageSplashScreen();
 
 });
 
-// Splash Screen Lifecycle & Full Intro Audio + Destination Selector (Routines vs Focus)
+// ==========================================================================
+// THREE-STAGE INITIAL SPLASH ANIMATION
+// Phase 1: On launch, display a pitch-black screen showing ONLY the text
+//          'Are you ready to take it to the moon?' in the center, and
+//          'In the loving memory of 27 / من' pinned to the bottom right.
+// Phase 2: Fade out the text and fade in the central app logo (moon_logo.png).
+// Phase 3: Fade out the logo entirely and smoothly transition to the main
+//          interface featuring the 'Start Odyssey' button and Workout Hub.
+// ==========================================================================
+
+let splashStage = 1;
+let splashStageTimer1 = null;
+let splashStageTimer2 = null;
 let splashDismissed = false;
 let splashAudio = null;
-let splashIdleSafetyTimer = null;
 
-function setSplashSoundStatus(state, message) {
-  const container = document.getElementById('splash-sound-status');
-  const label = document.getElementById('splash-sound-label');
-  if (!container || !label) return;
+function runThreeStageSplashScreen() {
+  const splash = document.getElementById('app-splash-screen');
+  if (!splash) return;
 
-  container.classList.remove('playing', 'blocked');
-  if (state) {
-    container.classList.add(state);
-  }
-  if (message) {
-    label.textContent = message;
-  }
+  splashDismissed = false;
+  splashStage = 1;
+
+  if (splashStageTimer1) clearTimeout(splashStageTimer1);
+  if (splashStageTimer2) clearTimeout(splashStageTimer2);
+
+  splash.style.display = 'flex';
+  splash.classList.remove('hidden', 'fade-out', 'splash-stage-2');
+  splash.classList.add('splash-stage-1');
+
+  // PHASE 1: Pitch-black screen showing ONLY quote and bottom-right tribute
+  // Duration: 2400ms
+  splashStageTimer1 = setTimeout(() => {
+    // Transition to Phase 2: Fade out text, fade in central logo (moon_logo.png)
+    splashStage = 2;
+    splash.classList.remove('splash-stage-1');
+    splash.classList.add('splash-stage-2');
+
+    // PHASE 2: Display central logo with ambient maroon glow
+    // Duration: 2200ms
+    splashStageTimer2 = setTimeout(() => {
+      // Transition to Phase 3: Fade out logo entirely and smoothly reveal Workout Hub & Start Odyssey
+      splashStage = 3;
+      finishSplashToWorkoutHub();
+    }, 2200);
+
+  }, 2400);
 }
 
-function handleSplashUserInteraction(e) {
-  // Splash screen interaction handler - auto-play on random screen taps removed.
-  // Intro MP3 audio is strictly attached to the Sign Up / Login buttons.
+function finishSplashToWorkoutHub(keepAudio = false) {
+  if (splashDismissed) return;
+  splashDismissed = true;
+
+  if (splashStageTimer1) clearTimeout(splashStageTimer1);
+  if (splashStageTimer2) clearTimeout(splashStageTimer2);
+
+  if (!keepAudio) {
+    stopSplashAudio();
+  }
+
+  const splash = document.getElementById('app-splash-screen');
+  if (splash) {
+    // Phase 3: Fade out logo entirely and smoothly transition
+    splash.classList.remove('splash-stage-1', 'splash-stage-2');
+    splash.classList.add('fade-out');
+
+    try {
+      triggerHaptic([25]);
+    } catch (e) {}
+
+    setTimeout(() => {
+      splash.classList.add('hidden');
+      splash.style.display = 'none';
+    }, 800);
+  }
+
+  // Ensure Workout Hub is visible and active
+  if (typeof switchTab === 'function') {
+    switchTab('workout');
+  }
+
+  // Prompt the user for OS-level Push Notification permissions immediately after splash screen on first login/session
+  promptNotificationPermissionOnFirstLogin();
 }
+
+window.handleSplashTap = function(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  // Responsive tap interaction: advance or dismiss directly to Workout Hub
+  if (splashStage === 1) {
+    if (splashStageTimer1) clearTimeout(splashStageTimer1);
+    splashStage = 2;
+    const splash = document.getElementById('app-splash-screen');
+    if (splash) {
+      splash.classList.remove('splash-stage-1');
+      splash.classList.add('splash-stage-2');
+    }
+    if (splashStageTimer2) clearTimeout(splashStageTimer2);
+    splashStageTimer2 = setTimeout(() => {
+      finishSplashToWorkoutHub();
+    }, 2000);
+  } else {
+    finishSplashToWorkoutHub();
+  }
+};
+
+window.dismissSplashScreen = finishSplashToWorkoutHub;
+window.showSplashScreen = function() {
+  runThreeStageSplashScreen();
+};
 
 function stopSplashAudio() {
   if (splashAudio) {
@@ -5588,7 +5766,7 @@ function stopSplashAudio() {
   }
 }
 
-// Requirement 3: Dedicated Startup Intro Audio Trigger attached strictly to Sign Up / Login onClick
+// Dedicated Startup Intro Audio Trigger attached strictly to Sign Up / Login onClick
 window.playStartupAudio = function() {
   try {
     stopSplashAudio();
@@ -5607,9 +5785,7 @@ window.playStartupAudio = function() {
 
     const p = splashAudio.play();
     if (p !== undefined) {
-      p.then(() => {
-        setSplashSoundStatus('playing', 'Sound active 🔊');
-      }).catch((err) => {
+      p.catch((err) => {
         console.warn('[Splash Audio] Audio playback pending or blocked:', err);
       });
     }
@@ -5617,27 +5793,19 @@ window.playStartupAudio = function() {
     console.warn('[Splash Audio] Startup audio error:', e);
   }
 };
-
 window.playSplashAudio = window.playStartupAudio;
 
 // Handle initial startup options: Sign Up / Login
 window.handleStartupAuth = function(mode, e) {
-  if (e && e.stopPropagation) {
-    e.stopPropagation();
-  }
+  if (e && e.stopPropagation) e.stopPropagation();
 
-  // Play startup MP3 audio strictly on user click
   window.playStartupAudio();
+  finishSplashToWorkoutHub(true);
 
-  // Dismiss splash screen smoothly while preserving audio playback
-  dismissSplashScreen(e, true);
-
-  // Switch auth tab to requested mode
   if (typeof window.switchAuthTab === 'function') {
     window.switchAuthTab(mode);
   }
 
-  // Open the auth modal for user interaction
   setTimeout(() => {
     window.openModal('modal-auth');
   }, 250);
@@ -5648,89 +5816,371 @@ window.handleStartupAuth = function(mode, e) {
 };
 
 window.selectAppDestination = function(destination, e) {
-  if (e && e.stopPropagation) {
-    e.stopPropagation();
-  }
-  if (splashDismissed) return;
-
-  if (splashIdleSafetyTimer) {
-    clearTimeout(splashIdleSafetyTimer);
-    splashIdleSafetyTimer = null;
-  }
-
-  // Route to user's selected tab
+  if (e && e.stopPropagation) e.stopPropagation();
   if (destination === 'focus') {
     switchTab('focus');
   } else {
     switchTab('workout');
   }
-
-  // Stop audio and dismiss splash
-  dismissSplashScreen();
+  finishSplashToWorkoutHub();
   try {
     triggerHaptic([30, 45]);
   } catch (err) {}
 };
 
-function dismissSplashScreen(e, keepAudio) {
-  if (e && e.stopPropagation) {
-    e.stopPropagation();
+// ==========================================================================
+// NOTIFICATION PERMISSIONS ON FIRST LOGIN & DISPATCH LOGIC
+// ==========================================================================
+function promptNotificationPermissionOnFirstLogin() {
+  if (!('Notification' in window)) return;
+  
+  const hasPrompted = localStorage.getItem('moon_push_notif_prompted');
+  if (hasPrompted) return;
+
+  // Mark as prompted for first login/session
+  localStorage.setItem('moon_push_notif_prompted', 'true');
+
+  if (Notification.permission === 'default') {
+    setTimeout(() => {
+      Notification.requestPermission().then((perm) => {
+        if (perm === 'granted') {
+          showToast('🔔 OS Push Notifications Enabled — Rest timer & gym alerts active!');
+          triggerLocalPushNotification('Moon Fitness OS 🚀', {
+            body: 'Mission alerts active! Rest timers, focus blocks, and workout reminders are set.',
+            tag: 'initial-welcome-notif'
+          });
+        }
+        if (typeof updateWorkoutSplitUI === 'function') {
+          updateWorkoutSplitUI();
+        }
+      }).catch((err) => {
+        console.warn('[Notification] requestPermission error:', err);
+      });
+    }, 500);
   }
-  if (splashDismissed) return;
-  splashDismissed = true;
-
-  if (splashIdleSafetyTimer) {
-    clearTimeout(splashIdleSafetyTimer);
-    splashIdleSafetyTimer = null;
-  }
-
-  // Stop audio unless user explicitly clicked Sign Up / Login (keepAudio = true)
-  if (!keepAudio) {
-    stopSplashAudio();
-  }
-
-  ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
-    window.removeEventListener(evt, handleSplashUserInteraction, { capture: true });
-  });
-
-  const splash = document.getElementById('app-splash-screen');
-  if (!splash) return;
-
-  splash.removeEventListener('pointerdown', handleSplashUserInteraction);
-  splash.removeEventListener('touchstart', handleSplashUserInteraction);
-
-  splash.classList.add('fade-out');
-
-  try {
-    triggerHaptic([25]);
-  } catch (e) {}
-
-  setTimeout(() => {
-    splash.classList.add('hidden');
-    splash.style.display = 'none';
-  }, 700);
 }
+window.promptNotificationPermissionOnFirstLogin = promptNotificationPermissionOnFirstLogin;
 
-function initSplashScreenTimer() {
-  const splash = document.getElementById('app-splash-screen');
-  if (!splash) return;
-
-  // Requirement 3: onMount auto-play audio removed from splash screen.
-  // Audio playback logic is strictly attached to onClick of Sign Up / Login buttons.
-}
-
-window.dismissSplashScreen = dismissSplashScreen;
-window.showSplashScreen = function() {
-  const splash = document.getElementById('app-splash-screen');
-  if (splash) {
-    splashDismissed = false;
-    splash.style.display = '';
-    splash.classList.remove('hidden', 'fade-out');
-    const picker = document.getElementById('splash-dest-picker');
-    if (picker) picker.classList.remove('pulse-ready');
-    initSplashScreenTimer();
+// ==========================================================================
+// WORKOUT SPLIT & TRAINING CADENCE TRACKING / REST DAY SHIELD
+// ==========================================================================
+const WORKOUT_SPLIT_PRESETS = {
+  PPL: {
+    name: 'Push / Pull / Legs (PPL)',
+    daysOn: 5,
+    daysOff: 2,
+    schedule: { Mon: true, Tue: true, Wed: true, Thu: true, Fri: true, Sat: false, Sun: false }
+  },
+  UpperLower: {
+    name: 'Upper / Lower',
+    daysOn: 4,
+    daysOff: 3,
+    schedule: { Mon: true, Tue: true, Wed: false, Thu: true, Fri: true, Sat: false, Sun: false }
+  },
+  FullBody: {
+    name: 'Full Body (3x)',
+    daysOn: 3,
+    daysOff: 4,
+    schedule: { Mon: true, Tue: false, Wed: true, Thu: false, Fri: true, Sat: false, Sun: false }
+  },
+  Arnold: {
+    name: 'Arnold Split (6x)',
+    daysOn: 6,
+    daysOff: 1,
+    schedule: { Mon: true, Tue: true, Wed: true, Thu: true, Fri: true, Sat: true, Sun: false }
+  },
+  BroSplit: {
+    name: 'Bro Split (5x)',
+    daysOn: 5,
+    daysOff: 2,
+    schedule: { Mon: true, Tue: true, Wed: true, Thu: true, Fri: true, Sat: false, Sun: false }
+  },
+  Custom: {
+    name: 'Custom Athlete Split',
+    daysOn: 5,
+    daysOff: 2,
+    schedule: { Mon: true, Tue: true, Wed: true, Thu: true, Fri: true, Sat: false, Sun: false }
   }
 };
+
+function ensureWorkoutSplitState() {
+  if (!AppState.workoutSplit) {
+    AppState.workoutSplit = {
+      splitType: 'PPL',
+      splitName: 'Push / Pull / Legs (PPL)',
+      daysOn: 5,
+      daysOff: 2,
+      schedule: {
+        Mon: true,
+        Tue: true,
+        Wed: true,
+        Thu: true,
+        Fri: true,
+        Sat: false,
+        Sun: false
+      },
+      reminderTime: '17:30',
+      remindersEnabled: true,
+      lastReminderDate: null
+    };
+  }
+  if (!AppState.workoutSplit.schedule) {
+    AppState.workoutSplit.schedule = {
+      Mon: true, Tue: true, Wed: true, Thu: true, Fri: true, Sat: false, Sun: false
+    };
+  }
+}
+
+function getTodayDayKey() {
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return dayNames[new Date().getDay()];
+}
+window.getTodayDayKey = getTodayDayKey;
+
+function isTodayRestDay() {
+  ensureWorkoutSplitState();
+  const dayKey = getTodayDayKey();
+  const sched = AppState.workoutSplit.schedule || {};
+  return sched[dayKey] === false;
+}
+window.isTodayRestDay = isTodayRestDay;
+
+function selectWorkoutSplitPreset(type) {
+  ensureWorkoutSplitState();
+  const preset = WORKOUT_SPLIT_PRESETS[type] || WORKOUT_SPLIT_PRESETS.PPL;
+  AppState.workoutSplit.splitType = type;
+  AppState.workoutSplit.splitName = preset.name;
+  AppState.workoutSplit.daysOn = preset.daysOn;
+  AppState.workoutSplit.daysOff = preset.daysOff;
+  AppState.workoutSplit.schedule = { ...preset.schedule };
+
+  saveState();
+  updateWorkoutSplitUI();
+  triggerHaptic([30]);
+  showToast(`Workout Split set to ${preset.name}!`);
+}
+window.selectWorkoutSplitPreset = selectWorkoutSplitPreset;
+
+function setSplitCadence(daysOn, daysOff) {
+  ensureWorkoutSplitState();
+  AppState.workoutSplit.daysOn = Number(daysOn) || 5;
+  AppState.workoutSplit.daysOff = Number(daysOff) || 2;
+  
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  days.forEach((day, idx) => {
+    AppState.workoutSplit.schedule[day] = idx < daysOn;
+  });
+
+  saveState();
+  updateWorkoutSplitUI();
+  triggerHaptic([25]);
+  showToast(`Cadence set to ${daysOn} Days On / ${daysOff} Days Off`);
+}
+window.setSplitCadence = setSplitCadence;
+
+function toggleSplitDay(dayKey) {
+  ensureWorkoutSplitState();
+  if (!AppState.workoutSplit.schedule) {
+    AppState.workoutSplit.schedule = {};
+  }
+  const current = AppState.workoutSplit.schedule[dayKey] !== false;
+  AppState.workoutSplit.schedule[dayKey] = !current;
+  
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  let countOn = 0;
+  days.forEach(d => {
+    if (AppState.workoutSplit.schedule[d] !== false) countOn++;
+  });
+  AppState.workoutSplit.daysOn = countOn;
+  AppState.workoutSplit.daysOff = 7 - countOn;
+  AppState.workoutSplit.splitType = 'Custom';
+  AppState.workoutSplit.splitName = 'Custom Split';
+
+  saveState();
+  updateWorkoutSplitUI();
+  triggerHaptic([20]);
+}
+window.toggleSplitDay = toggleSplitDay;
+
+function toggleWorkoutSplitReminders(enabled) {
+  ensureWorkoutSplitState();
+  AppState.workoutSplit.remindersEnabled = Boolean(enabled);
+  saveState();
+  updateWorkoutSplitUI();
+  triggerHaptic([25]);
+  showToast(enabled ? '🔔 Daily Gym Reminders armed (suppressed on rest days)' : 'Gym Reminders muted');
+}
+window.toggleWorkoutSplitReminders = toggleWorkoutSplitReminders;
+
+function updateWorkoutSplitReminderTime(time) {
+  ensureWorkoutSplitState();
+  if (time) {
+    AppState.workoutSplit.reminderTime = time;
+    saveState();
+    updateWorkoutSplitUI();
+    showToast(`Gym reminder time set to ${time}`);
+  }
+}
+window.updateWorkoutSplitReminderTime = updateWorkoutSplitReminderTime;
+
+function checkDailyGymReminder() {
+  ensureWorkoutSplitState();
+  const ws = AppState.workoutSplit;
+  if (!ws || ws.remindersEnabled === false) return;
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  if (ws.lastReminderDate === todayStr) {
+    return; // Already processed today
+  }
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const currentTimeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const targetTime = ws.reminderTime || '17:30';
+
+  if (currentTimeStr < targetTime) {
+    return; // Target time not yet reached
+  }
+
+  // REST DAY SUPPRESSION CHECK:
+  // If today is designated as a REST DAY, automatically suppress the reminder!
+  if (isTodayRestDay()) {
+    console.log(`[Daily Reminder] Today (${getTodayDayKey()}) is a designated REST DAY. Suppressing 'time to lift' alert.`);
+    ws.lastReminderDate = todayStr;
+    saveState();
+    return;
+  }
+
+  // TRAINING DAY: Trigger notification
+  const splitTitle = ws.splitName || ws.splitType || 'Daily Workout';
+  triggerLocalPushNotification('🚀 Moon Fitness OS — Time to Lift!', {
+    body: `Today is a scheduled training day (${splitTitle}). Step up and take it to the moon!`,
+    tag: 'daily-gym-reminder',
+    icon: 'moon_logo.png',
+    requireInteraction: true
+  });
+  ws.lastReminderDate = todayStr;
+  saveState();
+}
+window.checkDailyGymReminder = checkDailyGymReminder;
+
+window.testDailyGymReminder = function() {
+  ensureWorkoutSplitState();
+  const ws = AppState.workoutSplit;
+  const day = getTodayDayKey();
+  const isRest = isTodayRestDay();
+  const splitTitle = ws.splitName || ws.splitType || 'Daily Workout';
+
+  if (isRest) {
+    showToast(`🛡️ Rest Day Active: Today (${day}) is marked as a Rest Day. Gym alert was safely SUPPRESSED.`);
+    triggerHaptic([30, 20]);
+    console.log(`[Test Reminder] Today (${day}) is a rest day. Alert suppressed.`);
+  } else {
+    showToast(`🚀 Training Day Active: Today (${day}) is a training day. Triggering notification...`);
+    triggerLocalPushNotification('🚀 Moon Fitness OS — Time to Lift!', {
+      body: `Today (${day}) is a scheduled training day (${splitTitle}). Time to crush your workout!`,
+      tag: 'test-gym-reminder',
+      icon: 'moon_logo.png',
+      requireInteraction: true
+    });
+    triggerHaptic([40, 60, 40]);
+  }
+};
+
+function handleSignupSplitChange(value) {
+  ensureWorkoutSplitState();
+  const preset = WORKOUT_SPLIT_PRESETS[value] || WORKOUT_SPLIT_PRESETS.PPL;
+  AppState.workoutSplit.splitType = value;
+  AppState.workoutSplit.splitName = preset.name;
+  AppState.workoutSplit.daysOn = preset.daysOn;
+  AppState.workoutSplit.daysOff = preset.daysOff;
+  AppState.workoutSplit.schedule = { ...preset.schedule };
+}
+window.handleSignupSplitChange = handleSignupSplitChange;
+
+function updateWorkoutSplitUI() {
+  ensureWorkoutSplitState();
+  const ws = AppState.workoutSplit;
+  const isRest = isTodayRestDay();
+  const todayKey = getTodayDayKey();
+
+  // Summary label
+  const summaryEl = document.getElementById('split-card-summary');
+  if (summaryEl) {
+    summaryEl.textContent = `${ws.daysOn} Days On / ${ws.daysOff} Days Off • ${ws.splitName}`;
+  }
+
+  // Today Status Pill
+  const pillEl = document.getElementById('split-today-status-badge');
+  if (pillEl) {
+    pillEl.className = 'split-today-pill ' + (isRest ? 'rest' : 'training');
+    pillEl.textContent = isRest ? 'TODAY: REST DAY 🧘' : 'TODAY: TRAINING DAY 🔥';
+  }
+
+  // Status Banner
+  const bannerEl = document.getElementById('split-status-banner');
+  const bannerIcon = document.getElementById('split-banner-icon');
+  const bannerTitle = document.getElementById('split-banner-title');
+  const bannerDesc = document.getElementById('split-banner-desc');
+  if (bannerEl && bannerTitle && bannerDesc && bannerIcon) {
+    bannerEl.className = 'split-status-banner ' + (isRest ? 'rest-day' : 'training-day');
+    if (isRest) {
+      bannerIcon.textContent = '🧘';
+      bannerTitle.textContent = 'Today is a Designated Rest Day';
+      bannerDesc.textContent = 'Rest Day Shield Active: "Time to lift" notifications are automatically suppressed for recovery.';
+    } else {
+      bannerIcon.textContent = '🔥';
+      bannerTitle.textContent = 'Today is a Scheduled Training Day';
+      bannerDesc.textContent = `${ws.splitName} active. Daily gym reminders are armed for ${ws.reminderTime || '17:30'}.`;
+    }
+  }
+
+  // Presets Grid Active Button
+  const presetBtns = document.querySelectorAll('.split-preset-btn');
+  presetBtns.forEach(btn => {
+    const t = btn.getAttribute('data-split-type');
+    btn.classList.toggle('active', t === ws.splitType);
+  });
+
+  // Cadence Display & Active Buttons
+  const cadenceDisp = document.getElementById('split-cadence-display');
+  if (cadenceDisp) {
+    cadenceDisp.textContent = `${ws.daysOn} Days On • ${ws.daysOff} Days Off`;
+  }
+  const cadenceBtns = document.querySelectorAll('.cadence-pill-btn');
+  const cadenceKey = `${ws.daysOn}on${ws.daysOff}off`;
+  cadenceBtns.forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-cadence') === cadenceKey);
+  });
+
+  // 7-Day Interactive Week Schedule Strip
+  const weekGrid = document.getElementById('split-week-grid');
+  if (weekGrid) {
+    const dayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayLabels = { Mon: 'MON', Tue: 'TUE', Wed: 'WED', Thu: 'THU', Fri: 'FRI', Sat: 'SAT', Sun: 'SUN' };
+    weekGrid.innerHTML = dayKeys.map(day => {
+      const isLift = ws.schedule && ws.schedule[day] !== false;
+      const isToday = day === todayKey;
+      return `
+        <div class="split-day-card ${isLift ? 'training-day' : 'rest-day'} ${isToday ? 'is-today' : ''}" onclick="toggleSplitDay('${day}')" title="Tap to toggle ${day}">
+          <span class="split-day-name">${dayLabels[day]}</span>
+          <span class="split-day-badge">${isLift ? 'LIFT 🏋️' : 'REST 🧘'}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Reminder Controls Sync
+  const reminderToggle = document.getElementById('split-reminder-toggle');
+  if (reminderToggle) {
+    reminderToggle.checked = ws.remindersEnabled !== false;
+  }
+  const reminderInput = document.getElementById('split-reminder-time-input');
+  if (reminderInput && ws.reminderTime) {
+    reminderInput.value = ws.reminderTime;
+  }
+}
+window.updateWorkoutSplitUI = updateWorkoutSplitUI;
 
 // ==================== AUTHENTICATION & AI COACH GLUE ====================
 window.openAuthModal = function() {
@@ -5844,6 +6294,18 @@ window.handleAuthSignUp = function(e) {
         aiCoach,
         adminSecret
       });
+
+      // Save Workout Split & Cadence configured during onboarding
+      const splitEl = document.getElementById('signup-split-type');
+      const reminderEl = document.getElementById('signup-reminder-time');
+      const selectedSplit = splitEl ? splitEl.value : 'PPL';
+      const selectedReminder = reminderEl ? reminderEl.value : '17:30';
+      if (typeof selectWorkoutSplitPreset === 'function') {
+        selectWorkoutSplitPreset(selectedSplit);
+      }
+      if (typeof updateWorkoutSplitReminderTime === 'function') {
+        updateWorkoutSplitReminderTime(selectedReminder);
+      }
     }
   } catch (err) {
     if (typeof showToast === 'function') {

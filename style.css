@@ -8418,5 +8418,470 @@ button:active,
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(224, 80, 106, 0.15);
 }
 
+/* ==========================================================================
+   IMAGE ASSET RENDERING ENHANCEMENTS (Crisp Scaling & Anti-Pixelation)
+   ========================================================================== */
+img,
+.coach-avatar-img,
+.moon-lock-logo,
+.brand-icon,
+.auth-splash-avatar,
+.cosmic-entity-node img,
+.muscle-anatomy-diagram img,
+.pr-badge-icon img,
+.coach-header-avatar {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: high-quality;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img,
+  .coach-avatar-img,
+  .moon-lock-logo,
+  .brand-icon {
+    image-rendering: high-quality;
+  }
+}
+
+/* ==========================================================================
+   60FPS NATIVE TOUCH PAGER ENGINE (Zero-Lag Hardware Accelerated Swiping)
+   ========================================================================== */
+.main-content {
+  position: relative;
+  width: 100%;
+  overflow-x: clip;
+}
+
+.tab-view {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+/* Tab active during continuous drag gesture */
+.tab-view.native-pager-dragging {
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  transition: none !important;
+}
+
+/* Peeking adjacent tab during continuous 60fps drag */
+.tab-view.native-pager-peeking {
+  display: block !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100%;
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  transition: none !important;
+  z-index: 6;
+}
+
+/* Spring snap back / snap forward animation */
+.tab-view.native-pager-snapping {
+  transition: transform 0.28s cubic-bezier(0.18, 0.9, 0.25, 1.0) !important;
+}
+
+/* ==========================================================================
+   FUTURISTIC GOALS & TARGETS DASHBOARD (DEEP GLASSMORPHISM & GLOWING AURA)
+   ========================================================================== */
+.futuristic-goals-section {
+  margin-top: 18px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.goals-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.goals-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.goals-aura-icon {
+  font-size: 1.4rem;
+  filter: drop-shadow(0 0 10px rgba(224, 80, 106, 0.8));
+  animation: goalIconFloat 3s ease-in-out infinite;
+}
+
+@keyframes goalIconFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.08); }
+}
+
+.goals-section-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.2px;
+  margin: 0;
+  text-shadow: 0 0 14px rgba(224, 80, 106, 0.35);
+}
+
+.goals-section-sub {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(224, 80, 106, 0.85);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.goals-config-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(224, 80, 106, 0.12);
+  border: 1px solid rgba(224, 80, 106, 0.4);
+  color: #FF859C;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(224, 80, 106, 0.1);
+}
+
+.goals-config-btn:hover {
+  background: rgba(224, 80, 106, 0.25);
+  border-color: #E0506A;
+  color: #FFFFFF;
+  transform: translateY(-1.5px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(224, 80, 106, 0.35);
+}
+
+.goals-config-btn:active {
+  transform: scale(0.96);
+}
+
+/* Goals Grid */
+.goals-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+/* Individual Futuristic Goal Card */
+.goal-card-futuristic {
+  position: relative;
+  background: rgba(13, 15, 23, 0.72);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(224, 80, 106, 0.28);
+  border-radius: 20px;
+  padding: 16px 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.85), 0 0 22px -3px rgba(180, 20, 60, 0.22);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.goal-card-futuristic:hover {
+  transform: translateY(-2px);
+  border-color: rgba(224, 80, 106, 0.55);
+  box-shadow: 0 16px 45px -6px rgba(0, 0, 0, 0.95), 0 0 32px 0 rgba(224, 80, 106, 0.35);
+}
+
+/* Ambient Radial Glow inside Card */
+.goal-card-glass-glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(224, 80, 106, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.goal-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.goal-meta-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.goal-type-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #FF859C;
+  text-transform: uppercase;
+}
+
+.goal-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.goal-percentage-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+}
+
+/* Progress Bar Wrap & Track */
+.goal-progress-wrap {
+  width: 100%;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.goal-progress-track {
+  width: 100%;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Dynamic 60fps Animated Fill */
+.goal-progress-fill {
+  width: var(--goal-pct, 0%);
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7A001C 0%, #B8133E 45%, #E0506A 85%, #FF859C 100%);
+  position: relative;
+  transition: width 0.75s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(224, 80, 106, 0.4);
+}
+
+.goal-progress-fill.cosmic-fill {
+  background: linear-gradient(90deg, #4A0033 0%, #9B1A64 45%, #E0506A 80%, #FF8FD0 100%);
+}
+
+.goal-progress-fill.shield-fill {
+  background: linear-gradient(90deg, #0A3A2A 0%, #157E57 45%, #30B080 80%, #75E6BE 100%);
+}
+
+/* Continuous 60fps High-Framerate Shimmer Sweep */
+.goal-shimmer-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%);
+  animation: goalShimmerSweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes goalShimmerSweep {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(250%); }
+}
+
+/* Goal Card Bottom Metrics */
+.goal-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  position: relative;
+  z-index: 1;
+}
+
+.goal-count-metric {
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.2px;
+}
+
+.goal-status-note {
+  font-weight: 600;
+  color: #A0A5B5;
+  font-size: 0.72rem;
+}
+
+/* ==========================================================================
+   DYNAMIC LIGHTING STATES (Near Target & Target Met)
+   ========================================================================== */
+
+/* State 1: Approaching Target (>= 75%) -> Intense Glowing Maroon/Crimson Pulse */
+.goal-card-futuristic.near-target {
+  border-color: rgba(224, 80, 106, 0.75);
+  box-shadow: 0 14px 45px -6px rgba(0, 0, 0, 0.9), 0 0 32px 0 rgba(224, 80, 106, 0.45);
+  animation: goalNearTargetBorderPulse 2.4s ease-in-out infinite;
+}
+
+.goal-card-futuristic.near-target .goal-percentage-pill {
+  background: rgba(224, 80, 106, 0.25);
+  border-color: #E0506A;
+  color: #FF859C;
+  box-shadow: 0 0 12px rgba(224, 80, 106, 0.6);
+}
+
+.goal-card-futuristic.near-target .goal-progress-fill {
+  box-shadow: 0 0 18px rgba(224, 80, 106, 0.95), 0 0 35px rgba(255, 77, 115, 0.5);
+  animation: goalNearTargetFillPulse 2s ease-in-out infinite;
+}
+
+@keyframes goalNearTargetBorderPulse {
+  0%, 100% {
+    border-color: rgba(224, 80, 106, 0.65);
+    box-shadow: 0 14px 45px -6px rgba(0, 0, 0, 0.9), 0 0 25px 0 rgba(224, 80, 106, 0.35);
+  }
+  50% {
+    border-color: rgba(255, 77, 115, 0.95);
+    box-shadow: 0 14px 45px -6px rgba(0, 0, 0, 0.9), 0 0 42px 4px rgba(224, 80, 106, 0.65);
+  }
+}
+
+@keyframes goalNearTargetFillPulse {
+  0%, 100% {
+    box-shadow: 0 0 14px rgba(224, 80, 106, 0.75), 0 0 25px rgba(255, 77, 115, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 26px rgba(224, 80, 106, 1.0), 0 0 50px rgba(255, 77, 115, 0.7);
+  }
+}
+
+/* State 2: Target Met / Exceeded (>= 100%) -> Victory Gold & Radiant Maroon Aura */
+.goal-card-futuristic.target-met {
+  border-color: rgba(255, 215, 0, 0.85);
+  box-shadow: 0 16px 50px -6px rgba(0, 0, 0, 0.95), 0 0 38px 2px rgba(255, 215, 0, 0.4), 0 0 55px rgba(224, 80, 106, 0.4);
+  animation: goalTargetMetAura 2.2s ease-in-out infinite;
+}
+
+.goal-card-futuristic.target-met .goal-percentage-pill {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(224, 80, 106, 0.3) 100%);
+  border-color: #FFD700;
+  color: #FFEC8B;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.75);
+}
+
+.goal-card-futuristic.target-met .goal-progress-fill {
+  background: linear-gradient(90deg, #A80028 0%, #E0506A 40%, #FFD700 85%, #FFF2A8 100%);
+  box-shadow: 0 0 22px rgba(255, 215, 0, 0.95), 0 0 45px rgba(224, 80, 106, 0.75);
+}
+
+@keyframes goalTargetMetAura {
+  0%, 100% {
+    border-color: rgba(255, 215, 0, 0.75);
+    box-shadow: 0 16px 50px -6px rgba(0, 0, 0, 0.95), 0 0 30px 0 rgba(255, 215, 0, 0.35);
+  }
+  50% {
+    border-color: #FFE666;
+    box-shadow: 0 16px 50px -6px rgba(0, 0, 0, 0.95), 0 0 50px 6px rgba(255, 215, 0, 0.65), 0 0 65px rgba(224, 80, 106, 0.55);
+  }
+}
+
+/* ==========================================================================
+   GOALS CONFIGURATION MODAL & STEPPERS
+   ========================================================================== */
+.goals-config-card {
+  max-width: 480px;
+  width: 94%;
+  background: #0D070A;
+  border: 1.5px solid rgba(224, 80, 106, 0.45);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.98), 0 0 35px rgba(224, 80, 106, 0.25);
+}
+
+.stepper-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.stepper-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.stepper-btn:hover {
+  background: rgba(224, 80, 106, 0.25);
+  border-color: #E0506A;
+  color: #FF859C;
+  transform: scale(1.05);
+}
+
+.stepper-btn:active {
+  transform: scale(0.92);
+}
+
+.stepper-val-input {
+  flex: 1;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-family: var(--font-mono, monospace);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stepper-val-input:focus {
+  border-color: #E0506A;
+  box-shadow: 0 0 15px rgba(224, 80, 106, 0.4);
+}
+
+.form-help-sub {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+}
+
+
 
 

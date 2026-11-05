@@ -522,6 +522,18 @@ function ensureFocusBlockState() {
 }
 ensureFocusBlockState();
 
+function ensureGoalsState() {
+  if (!AppState.goals) {
+    AppState.goals = {
+      weeklyWorkoutsTarget: 4,
+      weeklyVolumeTarget: 20000,
+      streakMilestoneTarget: 10,
+      scrollDisciplineTargetMin: 20,
+    };
+  }
+}
+ensureGoalsState();
+
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(AppState));
 }
@@ -1979,7 +1991,194 @@ function updateOverviewStats() {
 
   // Update Cosmic Progression Map
   renderStreakProgressionMap();
+
+  // Update Futuristic Goals Hub
+  updateGoalsUI();
 }
+
+// ==========================================================================
+// FUTURISTIC GOALS ENGINE (Dynamic Target Tracking & Adaptive Illumination)
+// ==========================================================================
+function updateGoalsUI() {
+  ensureGoalsState();
+  const goals = AppState.goals;
+  const history = AppState.history || [];
+  const oneWeekAgo = Date.now() - 7 * 86400000;
+  const thisWeekWorkouts = history.filter(h => new Date(h.date).getTime() > oneWeekAgo);
+
+  // 1. Weekly Workouts Cadence
+  const workoutsCount = thisWeekWorkouts.length;
+  const workoutsTarget = Math.max(1, goals.weeklyWorkoutsTarget || 4);
+  const workoutsPct = Math.round((workoutsCount / workoutsTarget) * 100);
+
+  const cardWorkouts = document.getElementById('goal-card-workouts');
+  const barWorkouts = document.getElementById('goal-workouts-progress-bar');
+  const badgeWorkouts = document.getElementById('goal-workouts-pct-badge');
+  const metricWorkouts = document.getElementById('goal-workouts-metric');
+  const noteWorkouts = document.getElementById('goal-workouts-note');
+
+  if (cardWorkouts && barWorkouts) {
+    barWorkouts.style.setProperty('--goal-pct', `${Math.min(workoutsPct, 100)}%`);
+    if (badgeWorkouts) badgeWorkouts.textContent = `${workoutsPct}%`;
+    if (metricWorkouts) metricWorkouts.textContent = `${workoutsCount} / ${workoutsTarget} Workouts`;
+    
+    // Near target & Target met dynamic lighting classes
+    cardWorkouts.classList.remove('near-target', 'target-met');
+    if (workoutsPct >= 100) {
+      cardWorkouts.classList.add('target-met');
+      if (noteWorkouts) noteWorkouts.textContent = '🎯 Target Crushed! Consistency unlocked.';
+      if (badgeWorkouts) badgeWorkouts.textContent = `${workoutsPct}% ⚡`;
+    } else if (workoutsPct >= 75) {
+      cardWorkouts.classList.add('near-target');
+      if (noteWorkouts) noteWorkouts.textContent = `🔥 Final push! ${workoutsTarget - workoutsCount} session to go.`;
+    } else {
+      if (noteWorkouts) noteWorkouts.textContent = `${Math.max(0, workoutsTarget - workoutsCount)} sessions remaining this week.`;
+    }
+  }
+
+  // 2. Weekly Tonnage / Volume Goal
+  let thisWeekVol = 0;
+  thisWeekWorkouts.forEach(h => thisWeekVol += (h.volume || 0));
+  const volTarget = Math.max(100, goals.weeklyVolumeTarget || 20000);
+  const volPct = Math.round((thisWeekVol / volTarget) * 100);
+
+  const cardVol = document.getElementById('goal-card-volume');
+  const barVol = document.getElementById('goal-volume-progress-bar');
+  const badgeVol = document.getElementById('goal-volume-pct-badge');
+  const metricVol = document.getElementById('goal-volume-metric');
+  const noteVol = document.getElementById('goal-volume-note');
+
+  if (cardVol && barVol) {
+    barVol.style.setProperty('--goal-pct', `${Math.min(volPct, 100)}%`);
+    if (badgeVol) badgeVol.textContent = `${volPct}%`;
+    const unit = (AppState.settings && AppState.settings.unit ? AppState.settings.unit : 'kg').toUpperCase();
+    if (metricVol) metricVol.textContent = `${Math.round(thisWeekVol).toLocaleString()} / ${volTarget.toLocaleString()} ${unit}`;
+
+    cardVol.classList.remove('near-target', 'target-met');
+    if (volPct >= 100) {
+      cardVol.classList.add('target-met');
+      if (noteVol) noteVol.textContent = '🏆 Iron Milestone Met! Legendary volume.';
+      if (badgeVol) badgeVol.textContent = `${volPct}% ⚡`;
+    } else if (volPct >= 75) {
+      cardVol.classList.add('near-target');
+      if (noteVol) noteVol.textContent = `⚡ Approaching target! ${Math.round(volTarget - thisWeekVol).toLocaleString()} ${unit} left.`;
+    } else {
+      if (noteVol) noteVol.textContent = `${Math.round(Math.max(0, volTarget - thisWeekVol)).toLocaleString()} ${unit} to target.`;
+    }
+  }
+
+  // 3. Cosmic Moon Streak Milestone
+  const streak = getConsecutiveWorkoutStreak();
+  const streakTarget = Math.max(1, goals.streakMilestoneTarget || 10);
+  const streakPct = Math.round((streak / streakTarget) * 100);
+
+  const cardStreak = document.getElementById('goal-card-streak');
+  const barStreak = document.getElementById('goal-streak-progress-bar');
+  const badgeStreak = document.getElementById('goal-streak-pct-badge');
+  const metricStreak = document.getElementById('goal-streak-metric');
+  const noteStreak = document.getElementById('goal-streak-note');
+
+  if (cardStreak && barStreak) {
+    barStreak.style.setProperty('--goal-pct', `${Math.min(streakPct, 100)}%`);
+    if (badgeStreak) badgeStreak.textContent = `${streakPct}%`;
+    if (metricStreak) metricStreak.textContent = `${streak} / ${streakTarget} Days`;
+
+    cardStreak.classList.remove('near-target', 'target-met');
+    if (streakPct >= 100) {
+      cardStreak.classList.add('target-met');
+      if (noteStreak) noteStreak.textContent = '🌑 Landed on Maroon Moon Citadel!';
+      if (badgeStreak) badgeStreak.textContent = `${streakPct}% 🚀`;
+    } else if (streakPct >= 75) {
+      cardStreak.classList.add('near-target');
+      if (noteStreak) noteStreak.textContent = `🚀 Orbiting close! ${streakTarget - streak} days to Moon.`;
+    } else {
+      if (noteStreak) noteStreak.textContent = `${Math.max(0, streakTarget - streak)} days remaining to Moon.`;
+    }
+  }
+
+  // 4. Scroll Discipline Bank Target
+  const earnedSec = (AppState.scroll && AppState.scroll.earnedTotal) || 0;
+  const earnedMin = Math.round(earnedSec / 60);
+  const scrollTargetMin = Math.max(1, goals.scrollDisciplineTargetMin || 20);
+  const scrollPct = Math.round((earnedMin / scrollTargetMin) * 100);
+
+  const cardScroll = document.getElementById('goal-card-scroll');
+  const barScroll = document.getElementById('goal-scroll-progress-bar');
+  const badgeScroll = document.getElementById('goal-scroll-pct-badge');
+  const metricScroll = document.getElementById('goal-scroll-metric');
+  const noteScroll = document.getElementById('goal-scroll-note');
+
+  if (cardScroll && barScroll) {
+    barScroll.style.setProperty('--goal-pct', `${Math.min(scrollPct, 100)}%`);
+    if (badgeScroll) badgeScroll.textContent = `${scrollPct}%`;
+    if (metricScroll) metricScroll.textContent = `${earnedMin} / ${scrollTargetMin} Min`;
+
+    cardScroll.classList.remove('near-target', 'target-met');
+    if (scrollPct >= 100) {
+      cardScroll.classList.add('target-met');
+      if (noteScroll) noteScroll.textContent = '🛡️ Focus Shield Mastered! Clean discipline.';
+      if (badgeScroll) badgeScroll.textContent = `${scrollPct}% 🛡️`;
+    } else if (scrollPct >= 75) {
+      cardScroll.classList.add('near-target');
+      if (noteScroll) noteScroll.textContent = `🛡️ Almost at target! ${scrollTargetMin - earnedMin} min left.`;
+    } else {
+      if (noteScroll) noteScroll.textContent = 'Earned strictly via workout sets & push-ups.';
+    }
+  }
+}
+window.updateGoalsUI = updateGoalsUI;
+
+window.openGoalsConfigModal = function() {
+  ensureGoalsState();
+  const goals = AppState.goals;
+  const wInput = document.getElementById('goal-input-workouts');
+  const vInput = document.getElementById('goal-input-volume');
+  const sInput = document.getElementById('goal-input-streak');
+  const scInput = document.getElementById('goal-input-scroll');
+
+  if (wInput) wInput.value = goals.weeklyWorkoutsTarget || 4;
+  if (vInput) vInput.value = goals.weeklyVolumeTarget || 20000;
+  if (sInput) sInput.value = goals.streakMilestoneTarget || 10;
+  if (scInput) scInput.value = goals.scrollDisciplineTargetMin || 20;
+
+  const modal = document.getElementById('modal-goals-config');
+  if (modal) modal.classList.remove('hidden');
+};
+
+window.closeGoalsConfigModal = function() {
+  const modal = document.getElementById('modal-goals-config');
+  if (modal) modal.classList.add('hidden');
+};
+
+window.adjustGoalInput = function(inputId, delta, min, max) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  let val = parseInt(input.value, 10) || 0;
+  val = Math.max(min, Math.min(max, val + delta));
+  input.value = val;
+  triggerHaptic([15]);
+};
+
+window.saveGoalsConfig = function(event) {
+  if (event) event.preventDefault();
+  ensureGoalsState();
+
+  const wInput = document.getElementById('goal-input-workouts');
+  const vInput = document.getElementById('goal-input-volume');
+  const sInput = document.getElementById('goal-input-streak');
+  const scInput = document.getElementById('goal-input-scroll');
+
+  AppState.goals.weeklyWorkoutsTarget = Math.max(1, parseInt(wInput ? wInput.value : 4, 10) || 4);
+  AppState.goals.weeklyVolumeTarget = Math.max(100, parseInt(vInput ? vInput.value : 20000, 10) || 20000);
+  AppState.goals.streakMilestoneTarget = Math.max(1, parseInt(sInput ? sInput.value : 10, 10) || 10);
+  AppState.goals.scrollDisciplineTargetMin = Math.max(1, parseInt(scInput ? scInput.value : 20, 10) || 20);
+
+  saveState();
+  updateGoalsUI();
+  closeGoalsConfigModal();
+  showToast('🎯 Target milestones updated successfully!');
+  triggerHaptic([35, 20, 35]);
+};
 
 // --- Starting a Workout ---
 window.startBlankWorkout = function() {
@@ -4423,66 +4622,249 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-// Global Horizontal Swipe Gestures (Smooth slide between Instagram, Focus, Workout, etc.)
+// ==========================================================================
+// 60FPS NATIVE-DRIVEN TOUCH PAGER ENGINE (Hardware Accelerated Fluid Swiping)
+// ==========================================================================
+/**
+ * Locked 60fps horizontal swiping between:
+ * [0] Instagram ('instagram')
+ * [1] Focus ('focus')
+ * [2] Workout ('workout')
+ * as well as remaining navigation tabs (history, ranks, settings).
+ *
+ * Uses requestAnimationFrame, direct GPU transform: translate3d(..., 0, 0),
+ * continuous touch delta interpolation, and native spring momentum snapping.
+ */
 function initGlobalSwipeGestures() {
+  const SWIPE_TABS = ['instagram', 'focus', 'workout', 'history', 'ranks', 'settings'];
+
   let touchStartX = 0;
   let touchStartY = 0;
   let touchStartTime = 0;
+  let currentTouchX = 0;
+  let currentTouchY = 0;
+  let isTracking = false;
   let isSwiping = false;
+  let activeTabName = 'workout';
+  let activeTabEl = null;
+  let peekingTabName = null;
+  let peekingTabEl = null;
+  let rafId = null;
+  let screenWidth = window.innerWidth || document.documentElement.clientWidth || 375;
 
-  const SWIPE_TABS = ['instagram', 'focus', 'workout', 'history', 'ranks', 'settings'];
+  window.addEventListener('resize', () => {
+    screenWidth = window.innerWidth || document.documentElement.clientWidth || 375;
+  }, { passive: true });
+
+  function cleanupSwipeState() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    if (activeTabEl) {
+      activeTabEl.classList.remove('native-pager-dragging', 'native-pager-snapping');
+      activeTabEl.style.transform = '';
+      activeTabEl.style.transition = '';
+    }
+    if (peekingTabEl) {
+      peekingTabEl.classList.remove('native-pager-peeking', 'native-pager-snapping');
+      peekingTabEl.style.transform = '';
+      peekingTabEl.style.transition = '';
+      peekingTabEl.style.display = '';
+    }
+    isTracking = false;
+    isSwiping = false;
+    peekingTabName = null;
+    peekingTabEl = null;
+  }
 
   document.addEventListener('touchstart', (e) => {
     if (!e.touches || e.touches.length !== 1) return;
     const target = e.target;
-    // Don't intercept swipe if user is interacting with form controls, sliders, range inputs, or iframe
-    if (target.closest('input, textarea, select, .slider, .opal-hold-cancel-btn, #avatar-cropper, iframe, .ig-webview-viewport, .dedicated-ig-mount')) {
-      return;
-    }
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    touchStartTime = Date.now();
-    isSwiping = true;
-  }, { passive: true });
 
-  document.addEventListener('touchend', (e) => {
-    if (!isSwiping || !e.changedTouches || e.changedTouches.length !== 1) {
-      isSwiping = false;
-      return;
-    }
-    isSwiping = false;
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
-    const deltaX = touchEndX - touchStartX;
-    const deltaY = touchEndY - touchStartY;
-    const duration = Date.now() - touchStartTime;
-
-    // Must be a distinct horizontal swipe: > 45px distance, horizontal > vertical, duration < 600ms
-    if (Math.abs(deltaX) < 45 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25 || duration > 600) {
+    // Ignore touches on interactive controls, forms, crop handles, or modals
+    if (target.closest('input, textarea, select, .slider, .opal-hold-cancel-btn, #avatar-cropper, iframe, .ig-webview-viewport, .dedicated-ig-mount, .modal-overlay:not(.hidden)')) {
       return;
     }
 
     // Determine current active tab
-    const activeTabBtn = document.querySelector('.nav-tab.active');
-    const currentTab = activeTabBtn ? activeTabBtn.dataset.tab : currentActiveTab || 'workout';
-    const currentIndex = SWIPE_TABS.indexOf(currentTab);
-    if (currentIndex === -1) return;
+    const activeNavBtn = document.querySelector('.nav-tab.active');
+    activeTabName = activeNavBtn ? activeNavBtn.dataset.tab : currentActiveTab || 'workout';
+    activeTabEl = document.getElementById(`view-${activeTabName}`);
+    if (!activeTabEl) return;
 
-    const isRtl = document.documentElement.dir === 'rtl';
-    const swipedLeft = isRtl ? (deltaX > 0) : (deltaX < 0);
-    const swipedRight = isRtl ? (deltaX < 0) : (deltaX > 0);
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    currentTouchX = touchStartX;
+    currentTouchY = touchStartY;
+    touchStartTime = performance.now();
+    isTracking = true;
+    isSwiping = false;
+  }, { passive: true });
 
-    if (swipedLeft && currentIndex < SWIPE_TABS.length - 1) {
-      // Finger sliding left -> transition smoothly to next tab
-      const nextTab = SWIPE_TABS[currentIndex + 1];
-      switchTab(nextTab, 'left');
-      triggerHaptic([20]);
-    } else if (swipedRight && currentIndex > 0) {
-      // Finger sliding right -> transition smoothly to previous tab
-      const prevTab = SWIPE_TABS[currentIndex - 1];
-      switchTab(prevTab, 'right');
-      triggerHaptic([20]);
+  document.addEventListener('touchmove', (e) => {
+    if (!isTracking || !e.touches || e.touches.length !== 1) return;
+
+    currentTouchX = e.touches[0].clientX;
+    currentTouchY = e.touches[0].clientY;
+    const deltaX = currentTouchX - touchStartX;
+    const deltaY = currentTouchY - touchStartY;
+
+    // Disambiguate vertical vs horizontal intention
+    if (!isSwiping) {
+      if (Math.abs(deltaY) > 16 && Math.abs(deltaY) > Math.abs(deltaX)) {
+        // Vertical scroll dominant -> abort horizontal swipe tracking
+        isTracking = false;
+        return;
+      }
+      if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25) {
+        // Horizontal gesture locked!
+        isSwiping = true;
+        if (activeTabEl) activeTabEl.classList.add('native-pager-dragging');
+      }
     }
+
+    if (!isSwiping) return;
+
+    // Schedule 60fps locked hardware-accelerated translation update
+    if (!rafId) {
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        if (!isSwiping || !activeTabEl) return;
+
+        const isRtl = document.documentElement.dir === 'rtl';
+        const currentIndex = SWIPE_TABS.indexOf(activeTabName);
+        let dragDelta = currentTouchX - touchStartX;
+
+        // Resistance rubber-banding at boundaries
+        const atLeftBoundary = (isRtl ? (currentIndex === SWIPE_TABS.length - 1) : (currentIndex === 0));
+        const atRightBoundary = (isRtl ? (currentIndex === 0) : (currentIndex === SWIPE_TABS.length - 1));
+
+        if ((dragDelta > 0 && atLeftBoundary) || (dragDelta < 0 && atRightBoundary)) {
+          dragDelta = dragDelta * 0.28; // Elastic resistance
+        }
+
+        // Apply 60fps GPU translation to current active view
+        activeTabEl.style.transform = `translate3d(${dragDelta}px, 0, 0)`;
+
+        // Identify adjacent peeking tab
+        let targetPeekingTab = null;
+        let peekingOffset = 0;
+
+        if (dragDelta < 0) {
+          // Swiping left -> next tab enters from right
+          const nextIdx = currentIndex + 1;
+          if (nextIdx < SWIPE_TABS.length) {
+            targetPeekingTab = SWIPE_TABS[nextIdx];
+            peekingOffset = screenWidth + dragDelta;
+          }
+        } else if (dragDelta > 0) {
+          // Swiping right -> prev tab enters from left
+          const prevIdx = currentIndex - 1;
+          if (prevIdx >= 0) {
+            targetPeekingTab = SWIPE_TABS[prevIdx];
+            peekingOffset = -screenWidth + dragDelta;
+          }
+        }
+
+        // Mount / translate peeking tab synchronously
+        if (targetPeekingTab !== peekingTabName) {
+          if (peekingTabEl) {
+            peekingTabEl.classList.remove('native-pager-peeking');
+            peekingTabEl.style.transform = '';
+            peekingTabEl.style.display = '';
+          }
+          peekingTabName = targetPeekingTab;
+          peekingTabEl = targetPeekingTab ? document.getElementById(`view-${targetPeekingTab}`) : null;
+          if (peekingTabEl) {
+            peekingTabEl.classList.add('native-pager-peeking');
+          }
+        }
+
+        if (peekingTabEl) {
+          peekingTabEl.style.transform = `translate3d(${peekingOffset}px, 0, 0)`;
+        }
+      });
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!isTracking) return;
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+
+    if (!isSwiping || !activeTabEl) {
+      cleanupSwipeState();
+      return;
+    }
+
+    const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : currentTouchX;
+    const deltaX = endX - touchStartX;
+    const elapsedMs = Math.max(1, performance.now() - touchStartTime);
+    const velocity = deltaX / elapsedMs; // px per millisecond
+    const isRtl = document.documentElement.dir === 'rtl';
+    const currentIndex = SWIPE_TABS.indexOf(activeTabName);
+
+    const thresholdDist = screenWidth * 0.22;
+    const isFastFlick = Math.abs(velocity) > 0.38;
+    const hasEnoughDistance = Math.abs(deltaX) > thresholdDist;
+
+    let targetTab = null;
+    let slideDir = null;
+
+    if (hasEnoughDistance || isFastFlick) {
+      if (deltaX < 0) {
+        // Dragged left
+        const nextIdx = currentIndex + 1;
+        if (nextIdx < SWIPE_TABS.length) {
+          targetTab = SWIPE_TABS[nextIdx];
+          slideDir = 'left';
+        }
+      } else if (deltaX > 0) {
+        // Dragged right
+        const prevIdx = currentIndex - 1;
+        if (prevIdx >= 0) {
+          targetTab = SWIPE_TABS[prevIdx];
+          slideDir = 'right';
+        }
+      }
+    }
+
+    if (targetTab && targetTab !== activeTabName) {
+      // 60fps Native Spring Snap Forward to Target Tab
+      triggerHaptic([20]);
+      activeTabEl.classList.add('native-pager-snapping');
+      if (peekingTabEl) peekingTabEl.classList.add('native-pager-snapping');
+
+      const targetX = deltaX < 0 ? -screenWidth : screenWidth;
+      activeTabEl.style.transform = `translate3d(${targetX}px, 0, 0)`;
+      if (peekingTabEl) peekingTabEl.style.transform = `translate3d(0, 0, 0)`;
+
+      setTimeout(() => {
+        cleanupSwipeState();
+        switchTab(targetTab, slideDir);
+      }, 260);
+    } else {
+      // Snap back to original tab with 60fps spring physics
+      activeTabEl.classList.add('native-pager-snapping');
+      if (peekingTabEl) peekingTabEl.classList.add('native-pager-snapping');
+
+      activeTabEl.style.transform = 'translate3d(0, 0, 0)';
+      if (peekingTabEl) {
+        const resetOffset = deltaX < 0 ? screenWidth : -screenWidth;
+        peekingTabEl.style.transform = `translate3d(${resetOffset}px, 0, 0)`;
+      }
+
+      setTimeout(() => {
+        cleanupSwipeState();
+      }, 260);
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchcancel', () => {
+    cleanupSwipeState();
   }, { passive: true });
 }
 window.initGlobalSwipeGestures = initGlobalSwipeGestures;

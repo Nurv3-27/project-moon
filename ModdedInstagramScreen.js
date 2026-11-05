@@ -78,6 +78,16 @@ const isAllowedUrl = (rawUrl) => {
  */
 const INJECTED_JAVASCRIPT = `
 (function() {
+  // 0. Spoof navigator properties to iOS Safari to bypass Instagram embedded-browser & bot blocking
+  try {
+    var SAFARI_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
+    Object.defineProperty(navigator, 'userAgent', { get: function() { return SAFARI_UA; }, configurable: true });
+    Object.defineProperty(navigator, 'appVersion', { get: function() { return "5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"; }, configurable: true });
+    Object.defineProperty(navigator, 'vendor', { get: function() { return "Apple Computer, Inc."; }, configurable: true });
+    Object.defineProperty(navigator, 'platform', { get: function() { return "iPhone"; }, configurable: true });
+    Object.defineProperty(navigator, 'maxTouchPoints', { get: function() { return 5; }, configurable: true });
+  } catch(e) {}
+
   var CSS_RULES = \`
     /* 1. Physically delete Instagram Bottom Navigation Bar */
     nav[role="navigation"],
@@ -510,6 +520,9 @@ export default function ModdedInstagramScreen({
           domStorageEnabled={true}
           thirdPartyCookiesEnabled={true}
           sharedCookiesEnabled={true}
+          originWhitelist={['*']}
+          allowsInlineMediaPlayback={true}
+          mediaPlaybackRequiresUserAction={false}
           allowsBackForwardNavigationGestures={false}
           setSupportMultipleWindows={false}
           onOpenWindow={(syntheticEvent) => {
@@ -528,7 +541,8 @@ export default function ModdedInstagramScreen({
               <Text style={styles.loadingText}>Securing Direct Messenger...</Text>
             </View>
           )}
-          userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 300.0.0"
+          userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+          applicationNameForUserAgent="Version/17.0 Mobile/15E148 Safari/604.1"
         />
       </View>
     </SafeAreaView>

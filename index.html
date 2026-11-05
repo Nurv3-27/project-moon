@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=61">
+  <link rel="stylesheet" href="style.css?v=62">
 </head>
 <body>
   <!-- ANIMATED INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
@@ -220,6 +220,128 @@
             <div class="stat-pill">
               <span class="stat-num" id="stat-total-volume">0</span>
               <span class="stat-label" id="stat-volume-unit">TOTAL KG &#9889;</span>
+            </div>
+          </div>
+
+          <!-- ========================================================================= -->
+          <!-- FUTURISTIC GOALS & TARGETS DASHBOARD (DEEP GLASSMORPHISM & GLOWING AURA) -->
+          <!-- ========================================================================= -->
+          <div class="futuristic-goals-section" id="workout-goals-hub">
+            <div class="goals-section-header">
+              <div class="goals-header-left">
+                <span class="goals-aura-icon">🎯</span>
+                <div>
+                  <h3 class="goals-section-title">Futuristic Goals &amp; Milestones</h3>
+                  <span class="goals-section-sub">Dynamic Target Tracking &bull; Adaptive Aura</span>
+                </div>
+              </div>
+              <button type="button" class="goals-config-btn" onclick="openGoalsConfigModal()" title="Configure your fitness goals">
+                <span>⚙️</span>
+                <span>Edit Targets</span>
+              </button>
+            </div>
+
+            <!-- Goals Grid Cards -->
+            <div class="goals-cards-grid">
+              <!-- Goal 1: Weekly Workouts Cadence -->
+              <div class="goal-card-futuristic" id="goal-card-workouts" data-goal-type="workouts">
+                <div class="goal-card-glass-glow"></div>
+                <div class="goal-card-top">
+                  <div class="goal-meta-left">
+                    <span class="goal-type-badge">SESSION CADENCE</span>
+                    <h4 class="goal-name">Weekly Workouts</h4>
+                  </div>
+                  <div class="goal-percentage-pill" id="goal-workouts-pct-badge">0%</div>
+                </div>
+
+                <div class="goal-progress-wrap">
+                  <div class="goal-progress-track">
+                    <div class="goal-progress-fill" id="goal-workouts-progress-bar" style="--goal-pct: 0%;">
+                      <div class="goal-shimmer-sweep"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="goal-card-bottom">
+                  <span class="goal-count-metric" id="goal-workouts-metric">0 / 4 Workouts</span>
+                  <span class="goal-status-note" id="goal-workouts-note">4 sessions remaining</span>
+                </div>
+              </div>
+
+              <!-- Goal 2: Weekly Tonnage / Volume Target -->
+              <div class="goal-card-futuristic" id="goal-card-volume" data-goal-type="volume">
+                <div class="goal-card-glass-glow"></div>
+                <div class="goal-card-top">
+                  <div class="goal-meta-left">
+                    <span class="goal-type-badge">IRON TONNAGE</span>
+                    <h4 class="goal-name">Weekly Volume</h4>
+                  </div>
+                  <div class="goal-percentage-pill" id="goal-volume-pct-badge">0%</div>
+                </div>
+
+                <div class="goal-progress-wrap">
+                  <div class="goal-progress-track">
+                    <div class="goal-progress-fill" id="goal-volume-progress-bar" style="--goal-pct: 0%;">
+                      <div class="goal-shimmer-sweep"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="goal-card-bottom">
+                  <span class="goal-count-metric" id="goal-volume-metric">0 / 20,000 kg</span>
+                  <span class="goal-status-note" id="goal-volume-note">Accumulating set volume</span>
+                </div>
+              </div>
+
+              <!-- Goal 3: Cosmic Moon Streak Milestone -->
+              <div class="goal-card-futuristic" id="goal-card-streak" data-goal-type="streak">
+                <div class="goal-card-glass-glow"></div>
+                <div class="goal-card-top">
+                  <div class="goal-meta-left">
+                    <span class="goal-type-badge">MOON ORBIT</span>
+                    <h4 class="goal-name">Cosmic Streak Milestone</h4>
+                  </div>
+                  <div class="goal-percentage-pill" id="goal-streak-pct-badge">0%</div>
+                </div>
+
+                <div class="goal-progress-wrap">
+                  <div class="goal-progress-track">
+                    <div class="goal-progress-fill cosmic-fill" id="goal-streak-progress-bar" style="--goal-pct: 0%;">
+                      <div class="goal-shimmer-sweep"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="goal-card-bottom">
+                  <span class="goal-count-metric" id="goal-streak-metric">0 / 10 Days</span>
+                  <span class="goal-status-note" id="goal-streak-note">Journeying to Maroon Moon</span>
+                </div>
+              </div>
+
+              <!-- Goal 4: Scroll Discipline Bank -->
+              <div class="goal-card-futuristic" id="goal-card-scroll" data-goal-type="scroll">
+                <div class="goal-card-glass-glow"></div>
+                <div class="goal-card-top">
+                  <div class="goal-meta-left">
+                    <span class="goal-type-badge">SCROLL DISCIPLINE</span>
+                    <h4 class="goal-name">Focus Bank Earned</h4>
+                  </div>
+                  <div class="goal-percentage-pill" id="goal-scroll-pct-badge">0%</div>
+                </div>
+
+                <div class="goal-progress-wrap">
+                  <div class="goal-progress-track">
+                    <div class="goal-progress-fill shield-fill" id="goal-scroll-progress-bar" style="--goal-pct: 0%;">
+                      <div class="goal-shimmer-sweep"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="goal-card-bottom">
+                  <span class="goal-count-metric" id="goal-scroll-metric">0 / 20 Min</span>
+                  <span class="goal-status-note" id="goal-scroll-note">Earned via push-ups &amp; sets</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -2620,6 +2742,73 @@
     </div>
   </div>
 
+  <!-- ==================== CONFIGURE FITNESS GOALS MODAL ==================== -->
+  <div id="modal-goals-config" class="modal-overlay hidden" onclick="if(event.target===this)closeGoalsConfigModal()">
+    <div class="modal-card futuristic-modal goals-config-card">
+      <div class="modal-header">
+        <div class="modal-header-left" style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.4rem;">🎯</span>
+          <div>
+            <h3>Configure Fitness Goals</h3>
+            <span class="admin-badge-sub">Adaptive targets &amp; glowing visual thresholds</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeGoalsConfigModal()">&times;</button>
+      </div>
+
+      <form id="form-goals-config" onsubmit="saveGoalsConfig(event)" class="goals-config-form">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="goal-input-workouts" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">WEEKLY WORKOUTS TARGET (SESSIONS/WK)</label>
+          <div class="stepper-input-wrap">
+            <button type="button" class="stepper-btn" onclick="adjustGoalInput('goal-input-workouts', -1, 1, 7)">&minus;</button>
+            <input type="number" id="goal-input-workouts" min="1" max="7" value="4" class="stepper-val-input" required>
+            <button type="button" class="stepper-btn" onclick="adjustGoalInput('goal-input-workouts', 1, 1, 7)">&plus;</button>
+          </div>
+          <span class="form-help-sub">Standard recommendation: 3 &ndash; 5 intense sessions per week.</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="goal-input-volume" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">WEEKLY TONNAGE TARGET (KG)</label>
+          <div class="stepper-input-wrap">
+            <button type="button" class="stepper-btn" onclick="adjustGoalInput('goal-input-volume', -2500, 1000, 200000)">&minus;</button>
+            <input type="number" id="goal-input-volume" min="1000" max="200000" step="500" value="20000" class="stepper-val-input" required>
+            <button type="button" class="stepper-btn" onclick="adjustGoalInput('goal-input-volume', 2500, 1000, 200000)">&plus;</button>
+          </div>
+          <span class="form-help-sub">Total combined weight lifted across all completed sets this week.</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="goal-input-streak" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">COSMIC STREAK MILESTONE (DAYS)</label>
+          <div class="stepper-input-wrap">
+            <button type="button" class="stepper-btn" onclick="adjustGoalInput('goal-input-streak', -1, 3, 30)">&minus;</button>
+            <input type="number" id="goal-input-streak" min="3" max="30" value="10" class="stepper-val-input" required>
+            <button type="button" class="stepper-btn" onclick="adjustGoalInput('goal-input-streak', 1, 3, 30)">&plus;</button>
+          </div>
+          <span class="form-help-sub">Consecutive daily streak required to land on the Maroon Moon.</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label" for="goal-input-scroll" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">DAILY FOCUS DISCIPLINE TARGET (MINUTES)</label>
+          <div class="stepper-input-wrap">
+            <button type="button" class="stepper-btn" onclick="adjustGoalInput('goal-input-scroll', -5, 5, 120)">&minus;</button>
+            <input type="number" id="goal-input-scroll" min="5" max="120" step="5" value="20" class="stepper-val-input" required>
+            <button type="button" class="stepper-btn" onclick="adjustGoalInput('goal-input-scroll', 5, 5, 120)">&plus;</button>
+          </div>
+          <span class="form-help-sub">Scroll time earned strictly by hitting push-ups or gym exercises.</span>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="submit" class="primary-glow-btn full-width">
+            <span>💾 Save Target Milestones</span>
+          </button>
+          <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="closeGoalsConfigModal()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ==================== PROTECTED ADMIN CITADEL DASHBOARD MODAL ==================== -->
   <div id="modal-admin-dashboard" class="modal-overlay hidden">
     <div class="modal-card admin-modal-card">
@@ -2640,11 +2829,11 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=61"></script>
-  <script src="auth.js?v=61"></script>
-  <script src="app.js?v=61"></script>
-  <script src="camera.js?v=61"></script>
-  <script src="ranks.js?v=61"></script>
+  <script src="i18n.js?v=62"></script>
+  <script src="auth.js?v=62"></script>
+  <script src="app.js?v=62"></script>
+  <script src="camera.js?v=62"></script>
+  <script src="ranks.js?v=62"></script>
 </body>
 </html>
 

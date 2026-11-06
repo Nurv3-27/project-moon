@@ -7524,32 +7524,39 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
    COSMIC PROGRESSION MAP: EARTH TO MAROON MOON (STREAK GAMIFICATION)
    ========================================================== */
 .streak-roadmap-card {
-  background: radial-gradient(circle at 50% 10%, rgba(224, 80, 106, 0.18), transparent 60%),
-              linear-gradient(180deg, #13070E 0%, #080306 100%);
-  border: 1.5px solid rgba(224, 80, 106, 0.35);
+  background: 
+    radial-gradient(circle at 50% 6%, rgba(255, 42, 85, 0.28) 0%, rgba(184, 12, 52, 0.12) 28%, transparent 60%),
+    radial-gradient(circle at 25% 28%, rgba(192, 132, 252, 0.22) 0%, rgba(126, 34, 206, 0.08) 25%, transparent 55%),
+    radial-gradient(circle at 75% 50%, rgba(56, 189, 248, 0.20) 0%, rgba(37, 99, 235, 0.08) 28%, transparent 58%),
+    radial-gradient(circle at 35% 72%, rgba(245, 158, 11, 0.18) 0%, rgba(180, 83, 9, 0.06) 24%, transparent 52%),
+    radial-gradient(circle at 50% 94%, rgba(56, 189, 248, 0.25) 0%, rgba(2, 132, 199, 0.08) 30%, transparent 60%),
+    linear-gradient(180deg, #12050c 0%, #0a0307 40%, #040205 100%);
+  border: 1.5px solid rgba(255, 77, 115, 0.35);
   border-radius: 24px;
   padding: 20px 16px 24px 16px;
   margin: 18px 0;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .streak-roadmap-card::before {
   content: '';
   position: absolute;
   top: -200px; left: 0; right: 0; bottom: -200px;
   background-image: 
-    radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
-    radial-gradient(1.5px 1.5px at 100px 80px, #fff, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 230px 140px, #ddd, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 320px 220px, #fff, rgba(0,0,0,0)),
-    radial-gradient(1.5px 1.5px at 70px 290px, #fbc85a, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 190px 370px, #e8566f, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 280px 450px, #fff, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 50px 520px, #7de3d0, rgba(0,0,0,0));
+    radial-gradient(1.2px 1.2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1.8px 1.8px at 100px 80px, #38bdf8, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 230px 140px, #fbcfe8, rgba(0,0,0,0)),
+    radial-gradient(2.2px 2.2px at 320px 220px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 70px 290px, #fde047, rgba(0,0,0,0)),
+    radial-gradient(1.2px 1.2px at 190px 370px, #fb7185, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 280px 450px, #c084fc, rgba(0,0,0,0)),
+    radial-gradient(1.2px 1.2px at 50px 520px, #38bdf8, rgba(0,0,0,0)),
+    radial-gradient(2.5px 2px at 150px 260px, rgba(255,255,255,0.7), transparent), /* micro-debris */
+    radial-gradient(3px 1.8px at 270px 610px, rgba(220,220,230,0.6), transparent); /* stardust fragment */
   background-repeat: repeat;
   background-size: 350px 600px;
-  opacity: 0.65;
+  opacity: 0.75;
   pointer-events: none;
   animation: cosmicStarscapeDrift 38s linear infinite;
   will-change: background-position;
@@ -7560,13 +7567,15 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background-image: 
-    radial-gradient(1.2px 1.2px at 60px 50px, rgba(255, 255, 255, 0.85), transparent),
-    radial-gradient(2px 2px at 160px 180px, rgba(255, 215, 0, 0.75), transparent),
-    radial-gradient(1.5px 1.5px at 290px 310px, rgba(224, 80, 106, 0.9), transparent),
-    radial-gradient(1.2px 1.2px at 110px 440px, rgba(0, 240, 255, 0.7), transparent);
+    radial-gradient(1.2px 1.2px at 60px 50px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(2px 2px at 160px 180px, rgba(253, 224, 71, 0.85), transparent),
+    radial-gradient(1.8px 1.8px at 290px 310px, rgba(244, 63, 94, 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 110px 440px, rgba(56, 189, 248, 0.8), transparent),
+    radial-gradient(2.2px 2.2px at 220px 520px, rgba(192, 132, 252, 0.85), transparent),
+    radial-gradient(2.8px 1.5px at 80px 140px, rgba(200,210,230,0.5), transparent); /* floating debris fragment */
   background-repeat: repeat;
   background-size: 400px 700px;
-  opacity: 0.45;
+  opacity: 0.6;
   pointer-events: none;
   animation: cosmicStarscapeParallaxLayer 60s linear infinite reverse;
   will-change: background-position;
@@ -7788,16 +7797,16 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
 
 /* Earth Planet Body (Bottom Station 0) */
 .earth-planet-body {
-  width: 74px;
-  height: 74px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #29B6F6 0%, #0288D1 50%, #01579B 100%);
-  box-shadow: 0 0 32px rgba(41, 182, 246, 0.7), inset -6px -6px 16px rgba(0, 0, 0, 0.75);
+  background: #000000;
+  box-shadow: 0 0 32px rgba(56, 189, 248, 0.85), 0 0 65px rgba(2, 132, 199, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  border: 2px solid rgba(147, 197, 253, 0.75);
+  border: 2px solid rgba(147, 197, 253, 0.9);
   overflow: hidden;
 }
 .earth-continent-swirl {
@@ -7809,7 +7818,7 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   width: 98px;
   height: 98px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #B8133E 0%, #4A0E1C 55%, #180308 100%);
+  background: #000000;
   box-shadow: 0 0 50px rgba(224, 80, 106, 0.9), 0 0 95px rgba(184, 12, 52, 0.5), inset -8px -8px 24px rgba(0, 0, 0, 0.92);
   display: flex;
   flex-direction: column;
@@ -7855,36 +7864,33 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
 
 /* Asteroid Rock Body with Heavy Impact & Crater Texturing */
 .asteroid-rock-body {
-  width: 62px;
-  height: 62px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  background: #000000 !important;
   font-weight: 900;
   font-size: 0.88rem;
   color: #FFF;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.85), inset -4px -4px 10px rgba(0, 0, 0, 0.8);
-  transition: all 0.25s;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.9);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
   overflow: hidden;
 }
-.asteroid-rock-body::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 60%);
-  pointer-events: none;
+.ast-textured-body {
+  background: #000000 !important;
+}
+.ast-textured-body .celestial-texture-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 0;
 }
 .ast-crater-num {
-  position: relative;
-  z-index: 3;
-  font-family: 'Space Grotesk', monospace;
-  font-weight: 800;
-  font-size: 0.85rem;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  display: none !important;
 }
 
 .celestial-node.completed .asteroid-rock-body {
@@ -7944,51 +7950,51 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   filter: grayscale(0.8);
 }
 
-/* Asteroid Color Palette with crater gradients */
+/* Asteroid Color Palette with glowing boundaries */
 .ast-color-ruby {
-  background: radial-gradient(circle at 35% 35%, #FF4D73, #B80C34, #3B0411);
+  border-color: rgba(251, 113, 133, 0.9) !important;
+  box-shadow: 0 0 24px rgba(225, 29, 72, 0.65), 0 0 45px rgba(225, 29, 72, 0.25) !important;
   color: #FFD4DC;
-  box-shadow: 0 0 18px rgba(255, 42, 85, 0.45);
 }
 .ast-color-amber {
-  background: radial-gradient(circle at 35% 35%, #FFB020, #D97706, #451A03);
+  border-color: rgba(251, 191, 36, 0.9) !important;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.65), 0 0 45px rgba(245, 158, 11, 0.25) !important;
   color: #FEF3C7;
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.45);
 }
 .ast-color-gold {
-  background: radial-gradient(circle at 35% 35%, #FDE047, #CA8A04, #422006);
+  border-color: rgba(250, 204, 21, 0.9) !important;
+  box-shadow: 0 0 24px rgba(234, 179, 8, 0.65), 0 0 45px rgba(234, 179, 8, 0.25) !important;
   color: #FEF9C3;
-  box-shadow: 0 0 18px rgba(234, 179, 8, 0.45);
 }
 .ast-color-emerald {
-  background: radial-gradient(circle at 35% 35%, #4ADE80, #16A34A, #052E16);
+  border-color: rgba(52, 211, 153, 0.9) !important;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.65), 0 0 45px rgba(16, 185, 129, 0.25) !important;
   color: #DCFCE7;
-  box-shadow: 0 0 18px rgba(34, 197, 94, 0.45);
 }
 .ast-color-cyan {
-  background: radial-gradient(circle at 35% 35%, #38BDF8, #0284C7, #082F49);
+  border-color: rgba(56, 189, 248, 0.9) !important;
+  box-shadow: 0 0 24px rgba(6, 182, 212, 0.65), 0 0 45px rgba(6, 182, 212, 0.25) !important;
   color: #E0F2FE;
-  box-shadow: 0 0 18px rgba(14, 165, 233, 0.45);
 }
 .ast-color-sapphire {
-  background: radial-gradient(circle at 35% 35%, #60A5FA, #2563EB, #172554);
+  border-color: rgba(96, 165, 250, 0.9) !important;
+  box-shadow: 0 0 24px rgba(37, 99, 235, 0.65), 0 0 45px rgba(37, 99, 235, 0.25) !important;
   color: #DBEAFE;
-  box-shadow: 0 0 18px rgba(59, 130, 246, 0.45);
 }
 .ast-color-amethyst {
-  background: radial-gradient(circle at 35% 35%, #C084FC, #7E22CE, #2E1065);
+  border-color: rgba(192, 132, 252, 0.9) !important;
+  box-shadow: 0 0 26px rgba(147, 51, 234, 0.65), 0 0 50px rgba(147, 51, 234, 0.25) !important;
   color: #F3E8FF;
-  box-shadow: 0 0 24px rgba(147, 51, 234, 0.55);
 }
 .ast-color-rose {
-  background: radial-gradient(circle at 35% 35%, #F472B6, #DB2777, #500724);
+  border-color: rgba(244, 114, 182, 0.9) !important;
+  box-shadow: 0 0 24px rgba(219, 39, 119, 0.65), 0 0 45px rgba(219, 39, 119, 0.25) !important;
   color: #FCE7F3;
-  box-shadow: 0 0 22px rgba(219, 39, 119, 0.5);
 }
 .ast-color-chrome {
-  background: radial-gradient(circle at 35% 35%, #E2E8F0, #64748B, #0F172A);
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 0 24px rgba(148, 163, 184, 0.65), 0 0 45px rgba(148, 163, 184, 0.25) !important;
   color: #F8FAFC;
-  box-shadow: 0 0 22px rgba(148, 163, 184, 0.5);
 }
 
 /* Node Label & Badges: Sits Comfortably and Clearly Below Each Asteroid */

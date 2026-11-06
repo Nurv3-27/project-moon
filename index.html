@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=69">
+  <link rel="stylesheet" href="style.css?v=70">
 </head>
 <body>
   <!-- ANIMATED THREE-STAGE INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
@@ -359,15 +359,28 @@
               <svg class="cosmic-orbit-track-svg" viewBox="0 0 360 880" preserveAspectRatio="none" aria-hidden="true">
                 <defs>
                   <linearGradient id="cosmicPathGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.5"/>
-                    <stop offset="35%" stop-color="#e2e8f0" stop-opacity="0.45"/>
-                    <stop offset="65%" stop-color="#fb7185" stop-opacity="0.5"/>
-                    <stop offset="85%" stop-color="#c084fc" stop-opacity="0.55"/>
-                    <stop offset="100%" stop-color="#e11d48" stop-opacity="0.75"/>
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85"/>
+                    <stop offset="20%" stop-color="#f59e0b" stop-opacity="0.8"/>
+                    <stop offset="40%" stop-color="#10b981" stop-opacity="0.8"/>
+                    <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.8"/>
+                    <stop offset="75%" stop-color="#c084fc" stop-opacity="0.85"/>
+                    <stop offset="90%" stop-color="#f43f5e" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#ff2a55" stop-opacity="1.0"/>
                   </linearGradient>
+                  <filter id="cosmicOrbitGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="4" result="blur"/>
+                    <feMerge>
+                      <feMergeNode in="blur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
                 </defs>
+                <!-- Glowing ambient trajectory beam -->
                 <path d="M 180 840 C 180 760, 290 730, 290 650 C 290 570, 180 540, 180 460 C 180 380, 70 350, 70 270 C 70 190, 180 150, 180 60"
-                      fill="none" stroke="url(#cosmicPathGrad)" stroke-width="3" stroke-dasharray="8 8" stroke-linecap="round"/>
+                      fill="none" stroke="url(#cosmicPathGrad)" stroke-width="5" stroke-opacity="0.35" filter="url(#cosmicOrbitGlow)" stroke-linecap="round"/>
+                <!-- High-contrast dotted orbital trajectory line -->
+                <path d="M 180 840 C 180 760, 290 730, 290 650 C 290 570, 180 540, 180 460 C 180 380, 70 350, 70 270 C 70 190, 180 150, 180 60"
+                      fill="none" stroke="url(#cosmicPathGrad)" stroke-width="3" stroke-dasharray="6 10" stroke-linecap="round"/>
               </svg>
 
               <div class="cosmic-nodes-track">
@@ -389,7 +402,6 @@
                   <div class="celestial-node" id="celestial-node-1" onclick="inspectAsteroidNode(1)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-ruby">
                       <img src="cosmic_ruby_asset.png" alt="Ruby Igniter" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">1</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Ruby Igniter</span>
@@ -403,7 +415,6 @@
                   <div class="celestial-node" id="celestial-node-2" onclick="inspectAsteroidNode(2)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-amber">
                       <img src="cosmic_amber_asset.png" alt="Amber Thruster" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">2</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Amber Thruster</span>
@@ -417,7 +428,6 @@
                   <div class="celestial-node" id="celestial-node-3" onclick="inspectAsteroidNode(3)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-gold">
                       <img src="cosmic_gold_asset.png" alt="Golden Sling" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">3</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Golden Sling</span>
@@ -431,7 +441,6 @@
                   <div class="celestial-node" id="celestial-node-4" onclick="inspectAsteroidNode(4)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-emerald">
                       <img src="cosmic_emerald_asset.png" alt="Emerald Belt" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">4</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Emerald Belt</span>
@@ -445,7 +454,6 @@
                   <div class="celestial-node" id="celestial-node-5" onclick="inspectAsteroidNode(5)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-cyan">
                       <img src="cosmic_cyan_asset.png" alt="Cyan Comet" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">5</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Cyan Comet</span>
@@ -459,7 +467,6 @@
                   <div class="celestial-node" id="celestial-node-6" onclick="inspectAsteroidNode(6)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-sapphire">
                       <img src="cosmic_sapphire_asset.png" alt="Cobalt Void" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">6</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Cobalt Void</span>
@@ -473,7 +480,6 @@
                   <div class="celestial-node" id="celestial-node-7" onclick="inspectAsteroidNode(7)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-amethyst">
                       <img src="cosmic_nebula_asset.png" alt="Nebula Crown" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">7</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title nebula-node-title">Nebula Crown</span>
@@ -487,7 +493,6 @@
                   <div class="celestial-node" id="celestial-node-8" onclick="inspectAsteroidNode(8)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-rose">
                       <img src="cosmic_rose_asset.png" alt="Rose Valkyrie" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">8</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title rose-node-title">Rose Valkyrie</span>
@@ -501,7 +506,6 @@
                   <div class="celestial-node" id="celestial-node-9" onclick="inspectAsteroidNode(9)">
                     <div class="asteroid-rock-body ast-textured-body ast-color-chrome">
                       <img src="cosmic_chrome_asset.png" alt="Chrome Sentinel" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="ast-crater-num">9</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title chrome-node-title">Chrome Sentinel</span>
@@ -3312,11 +3316,11 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=69"></script>
-  <script src="auth.js?v=69"></script>
-  <script src="app.js?v=69"></script>
-  <script src="camera.js?v=69"></script>
-  <script src="ranks.js?v=69"></script>
+  <script src="i18n.js?v=70"></script>
+  <script src="auth.js?v=70"></script>
+  <script src="app.js?v=70"></script>
+  <script src="camera.js?v=70"></script>
+  <script src="ranks.js?v=70"></script>
 </body>
 </html>
 

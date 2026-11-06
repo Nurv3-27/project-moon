@@ -221,9 +221,872 @@
   }
   window.setBodyGender = setBodyGender;
 
+  // ==========================================================================
+  // 1-REP MAX (1RM) CALCULATION & DYNAMIC MUSCLE RANKING SYSTEM
+  // ==========================================================================
+
+  // Tiered Ranking Brackets: Bronze -> Olympian
+  const ONE_REP_MAX_TIERS = [
+    {
+      id: 'bronze',
+      name: 'Bronze',
+      title: 'Bronze Contender',
+      color: '#cd7f32',
+      badgeClass: 'badge-tier-bronze',
+      glowColor: 'rgba(205, 127, 50, 0.75)',
+      icon: '🥉',
+      desc: 'Foundational baseline. Power curves developing.'
+    },
+    {
+      id: 'silver',
+      name: 'Silver',
+      title: 'Silver Athlete',
+      color: '#c9d1da',
+      badgeClass: 'badge-tier-silver',
+      glowColor: 'rgba(201, 209, 218, 0.8)',
+      icon: '🥈',
+      desc: 'Solid strength standard exceeding intermediate lifters.'
+    },
+    {
+      id: 'gold',
+      name: 'Gold',
+      title: 'Gold Vanguard',
+      color: '#ffd02e',
+      badgeClass: 'badge-tier-gold',
+      glowColor: 'rgba(255, 208, 46, 0.95)',
+      icon: '🥇',
+      desc: 'Advanced pound-for-pound dominance in the gym.'
+    },
+    {
+      id: 'platinum',
+      name: 'Platinum',
+      title: 'Platinum Elite',
+      color: '#38bdf8',
+      badgeClass: 'badge-tier-platinum',
+      glowColor: 'rgba(56, 189, 248, 0.95)',
+      icon: '💠',
+      desc: 'Elite tier strength & load capacity. Top 5% caliber.'
+    },
+    {
+      id: 'diamond',
+      name: 'Diamond',
+      title: 'Diamond Master',
+      color: '#818cf8',
+      badgeClass: 'badge-tier-diamond',
+      glowColor: 'rgba(129, 140, 248, 1)',
+      icon: '💎',
+      desc: 'Master tier. Apex neuromuscular recruitment & power.'
+    },
+    {
+      id: 'titan',
+      name: 'Titan',
+      title: 'Titan Colossus',
+      color: '#ff3b30',
+      badgeClass: 'badge-tier-titan',
+      glowColor: 'rgba(255, 59, 48, 1)',
+      icon: '🔥',
+      desc: 'Colossus status. Overwhelming kinetic drive shattering plateaus.'
+    },
+    {
+      id: 'olympian',
+      name: 'Olympian',
+      title: 'Olympian Pinnacle',
+      color: '#c084fc',
+      badgeClass: 'badge-tier-olympian',
+      glowColor: 'rgba(192, 132, 252, 1)',
+      icon: '⚡',
+      desc: 'Celestial realm of strength. Legendary divine power.'
+    }
+  ];
+
+  // Benchmark Exercises linked to Primary Muscle Groups
+  const ONE_REP_MAX_BENCHMARKS = {
+    chest: {
+      key: 'chest',
+      name: 'Chest',
+      icon: '🛡️',
+      defaultExercise: 'Incline Bench Press',
+      exercises: [
+        { name: 'Incline Bench Press', scale: 1.0 },
+        { name: 'Smith Machine Bench Press', scale: 1.05 },
+        { name: 'Barbell Bench Press', scale: 0.95 },
+        { name: 'Dumbbell Bench Press', scale: 1.05 },
+        { name: 'Weighted Chest Dips', scale: 1.1 }
+      ],
+      thresholds: {
+        bronze: 45,
+        silver: 65,
+        gold: 90,
+        platinum: 115,
+        diamond: 140,
+        titan: 165,
+        olympian: 190
+      }
+    },
+    legs: {
+      key: 'legs',
+      name: 'Legs',
+      icon: '🦵',
+      defaultExercise: 'Barbell Back Squat',
+      exercises: [
+        { name: 'Barbell Back Squat', scale: 1.0 },
+        { name: 'Smith Machine Squat', scale: 1.05 },
+        { name: 'Front Squat', scale: 1.15 },
+        { name: 'Leg Press', scale: 0.5 },
+        { name: 'Hack Squat', scale: 0.85 },
+        { name: 'Romanian Deadlift', scale: 1.05 }
+      ],
+      thresholds: {
+        bronze: 60,
+        silver: 95,
+        gold: 130,
+        platinum: 165,
+        diamond: 200,
+        titan: 240,
+        olympian: 280
+      }
+    },
+    back: {
+      key: 'back',
+      name: 'Back',
+      icon: '🦅',
+      defaultExercise: 'Barbell Deadlift',
+      exercises: [
+        { name: 'Barbell Deadlift', scale: 1.0 },
+        { name: 'Barbell Bent-Over Row', scale: 1.55 },
+        { name: 'Weighted Pull-ups', scale: 1.5 },
+        { name: 'Lat Pulldown', scale: 1.5 },
+        { name: 'Seated Cable Row', scale: 1.5 }
+      ],
+      thresholds: {
+        bronze: 70,
+        silver: 110,
+        gold: 155,
+        platinum: 200,
+        diamond: 245,
+        titan: 290,
+        olympian: 340
+      }
+    },
+    shoulders: {
+      key: 'shoulders',
+      name: 'Shoulders',
+      icon: '⚡',
+      defaultExercise: 'Overhead Shoulder Press',
+      exercises: [
+        { name: 'Overhead Shoulder Press', scale: 1.0 },
+        { name: 'Smith Machine Shoulder Press', scale: 1.05 },
+        { name: 'Dumbbell Shoulder Press', scale: 1.1 },
+        { name: 'Seated Barbell Overhead Press', scale: 0.98 },
+        { name: 'Arnold Press', scale: 1.15 }
+      ],
+      thresholds: {
+        bronze: 30,
+        silver: 47.5,
+        gold: 67.5,
+        platinum: 85,
+        diamond: 105,
+        titan: 122.5,
+        olympian: 140
+      }
+    },
+    arms: {
+      key: 'arms',
+      name: 'Arms',
+      icon: '🦾',
+      defaultExercise: 'Barbell Bicep Curl',
+      exercises: [
+        { name: 'Barbell Bicep Curl', scale: 1.0 },
+        { name: 'Close-Grip Bench Press', scale: 0.62 },
+        { name: 'Incline Dumbbell Curl', scale: 1.15 },
+        { name: 'Skull Crushers', scale: 0.8 },
+        { name: 'Tricep Rope Pushdown', scale: 1.2 }
+      ],
+      thresholds: {
+        bronze: 22.5,
+        silver: 35,
+        gold: 50,
+        platinum: 65,
+        diamond: 77.5,
+        titan: 90,
+        olympian: 105
+      }
+    },
+    core: {
+      key: 'core',
+      name: 'Core / Abs',
+      icon: '🎯',
+      defaultExercise: 'Weighted Cable Crunch',
+      exercises: [
+        { name: 'Weighted Cable Crunch', scale: 1.0 },
+        { name: 'Weighted Hanging Leg Raise', scale: 1.8 },
+        { name: 'Weighted Decline Sit-Up', scale: 1.35 }
+      ],
+      thresholds: {
+        bronze: 30,
+        silver: 50,
+        gold: 70,
+        platinum: 90,
+        diamond: 110,
+        titan: 130,
+        olympian: 150
+      }
+    }
+  };
+
+  const ANATOMY_TO_1RM_GROUP = {
+    chest: 'chest',
+    quads: 'legs',
+    hamstrings: 'legs',
+    glutes: 'legs',
+    calves: 'legs',
+    adductors: 'legs',
+    back: 'back',
+    lower_back: 'back',
+    traps: 'back',
+    mid_traps: 'back',
+    shoulders: 'shoulders',
+    neck: 'shoulders',
+    biceps: 'arms',
+    triceps: 'arms',
+    forearms: 'arms',
+    abs: 'core',
+    obliques: 'core'
+  };
+
+  // Utility 1RM calculation: Epley Equation
+  function calculate1RM(weight, reps) {
+    const w = Math.max(0, Number(weight) || 0);
+    const r = Math.max(0, Number(reps) || 0);
+    if (w <= 0 || r <= 0) {
+      return { oneRepMax: 0, epley: 0, brzycki: 0, weight: w, reps: r };
+    }
+    if (r === 1) {
+      return { oneRepMax: w, epley: w, brzycki: w, weight: w, reps: 1 };
+    }
+    // Epley Formula: Weight * (1 + Reps / 30)
+    const epley = w * (1 + (r / 30));
+    // Brzycki Formula: Weight * (36 / (37 - Reps))
+    const brzycki = r < 37 ? w * (36 / (37 - r)) : epley;
+
+    const rounded = Math.round(epley * 10) / 10;
+    return {
+      oneRepMax: rounded,
+      epley: rounded,
+      brzycki: Math.round(brzycki * 10) / 10,
+      weight: w,
+      reps: r
+    };
+  }
+
+  function getMuscle1RMTier(muscleKey, weight, reps, exerciseName) {
+    const group = ONE_REP_MAX_BENCHMARKS[muscleKey] || ONE_REP_MAX_BENCHMARKS.chest;
+    const isLbs = (window.AppState && AppState.settings && AppState.settings.unit === 'lbs');
+    
+    const exObj = group.exercises.find(e => e.name.toLowerCase() === (exerciseName || '').toLowerCase()) || group.exercises[0];
+    const scale = exObj ? exObj.scale : 1.0;
+
+    const { oneRepMax } = calculate1RM(weight, reps);
+    const oneRepMaxKg = isLbs ? (oneRepMax * 0.453592) : oneRepMax;
+    const normalized1RMKg = oneRepMaxKg * scale;
+
+    const th = group.thresholds;
+    const tierList = ONE_REP_MAX_TIERS;
+
+    let currentTier = null;
+    let nextTier = null;
+    let pct = 0;
+    let weightToNextKg = 0;
+
+    if (normalized1RMKg < th.bronze) {
+      currentTier = {
+        id: 'unranked',
+        name: 'Unranked',
+        title: 'Road to Bronze',
+        color: '#71717a',
+        badgeClass: 'badge-tier-unranked',
+        glowColor: 'rgba(113, 113, 122, 0.5)',
+        icon: '🛡️',
+        desc: 'Keep logging lifts to breach the Bronze threshold.'
+      };
+      nextTier = tierList[0];
+      pct = Math.min(100, Math.max(0, (normalized1RMKg / th.bronze) * 100));
+      weightToNextKg = Math.max(0, (th.bronze - normalized1RMKg) / scale);
+    } else {
+      for (let i = tierList.length - 1; i >= 0; i--) {
+        const t = tierList[i];
+        if (normalized1RMKg >= th[t.id]) {
+          currentTier = t;
+          nextTier = tierList[i + 1] || null;
+          if (nextTier) {
+            const curTh = th[t.id];
+            const nextTh = th[nextTier.id];
+            pct = Math.min(100, Math.max(0, ((normalized1RMKg - curTh) / (nextTh - curTh)) * 100));
+            weightToNextKg = Math.max(0, (nextTh - normalized1RMKg) / scale);
+          } else {
+            pct = 100;
+            weightToNextKg = 0;
+          }
+          break;
+        }
+      }
+    }
+
+    const weightToNext = isLbs ? Math.round(weightToNextKg * 2.20462 * 10) / 10 : Math.round(weightToNextKg * 10) / 10;
+    const nextTierWeight = nextTier ? (isLbs ? Math.round((th[nextTier.id] / scale) * 2.20462) : Math.round(th[nextTier.id] / scale)) : null;
+
+    return {
+      currentTier,
+      nextTier,
+      pct: Math.round(pct),
+      oneRepMax,
+      oneRepMaxKg: Math.round(oneRepMaxKg * 10) / 10,
+      weightToNext,
+      nextTierWeight,
+      exercise: exObj.name,
+      scale,
+      unit: isLbs ? 'lbs' : 'kg'
+    };
+  }
+
+  // Active state
+  let active1RMMuscle = 'chest';
+  let active1RMExercise = 'Incline Bench Press';
+  let active1RMWeight = 70;
+  let active1RMReps = 6;
+  let onermStateInitialized = false;
+
+  function ensure1RMState() {
+    if (!window.AppState) return;
+    if (!AppState.muscleRanks1RM) {
+      AppState.muscleRanks1RM = {
+        chest: { exercise: 'Incline Bench Press', weight: 70, reps: 6, oneRepMax: 84, tier: 'silver', date: new Date().toISOString() },
+        legs: { exercise: 'Barbell Back Squat', weight: 110, reps: 5, oneRepMax: 128, tier: 'silver', date: new Date().toISOString() },
+        back: { exercise: 'Barbell Deadlift', weight: 140, reps: 5, oneRepMax: 163, tier: 'gold', date: new Date().toISOString() },
+        shoulders: { exercise: 'Overhead Shoulder Press', weight: 55, reps: 6, oneRepMax: 66, tier: 'silver', date: new Date().toISOString() },
+        arms: { exercise: 'Barbell Bicep Curl', weight: 35, reps: 8, oneRepMax: 44, tier: 'silver', date: new Date().toISOString() },
+        core: { exercise: 'Weighted Cable Crunch', weight: 55, reps: 10, oneRepMax: 73, tier: 'gold', date: new Date().toISOString() }
+      };
+    }
+    if (!onermStateInitialized) {
+      const saved = AppState.muscleRanks1RM[active1RMMuscle];
+      if (saved) {
+        active1RMExercise = saved.exercise || 'Incline Bench Press';
+        active1RMWeight = saved.weight || 70;
+        active1RMReps = saved.reps || 6;
+      }
+      onermStateInitialized = true;
+    }
+  }
+
+  function render1RMCalculatorStation() {
+    const container = document.getElementById('ranks-1rm-calculator-container');
+    if (!container) return;
+
+    ensure1RMState();
+    const unit = (window.AppState && AppState.settings && AppState.settings.unit) || 'kg';
+    const unitUpper = unit.toUpperCase();
+    const group = ONE_REP_MAX_BENCHMARKS[active1RMMuscle] || ONE_REP_MAX_BENCHMARKS.chest;
+    
+    // Calculate tier info for current active inputs
+    const tierInfo = getMuscle1RMTier(active1RMMuscle, active1RMWeight, active1RMReps, active1RMExercise);
+    const curTier = tierInfo.currentTier;
+    const nextTier = tierInfo.nextTier;
+    const isMaxTier = !nextTier || curTier.id === 'olympian';
+
+    // Check if user has an existing PR for this exercise
+    const currentPR = (window.AppState && AppState.prs) ? AppState.prs[active1RMExercise] : null;
+
+    // Reps Presets: 1, 3, 5, 6, 8, 10, 12
+    const repPresets = [1, 3, 5, 6, 8, 10, 12];
+
+    // Muscle tabs list
+    const muscleKeys = ['chest', 'legs', 'back', 'shoulders', 'arms', 'core'];
+
+    container.innerHTML = `
+      <div class="onerm-station-card">
+        <div class="onerm-card-header">
+          <div class="onerm-header-left">
+            <span class="onerm-eyebrow">1-REP MAX (1RM) STRENGTH BENCHMARK</span>
+            <h2 class="onerm-title">Theoretical Max &amp; Muscle Ranks</h2>
+          </div>
+          <div class="onerm-formula-badge" title="Epley Equation: 1RM = Weight × (1 + Reps/30)">
+            <span class="ofb-dot"></span>
+            <span>EPLEY 1RM FORMULA</span>
+          </div>
+        </div>
+
+        <!-- Muscle Group Filter Tabs -->
+        <div class="onerm-muscle-tabs-bar" role="tablist" aria-label="Target Muscle Group">
+          ${muscleKeys.map(k => {
+            const m = ONE_REP_MAX_BENCHMARKS[k];
+            const saved = (window.AppState && AppState.muscleRanks1RM && AppState.muscleRanks1RM[k]) || null;
+            const tId = saved ? saved.tier : 'unranked';
+            const tObj = ONE_REP_MAX_TIERS.find(t => t.id === tId) || { icon: '○', color: '#71717a' };
+            const isActive = k === active1RMMuscle;
+            return `
+              <button type="button" 
+                      class="onerm-tab-btn ${isActive ? 'active' : ''}" 
+                      onclick="select1RMMuscle('${k}')"
+                      data-muscle="${k}">
+                <span class="otb-icon">${m.icon}</span>
+                <span class="otb-name">${m.name}</span>
+                <span class="otb-tier-dot" style="background:${tObj.color};box-shadow:0 0 6px ${tObj.color}"></span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Main Calculator Box -->
+        <div class="onerm-calc-body">
+          <!-- Benchmark Exercise Selector Row -->
+          <div class="onerm-ex-selector-row">
+            <div class="onerm-field-group" style="flex:1;">
+              <label class="onerm-label">BENCHMARK EXERCISE FOR ${group.name.toUpperCase()}</label>
+              <div class="onerm-select-wrapper">
+                <select id="onerm-exercise-select" class="ios-select onerm-select-menu" onchange="select1RMExercise(this.value)">
+                  ${group.exercises.map(e => `
+                    <option value="${e.name}" ${e.name === active1RMExercise ? 'selected' : ''}>
+                      ${e.name} ${e.scale === 1.0 ? '★ (Benchmark)' : `(Scale ${e.scale}x)`}
+                    </option>
+                  `).join('')}
+                </select>
+              </div>
+            </div>
+            ${currentPR ? `
+              <button type="button" class="onerm-pr-autofill-btn" onclick="loadPRForActive1RM()" title="Auto-fill your logged PR: ${currentPR.weight}${unit} × ${currentPR.reps}">
+                <span class="pr-bolt">⚡</span>
+                <span>Load PR: <strong>${currentPR.weight}${unit} × ${currentPR.reps}</strong></span>
+              </button>
+            ` : ''}
+          </div>
+
+          <!-- Weight & Reps Inputs Row -->
+          <div class="onerm-inputs-dual-grid">
+            <!-- Weight Control Box -->
+            <div class="onerm-input-card">
+              <div class="onerm-input-header">
+                <span class="onerm-input-label">WEIGHT LIFTED</span>
+                <span class="onerm-unit-tag">${unitUpper}</span>
+              </div>
+              <div class="onerm-stepper-row">
+                <button type="button" class="onerm-step-btn" onclick="adjust1RMWeight(-5)" title="-5 ${unitUpper}">-5</button>
+                <button type="button" class="onerm-step-btn" onclick="adjust1RMWeight(-2.5)" title="-2.5 ${unitUpper}">-2.5</button>
+                <input type="number" 
+                       id="onerm-input-weight" 
+                       class="onerm-numeric-input" 
+                       value="${active1RMWeight}" 
+                       min="1" 
+                       max="500" 
+                       step="0.5" 
+                       oninput="on1RMWeightChange(this.value)"
+                       aria-label="Weight Lifted">
+                <button type="button" class="onerm-step-btn" onclick="adjust1RMWeight(2.5)" title="+2.5 ${unitUpper}">+2.5</button>
+                <button type="button" class="onerm-step-btn" onclick="adjust1RMWeight(5)" title="+5 ${unitUpper}">+5</button>
+              </div>
+            </div>
+
+            <!-- Reps Control Box -->
+            <div class="onerm-input-card">
+              <div class="onerm-input-header">
+                <span class="onerm-input-label">REPETITIONS</span>
+                <span class="onerm-unit-tag">REPS</span>
+              </div>
+              <div class="onerm-stepper-row">
+                <button type="button" class="onerm-step-btn" onclick="adjust1RMReps(-1)" title="-1 Rep">-1</button>
+                <input type="number" 
+                       id="onerm-input-reps" 
+                       class="onerm-numeric-input" 
+                       value="${active1RMReps}" 
+                       min="1" 
+                       max="30" 
+                       step="1" 
+                       oninput="on1RMRepsChange(this.value)"
+                       aria-label="Repetitions">
+                <button type="button" class="onerm-step-btn" onclick="adjust1RMReps(1)" title="+1 Rep">+1</button>
+              </div>
+              <!-- Quick Preset Rep Pills -->
+              <div class="onerm-rep-pills-row">
+                ${repPresets.map(r => `
+                  <button type="button" 
+                          class="onerm-rep-pill ${active1RMReps === r ? 'active' : ''}" 
+                          onclick="set1RMPresetReps(${r})">
+                    ${r === 1 ? '1RM' : r}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Real-Time Calculation & Glowing Achieved Rank Badge Showcase -->
+          <div class="onerm-results-showcase">
+            <div class="onerm-result-stats-col">
+              <div class="onerm-stat-meta-label">THEORETICAL 1-REP MAX (1RM)</div>
+              <div class="onerm-stat-value-group">
+                <span class="onerm-big-number mono" id="onerm-display-val">${tierInfo.oneRepMax}</span>
+                <span class="onerm-big-unit">${unitUpper}</span>
+              </div>
+              <div class="onerm-equation-callout">
+                <span>Epley Formula:</span>
+                <code class="mono">${active1RMWeight} × (1 + ${active1RMReps}/30) = ${tierInfo.oneRepMax} ${unitUpper}</code>
+              </div>
+            </div>
+
+            <div class="onerm-result-badge-col">
+              <div class="onerm-stat-meta-label">ACHIEVED MUSCLE RANK</div>
+              <!-- High-Fidelity Glowing Badge -->
+              <div class="onerm-rank-badge ${curTier.badgeClass}" id="onerm-achieved-badge" style="--tier-color:${curTier.color}">
+                <span class="orb-icon">${curTier.icon}</span>
+                <div class="orb-content">
+                  <span class="orb-tier-name">${curTier.name.toUpperCase()}</span>
+                  <span class="orb-tier-title">${curTier.title || 'Athletic Rank'}</span>
+                </div>
+              </div>
+              <p class="orb-tier-desc">${curTier.desc || ''}</p>
+            </div>
+          </div>
+
+          <!-- Tier Progression Bar -->
+          <div class="onerm-tier-progression-wrap">
+            <div class="onerm-prog-info">
+              <span>
+                ${isMaxTier 
+                  ? '🌟 Olympian Pinnacle Reached — Godlike Strength' 
+                  : `Progress to <strong>${nextTier.name.toUpperCase()}</strong> (${tierInfo.nextTierWeight} ${unitUpper})`}
+              </span>
+              <span class="mono">${tierInfo.pct}%</span>
+            </div>
+            <div class="onerm-prog-bar-frame">
+              <div class="onerm-prog-bar-fill ${curTier.badgeClass}" style="width:${tierInfo.pct}%;background:${curTier.color}"></div>
+            </div>
+            ${!isMaxTier ? `
+              <div class="onerm-delta-callout">
+                <span>⚡ Lift Target:</span>
+                <span>Add <strong>+${tierInfo.weightToNext} ${unitUpper}</strong> to theoretical 1RM to unlock <strong>${nextTier.name}</strong>.</span>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Save Rank Action Bar -->
+          <div class="onerm-actions-bar">
+            <button type="button" class="onerm-save-rank-btn primary-glow-btn" onclick="saveCurrent1RMRank()">
+              <span>🏆 Save &amp; Lock Rank for ${group.name}</span>
+            </button>
+            <button type="button" class="onerm-toggle-reps-table-btn" onclick="toggle1RMRepTable()">
+              <span>📊 Reps Table</span>
+            </button>
+          </div>
+
+          <!-- Expandable Rep Max Reference Table -->
+          <div id="onerm-rep-table-drawer" class="onerm-rep-table-drawer hidden">
+            <div class="onerm-rep-table-grid">
+              ${[
+                { reps: 1, pct: 1.0, label: '100% (1RM)' },
+                { reps: 2, pct: 0.95, label: '95% (2RM)' },
+                { reps: 3, pct: 0.93, label: '93% (3RM)' },
+                { reps: 5, pct: 0.87, label: '87% (5RM)' },
+                { reps: 8, pct: 0.80, label: '80% (8RM)' },
+                { reps: 10, pct: 0.75, label: '75% (10RM)' },
+                { reps: 12, pct: 0.70, label: '70% (12RM)' }
+              ].map(row => {
+                const est = Math.round(tierInfo.oneRepMax * row.pct * 10) / 10;
+                return `
+                  <div class="onerm-table-cell">
+                    <span class="otc-reps">${row.reps} Rep${row.reps > 1 ? 's' : ''}</span>
+                    <span class="otc-weight mono">${est} ${unitUpper}</span>
+                    <span class="otc-pct">${row.label}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Targeted Muscle Groups Ranks Grid -->
+        <div class="onerm-matrix-section">
+          <div class="onerm-matrix-header">
+            <h3 class="onerm-matrix-heading">Targeted Muscle Groups 1RM Ranks</h3>
+            <span class="onerm-matrix-sub">Tap any muscle group below to load its benchmark lift</span>
+          </div>
+          <div class="onerm-matrix-grid">
+            ${muscleKeys.map(k => {
+              const m = ONE_REP_MAX_BENCHMARKS[k];
+              const saved = (window.AppState && AppState.muscleRanks1RM && AppState.muscleRanks1RM[k]) || null;
+              let display1RM = 0;
+              let displayTier = null;
+              let displayExercise = m.defaultExercise;
+
+              if (saved) {
+                display1RM = saved.oneRepMax || 0;
+                displayExercise = saved.exercise || m.defaultExercise;
+                displayTier = ONE_REP_MAX_TIERS.find(t => t.id === saved.tier) || null;
+              } else {
+                const pr = (window.AppState && AppState.prs) ? AppState.prs[m.defaultExercise] : null;
+                const w = pr ? pr.weight : (m.thresholds.bronze + 10);
+                const r = pr ? pr.reps : 6;
+                const info = getMuscle1RMTier(k, w, r, m.defaultExercise);
+                display1RM = info.oneRepMax;
+                displayTier = info.currentTier;
+              }
+
+              if (!displayTier) {
+                displayTier = ONE_REP_MAX_TIERS[0];
+              }
+
+              const isSelected = k === active1RMMuscle;
+
+              return `
+                <div class="onerm-matrix-card ${isSelected ? 'selected' : ''}" 
+                     onclick="select1RMMuscle('${k}')"
+                     style="--card-tier-color:${displayTier.color}">
+                  <div class="omc-top">
+                    <div class="omc-muscle-title">
+                      <span class="omc-icon">${m.icon}</span>
+                      <span class="omc-name">${m.name}</span>
+                    </div>
+                    <!-- Achieved glowing badge -->
+                    <div class="onerm-mini-badge ${displayTier.badgeClass}">
+                      <span>${displayTier.icon}</span>
+                      <span>${displayTier.name.toUpperCase()}</span>
+                    </div>
+                  </div>
+                  <div class="omc-exercise-name">${displayExercise}</div>
+                  <div class="omc-bottom">
+                    <div class="omc-1rm-val">
+                      <span class="mono">${display1RM}</span>
+                      <span class="omc-unit">${unitUpper} 1RM</span>
+                    </div>
+                    <span class="omc-chevron">&rarr;</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function on1RMWeightChange(val) {
+    active1RMWeight = Math.max(1, Number(val) || 0);
+    update1RMLiveCalculation();
+  }
+  window.on1RMWeightChange = on1RMWeightChange;
+
+  function on1RMRepsChange(val) {
+    active1RMReps = Math.max(1, Math.min(30, Number(val) || 0));
+    update1RMLiveCalculation();
+  }
+  window.on1RMRepsChange = on1RMRepsChange;
+
+  function adjust1RMWeight(delta) {
+    active1RMWeight = Math.max(1, Math.round((active1RMWeight + delta) * 10) / 10);
+    const input = document.getElementById('onerm-input-weight');
+    if (input) input.value = active1RMWeight;
+    update1RMLiveCalculation();
+    if (typeof triggerHaptic === 'function') triggerHaptic([15]);
+  }
+  window.adjust1RMWeight = adjust1RMWeight;
+
+  function adjust1RMReps(delta) {
+    active1RMReps = Math.max(1, Math.min(30, active1RMReps + delta));
+    const input = document.getElementById('onerm-input-reps');
+    if (input) input.value = active1RMReps;
+    update1RMLiveCalculation();
+    if (typeof triggerHaptic === 'function') triggerHaptic([15]);
+  }
+  window.adjust1RMReps = adjust1RMReps;
+
+  function set1RMPresetReps(reps) {
+    active1RMReps = Number(reps) || 1;
+    const input = document.getElementById('onerm-input-reps');
+    if (input) input.value = active1RMReps;
+    document.querySelectorAll('.onerm-rep-pill').forEach(btn => {
+      btn.classList.toggle('active', Number(btn.textContent.trim().replace('1RM', '1')) === active1RMReps);
+    });
+    update1RMLiveCalculation();
+    if (typeof triggerHaptic === 'function') triggerHaptic([20]);
+  }
+  window.set1RMPresetReps = set1RMPresetReps;
+
+  function select1RMMuscle(muscleKey, recomputeDefaults = true) {
+    active1RMMuscle = muscleKey;
+    const group = ONE_REP_MAX_BENCHMARKS[muscleKey] || ONE_REP_MAX_BENCHMARKS.chest;
+    
+    if (recomputeDefaults) {
+      const saved = (window.AppState && AppState.muscleRanks1RM && AppState.muscleRanks1RM[muscleKey]) || null;
+      if (saved) {
+        active1RMExercise = saved.exercise || group.defaultExercise;
+        active1RMWeight = saved.weight || 70;
+        active1RMReps = saved.reps || 6;
+      } else {
+        active1RMExercise = group.defaultExercise;
+        const pr = (window.AppState && AppState.prs) ? AppState.prs[group.defaultExercise] : null;
+        if (pr) {
+          active1RMWeight = pr.weight;
+          active1RMReps = pr.reps;
+        } else {
+          const unit = (window.AppState && AppState.settings && AppState.settings.unit) || 'kg';
+          active1RMWeight = unit === 'lbs' ? Math.round(group.thresholds.bronze * 2.20462) : group.thresholds.bronze;
+          active1RMReps = 6;
+        }
+      }
+    }
+
+    render1RMCalculatorStation();
+    if (typeof triggerHaptic === 'function') triggerHaptic([25]);
+  }
+  window.select1RMMuscle = select1RMMuscle;
+
+  function select1RMExercise(exerciseName) {
+    active1RMExercise = exerciseName;
+    const pr = (window.AppState && AppState.prs) ? AppState.prs[exerciseName] : null;
+    if (pr) {
+      active1RMWeight = pr.weight;
+      active1RMReps = pr.reps;
+      if (typeof showToast === 'function') {
+        showToast(`Loaded PR for ${exerciseName}: ${pr.weight}kg × ${pr.reps} reps`);
+      }
+    }
+    render1RMCalculatorStation();
+    if (typeof triggerHaptic === 'function') triggerHaptic([20]);
+  }
+  window.select1RMExercise = select1RMExercise;
+
+  function loadPRForActive1RM() {
+    const pr = (window.AppState && AppState.prs) ? AppState.prs[active1RMExercise] : null;
+    if (pr) {
+      active1RMWeight = pr.weight;
+      active1RMReps = pr.reps;
+      const wInput = document.getElementById('onerm-input-weight');
+      const rInput = document.getElementById('onerm-input-reps');
+      if (wInput) wInput.value = pr.weight;
+      if (rInput) rInput.value = pr.reps;
+      update1RMLiveCalculation();
+      if (typeof triggerHaptic === 'function') triggerHaptic([35]);
+      if (typeof showToast === 'function') {
+        const u = (window.AppState && AppState.settings && AppState.settings.unit) || 'kg';
+        showToast(`⚡ Loaded PR: ${pr.weight}${u} × ${pr.reps} reps`);
+      }
+    }
+  }
+  window.loadPRForActive1RM = loadPRForActive1RM;
+
+  function toggle1RMRepTable() {
+    const drawer = document.getElementById('onerm-rep-table-drawer');
+    if (drawer) {
+      drawer.classList.toggle('hidden');
+      if (typeof triggerHaptic === 'function') triggerHaptic([20]);
+    }
+  }
+  window.toggle1RMRepTable = toggle1RMRepTable;
+
+  function update1RMLiveCalculation() {
+    const unit = (window.AppState && AppState.settings && AppState.settings.unit) || 'kg';
+    const unitUpper = unit.toUpperCase();
+    const info = getMuscle1RMTier(active1RMMuscle, active1RMWeight, active1RMReps, active1RMExercise);
+    const curTier = info.currentTier;
+    const nextTier = info.nextTier;
+    const isMaxTier = !nextTier || curTier.id === 'olympian';
+
+    const numEl = document.getElementById('onerm-display-val');
+    if (numEl) numEl.textContent = info.oneRepMax;
+
+    const eqEl = document.querySelector('.onerm-equation-callout code');
+    if (eqEl) {
+      eqEl.textContent = `${active1RMWeight} × (1 + ${active1RMReps}/30) = ${info.oneRepMax} ${unitUpper}`;
+    }
+
+    const badgeEl = document.getElementById('onerm-achieved-badge');
+    if (badgeEl) {
+      badgeEl.className = `onerm-rank-badge ${curTier.badgeClass}`;
+      badgeEl.style.setProperty('--tier-color', curTier.color);
+      badgeEl.innerHTML = `
+        <span class="orb-icon">${curTier.icon}</span>
+        <div class="orb-content">
+          <span class="orb-tier-name">${curTier.name.toUpperCase()}</span>
+          <span class="orb-tier-title">${curTier.title || 'Athletic Rank'}</span>
+        </div>
+      `;
+    }
+
+    const descEl = document.querySelector('.orb-tier-desc');
+    if (descEl) descEl.textContent = curTier.desc || '';
+
+    const progInfo = document.querySelector('.onerm-prog-info');
+    if (progInfo) {
+      progInfo.innerHTML = `
+        <span>
+          ${isMaxTier 
+            ? '🌟 Olympian Pinnacle Reached — Godlike Strength' 
+            : `Progress to <strong>${nextTier.name.toUpperCase()}</strong> (${info.nextTierWeight} ${unitUpper})`}
+        </span>
+        <span class="mono">${info.pct}%</span>
+      `;
+    }
+    const progFill = document.querySelector('.onerm-prog-bar-fill');
+    if (progFill) {
+      progFill.className = `onerm-prog-bar-fill ${curTier.badgeClass}`;
+      progFill.style.width = `${info.pct}%`;
+      progFill.style.background = curTier.color;
+    }
+
+    const deltaEl = document.querySelector('.onerm-delta-callout');
+    if (deltaEl) {
+      if (!isMaxTier) {
+        deltaEl.style.display = 'flex';
+        deltaEl.innerHTML = `
+          <span>⚡ Lift Target:</span>
+          <span>Add <strong>+${info.weightToNext} ${unitUpper}</strong> to theoretical 1RM to unlock <strong>${nextTier.name}</strong>.</span>
+        `;
+      } else {
+        deltaEl.style.display = 'none';
+      }
+    }
+
+    document.querySelectorAll('.onerm-rep-pill').forEach(btn => {
+      const r = Number(btn.textContent.trim().replace('1RM', '1'));
+      btn.classList.toggle('active', r === active1RMReps);
+    });
+  }
+  window.update1RMLiveCalculation = update1RMLiveCalculation;
+
+  function saveCurrent1RMRank() {
+    if (!window.AppState) return;
+    if (!AppState.muscleRanks1RM) AppState.muscleRanks1RM = {};
+    
+    const info = getMuscle1RMTier(active1RMMuscle, active1RMWeight, active1RMReps, active1RMExercise);
+    AppState.muscleRanks1RM[active1RMMuscle] = {
+      exercise: active1RMExercise,
+      weight: active1RMWeight,
+      reps: active1RMReps,
+      oneRepMax: info.oneRepMax,
+      tier: info.currentTier.id,
+      tierName: info.currentTier.name,
+      date: new Date().toISOString()
+    };
+    
+    if (typeof saveState === 'function') saveState();
+    if (typeof triggerHaptic === 'function') triggerHaptic([40, 60, 40]);
+    if (typeof showToast === 'function') {
+      showToast(`🏆 ${ONE_REP_MAX_BENCHMARKS[active1RMMuscle].name} 1RM saved: ${info.oneRepMax} ${info.unit.toUpperCase()} (${info.currentTier.name})!`);
+    }
+
+    render1RMCalculatorStation();
+    if (typeof renderRanks === 'function') renderRanks();
+  }
+  window.saveCurrent1RMRank = saveCurrent1RMRank;
+
+  window.calculate1RM = calculate1RM;
+  window.getMuscle1RMTier = getMuscle1RMTier;
+  window.ONE_REP_MAX_TIERS = ONE_REP_MAX_TIERS;
+  window.ONE_REP_MAX_BENCHMARKS = ONE_REP_MAX_BENCHMARKS;
+  window.render1RMCalculatorStation = render1RMCalculatorStation;
+
   window.renderRanks = function () {
     const root = document.getElementById('ranks-body');
     if (!root) return;
+    render1RMCalculatorStation();
     const { pts, src } = compute();
     const avgPts = overall(pts);
     const ov = tierFor(avgPts);
@@ -406,11 +1269,24 @@
     } else if (FRONT_ONLY.includes(m) && currentView === 'back') {
       setAnatomyView('front');
     }
+    const target1RM = ANATOMY_TO_1RM_GROUP[m];
+    if (target1RM && target1RM !== active1RMMuscle) {
+      active1RMMuscle = target1RM;
+      const group = ONE_REP_MAX_BENCHMARKS[target1RM];
+      active1RMExercise = group.defaultExercise;
+      const saved = (window.AppState && AppState.muscleRanks1RM && AppState.muscleRanks1RM[target1RM]) || null;
+      if (saved) {
+        active1RMWeight = saved.weight;
+        active1RMReps = saved.reps;
+      }
+    }
     window.renderRanks();
   }
   window.selectMuscle = selectMuscle;
 
   document.addEventListener('DOMContentLoaded', () => {
+    // Render 1RM Calculator & Benchmark matrix
+    render1RMCalculatorStation();
     // Handle clicking directly on muscle paths
     document.querySelectorAll('.muscle').forEach((el) => {
       el.addEventListener('click', (e) => {

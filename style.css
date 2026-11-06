@@ -10860,6 +10860,838 @@ body.oled-true-black .streak-roadmap-card {
   background: rgba(147, 51, 234, 0.25);
 }
 
+/* ==========================================================================
+   1-REP MAX (1RM) CALCULATION & DYNAMIC MUSCLE RANKING SYSTEM
+   ========================================================================== */
+
+/* Keyframe Animations for Glowing Tiers */
+@keyframes goldAuraGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.65), 0 0 35px rgba(245, 158, 11, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.95), 0 0 65px rgba(245, 158, 11, 0.55), inset 0 1px 3px rgba(255, 255, 255, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.65), 0 0 35px rgba(245, 158, 11, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  }
+}
+
+@keyframes celestialAuraPulse {
+  0% {
+    box-shadow: 0 0 24px rgba(192, 132, 252, 0.8), 0 0 50px rgba(244, 114, 182, 0.45), inset 0 0 14px rgba(255, 255, 255, 0.4);
+    border-color: #c084fc;
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(192, 132, 252, 1), 0 0 85px rgba(244, 114, 182, 0.75), 0 0 110px rgba(253, 224, 71, 0.35), inset 0 0 24px rgba(255, 255, 255, 0.8);
+    border-color: #f472b6;
+  }
+  100% {
+    box-shadow: 0 0 24px rgba(192, 132, 252, 0.8), 0 0 50px rgba(244, 114, 182, 0.45), inset 0 0 14px rgba(255, 255, 255, 0.4);
+    border-color: #c084fc;
+  }
+}
+
+@keyframes celestialShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes titanFlameGlow {
+  0% {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.75), 0 0 50px rgba(185, 28, 28, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 42px rgba(239, 68, 68, 1), 0 0 80px rgba(249, 115, 22, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.75), 0 0 50px rgba(185, 28, 28, 0.4);
+  }
+}
+
+@keyframes diamondPrismGlow {
+  0% {
+    box-shadow: 0 0 25px rgba(129, 140, 248, 0.75), 0 0 45px rgba(79, 70, 229, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 38px rgba(129, 140, 248, 1), 0 0 70px rgba(96, 165, 250, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(129, 140, 248, 0.75), 0 0 45px rgba(79, 70, 229, 0.35);
+  }
+}
+
+/* Tier Badge Classes */
+.badge-tier-unranked {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  color: #a1a1aa;
+}
+
+.badge-tier-bronze {
+  background: linear-gradient(135deg, #7c3b12 0%, #cd7f32 50%, #e28f4d 100%);
+  border: 1.5px solid #cd7f32;
+  box-shadow: 0 0 20px rgba(205, 127, 50, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.badge-tier-silver {
+  background: linear-gradient(135deg, #475569 0%, #cbd5e1 50%, #f8fafc 100%);
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 0 22px rgba(203, 213, 225, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  color: #0f172a;
+}
+
+.badge-tier-gold {
+  background: linear-gradient(135deg, #b45309 0%, #ffd700 50%, #fef08a 100%);
+  border: 1.5px solid #fde047;
+  color: #1a1005;
+  animation: goldAuraGlow 2.5s infinite ease-in-out;
+}
+
+.badge-tier-platinum {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #e0f2fe 100%);
+  border: 1.5px solid #38bdf8;
+  box-shadow: 0 0 28px rgba(56, 189, 248, 0.85), 0 0 50px rgba(2, 132, 199, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+  color: #082f49;
+}
+
+.badge-tier-diamond {
+  background: linear-gradient(135deg, #4338ca 0%, #818cf8 50%, #e0e7ff 100%);
+  border: 1.5px solid #a5b4fc;
+  color: #1e1b4b;
+  animation: diamondPrismGlow 2.8s infinite ease-in-out;
+}
+
+.badge-tier-titan {
+  background: linear-gradient(135deg, #991b1b 0%, #ef4444 50%, #fecaca 100%);
+  border: 1.5px solid #f87171;
+  color: #fff;
+  animation: titanFlameGlow 2.5s infinite ease-in-out;
+}
+
+.badge-tier-olympian {
+  background: linear-gradient(135deg, #6b21a8 0%, #c084fc 35%, #f472b6 70%, #fde047 100%);
+  background-size: 200% 200%;
+  border: 2px solid #f472b6;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  animation: celestialAuraPulse 3s infinite ease-in-out, celestialShimmer 4s infinite linear;
+}
+
+/* 1RM Station Container & Main Card */
+.ranks-1rm-calculator-container {
+  margin-top: 14px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.onerm-station-card {
+  background: rgba(18, 10, 15, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(168, 39, 65, 0.4);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.8), 0 0 35px rgba(168, 39, 65, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.onerm-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.onerm-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--accent-maroon);
+  text-transform: uppercase;
+  display: block;
+}
+
+.onerm-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 3px 0 0;
+  letter-spacing: -0.02em;
+}
+
+.onerm-formula-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ofb-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+/* Muscle Group Filter Tabs */
+.onerm-muscle-tabs-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.onerm-muscle-tabs-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.onerm-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.onerm-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.onerm-tab-btn.active {
+  background: rgba(168, 39, 65, 0.25);
+  border-color: var(--accent-maroon);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(168, 39, 65, 0.4);
+}
+
+.otb-tier-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 2px;
+}
+
+/* Main Calculator Box */
+.onerm-calc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.onerm-ex-selector-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.onerm-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.onerm-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.onerm-select-menu {
+  width: 100%;
+  background: rgba(12, 6, 9, 0.95);
+  border: 1.5px solid rgba(168, 39, 65, 0.4);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.onerm-select-menu:focus {
+  border-color: var(--accent-maroon);
+  outline: none;
+  box-shadow: 0 0 12px rgba(168, 39, 65, 0.4);
+}
+
+.onerm-pr-autofill-btn {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1.5px solid rgba(245, 158, 11, 0.45);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #fbbf24;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.onerm-pr-autofill-btn:hover {
+  background: rgba(245, 158, 11, 0.22);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Dual Stepper Inputs Grid */
+.onerm-inputs-dual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.onerm-input-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.onerm-input-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.onerm-input-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.onerm-unit-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.onerm-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.onerm-step-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 38px;
+  text-align: center;
+}
+
+.onerm-step-btn:hover {
+  background: var(--accent-maroon);
+  border-color: var(--accent-maroon);
+  transform: scale(1.05);
+}
+
+.onerm-numeric-input {
+  flex: 1;
+  min-width: 50px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  padding: 8px 6px;
+  color: #fff;
+  transition: border-color 0.2s;
+}
+
+.onerm-numeric-input:focus {
+  border-color: var(--accent-maroon);
+  outline: none;
+  box-shadow: 0 0 12px rgba(168, 39, 65, 0.5);
+}
+
+/* Rep Preset Pills */
+.onerm-rep-pills-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.onerm-rep-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.onerm-rep-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.onerm-rep-pill.active {
+  background: var(--accent-maroon);
+  border-color: var(--accent-maroon);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(168, 39, 65, 0.4);
+}
+
+/* Results Showcase (1RM and Glowing Achieved Badge) */
+.onerm-results-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1.5px solid rgba(168, 39, 65, 0.35);
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 4px;
+}
+
+.onerm-result-stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding-right: 14px;
+}
+
+.onerm-result-badge-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.onerm-stat-meta-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.onerm-stat-value-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.onerm-big-number {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.onerm-big-unit {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent-maroon);
+}
+
+.onerm-equation-callout {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.onerm-equation-callout code {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px 6px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* High-Fidelity Glowing Badge */
+.onerm-rank-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.onerm-rank-badge:hover {
+  transform: translateY(-2px);
+}
+
+.orb-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.orb-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.orb-tier-name {
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+}
+
+.orb-tier-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  opacity: 0.9;
+  letter-spacing: 0.02em;
+}
+
+.orb-tier-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.35;
+  font-style: italic;
+}
+
+/* Tier Progression Bar */
+.onerm-tier-progression-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.onerm-prog-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.onerm-prog-bar-frame {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.onerm-prog-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.35s ease, background 0.35s ease;
+}
+
+.onerm-delta-callout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+/* Actions Bar */
+.onerm-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.onerm-save-rank-btn {
+  flex: 1;
+  padding: 12px 18px !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+}
+
+.onerm-toggle-reps-table-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.onerm-toggle-reps-table-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Rep Table Drawer */
+.onerm-rep-table-drawer {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.onerm-rep-table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.onerm-table-cell {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.otc-reps {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.otc-weight {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.otc-pct {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--accent-maroon);
+}
+
+/* Targeted Muscle Groups Matrix */
+.onerm-matrix-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.onerm-matrix-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.onerm-matrix-heading {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.onerm-matrix-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.onerm-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.onerm-matrix-card {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.onerm-matrix-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--card-tier-color, var(--accent-maroon));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7), 0 0 20px var(--card-tier-color, rgba(168, 39, 65, 0.3));
+}
+
+.onerm-matrix-card.selected {
+  border-color: var(--accent-maroon);
+  background: rgba(168, 39, 65, 0.15);
+  box-shadow: 0 0 22px rgba(168, 39, 65, 0.4);
+}
+
+.omc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.omc-muscle-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.omc-icon {
+  font-size: 1.15rem;
+}
+
+.omc-name {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.onerm-mini-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.omc-exercise-name {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.omc-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.omc-1rm-val {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.omc-1rm-val span.mono {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.omc-unit {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-maroon);
+}
+
+.omc-chevron {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s;
+}
+
+.onerm-matrix-card:hover .omc-chevron {
+  transform: translateX(3px);
+  color: #fff;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 640px) {
+  .onerm-inputs-dual-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .onerm-results-showcase {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .onerm-result-stats-col {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-right: 0;
+    padding-bottom: 12px;
+  }
+  .onerm-matrix-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 
 

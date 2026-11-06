@@ -2941,63 +2941,389 @@ window.deleteHistoryWorkout = function(id) {
   triggerHaptic([30, 40]);
 };
 
-window.openEditHistoryModal = function(id) {
-  const item = AppState.history.find(h => (h.id === id || h.date === id));
-  if (!item) return;
+// --- History View & Tabular Active Workout Style Editor ---
+let editingHistoryWorkout = null;
 
-  document.getElementById('edit-history-id').value = item.id || item.date;
-  document.getElementById('edit-history-title').value = item.title || 'Workout Session';
-  
-  // Format date for datetime-local input
-  try {
-    const d = new Date(item.date);
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    document.getElementById('edit-history-date').value = d.toISOString().slice(0, 16);
-  } catch (e) {
-    document.getElementById('edit-history-date').value = '';
+window.openEditHistoryModal = function(id) {
+  const unit = (AppState.settings.unit || 'kg').toUpperCase();
+
+  if (!id) {
+    // Brand new missed workout log
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    editingHistoryWorkout = {
+      id: 'hist_' + Date.now(),
+      isNew: true,
+      title: 'Logged Workout',
+      date: new Date().toISOString(),
+      durationSeconds: 45 * 60,
+      volume: 0,
+      unit: AppState.settings.unit || 'kg',
+      setsCount: 0,
+      exercises: []
+    };
+    const headEl = document.getElementById('edit-history-modal-heading');
+    if (headEl) headEl.textContent = 'Log Missed Workout';
+    document.getElementById('edit-history-id').value = '';
+    document.getElementById('edit-history-title').value = 'Logged Workout';
+    document.getElementById('edit-history-date').value = now.toISOString().slice(0, 16);
+    document.getElementById('edit-history-duration').value = 45;
+  } else {
+    const item = AppState.history.find(h => (h.id === id || h.date === id));
+    if (!item) return;
+
+    const headEl = document.getElementById('edit-history-modal-heading');
+    if (headEl) headEl.textContent = 'Edit Workout History';
+    document.getElementById('edit-history-id').value = item.id || item.date;
+    document.getElementById('edit-history-title').value = item.title || 'Workout Session';
+    
+    try {
+      const d = new Date(item.date);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      document.getElementById('edit-history-date').value = d.toISOString().slice(0, 16);
+    } catch (e) {
+      document.getElementById('edit-history-date').value = '';
+    }
+
+    const durationMin = Math.round((item.durationSeconds || 0) / 60) || 45;
+    document.getElementById('edit-history-duration').value = durationMin;
+
+    // Deep copy and normalize exercises
+    let exList = [];
+    if (item.exercises && Array.isArray(item.exercises)) {
+      exList = item.exercises.map(ex => {
+        let setsArr = [];
+        if (Array.isArray(ex.sets)) {
+          setsArr = ex.sets.map(s => ({
+            weight: Number(s.weight) || 0,
+            reps: Number(s.reps) || 0,
+            completed: s.completed !== false,
+            isWarmup: Boolean(s.isWarmup)
+          }));
+        } else {
+          const count = Number(ex.sets) || (ex.setsCount || 3);
+          for (let i = 0; i < count; i++) {
+            setsArr.push({
+              weight: Number(ex.bestWeight) || 40,
+              reps: Number(ex.bestReps) || 10,
+              completed: true,
+              isWarmup: false
+            });
+          }
+        }
+        return {
+          name: ex.name,
+          category: ex.category || (AppState.exercises.find(e => e.name === ex.name) ? AppState.exercises.find(e => e.name === ex.name).category : 'General'),
+          sets: setsArr
+        };
+      });
+    }
+
+    editingHistoryWorkout = {
+      ...item,
+      isNew: false,
+      exercises: exList
+    };
   }
 
-  const durationMin = Math.round((item.durationSeconds || 0) / 60) || 45;
-  document.getElementById('edit-history-duration').value = durationMin;
-  document.getElementById('edit-history-volume').value = item.volume || 0;
-  document.getElementById('edit-history-sets').value = item.setsCount || (item.exercises ? item.exercises.reduce((a, x) => a + (x.sets || 3), 0) : 10);
-  
-  const exSummary = item.exercises && item.exercises.length
-    ? item.exercises.map(e => `${e.name} (${e.bestWeight || 0}${item.unit} × ${e.bestReps || 0})`).join(', ')
-    : '';
-  document.getElementById('edit-history-notes').value = item.notes || exSummary || '';
-
+  renderEditHistoryExercises();
   openModal('modal-edit-history');
+};
+
+function renderEditHistoryExercises() {
+  const container = document.getElementById('edit-history-exercises-list');
+  if (!container || !editingHistoryWorkout) return;
+
+  const unit = (AppState.settings.unit || 'kg').toUpperCase();
+  let totalVolume = 0;
+  let totalCompletedSets = 0;
+
+  if (!editingHistoryWorkout.exercises || editingHistoryWorkout.exercises.length === 0) {
+    container.innerHTML = `
+      <div class="idle-placeholder" style="padding:26px 16px; text-align:center;">
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">🏋️</span>
+        <p style="margin:0;color:var(--text-muted);font-size:0.88rem;">No exercises in this session yet.</p>
+        <button type="button" class="primary-glow-btn small-btn" style="margin-top:12px;" onclick="openExercisePicker('edit_history')">
+          + Add Exercise
+        </button>
+      </div>
+    `;
+    const volEl = document.getElementById('edit-history-live-volume');
+    const setsEl = document.getElementById('edit-history-live-sets');
+    if (volEl) volEl.textContent = `0 ${unit}`;
+    if (setsEl) setsEl.textContent = '0';
+    return;
+  }
+
+  container.innerHTML = editingHistoryWorkout.exercises.map((ex, exIdx) => {
+    const pr = AppState.prs[ex.name];
+    const prevText = pr ? `${pr.weight} ${unit.toLowerCase()} × ${pr.reps}` : '-';
+
+    return `
+      <div class="exercise-session-card edit-history-ex-card" data-ex-index="${exIdx}">
+        <div class="exercise-session-header">
+          <div class="ex-title-group">
+            <span class="ex-session-name">${escapeHtml(ex.name)}</span>
+            <span class="ex-session-cat">${escapeHtml(ex.category || 'EXERCISE')}</span>
+          </div>
+          <button type="button" class="remove-ex-btn" onclick="removeExerciseFromEditHistory(${exIdx})" title="Remove Exercise">&times;</button>
+        </div>
+
+        <div class="sets-table">
+          <div class="sets-header-row">
+            <span>SET</span>
+            <span>PREV</span>
+            <span>${unit}</span>
+            <span>REPS</span>
+            <span>DONE</span>
+            <span>DEL</span>
+          </div>
+
+          ${(() => {
+            let workingCount = 0;
+            let warmupCount = 0;
+            return ex.sets.map((set, setIdx) => {
+              if (set.completed) {
+                totalCompletedSets++;
+                totalVolume += (Number(set.weight) || 0) * (Number(set.reps) || 0);
+              }
+
+              let badgeHtml;
+              if (set.isWarmup) {
+                warmupCount++;
+                badgeHtml = `<span class="set-index-badge warmup-badge" title="Warm-up Set">W${warmupCount}</span>`;
+              } else {
+                workingCount++;
+                badgeHtml = `<span class="set-index-badge">${workingCount}</span>`;
+              }
+
+              return `
+                <div class="set-row ${set.completed ? 'completed' : ''} ${set.isWarmup ? 'warmup-set-row' : ''}">
+                  ${badgeHtml}
+                  <span class="prev-set-text">${prevText}</span>
+                  <input type="number" class="set-input set-weight-input"
+                         value="${set.weight}"
+                         placeholder="0"
+                         step="0.5"
+                         onchange="updateEditHistorySet(${exIdx}, ${setIdx}, 'weight', this.value)">
+                  <input type="number" class="set-input set-reps-input"
+                         value="${set.reps}"
+                         placeholder="0"
+                         step="1"
+                         onchange="updateEditHistorySet(${exIdx}, ${setIdx}, 'reps', this.value)">
+                  <button type="button" class="set-checkbox-btn ${set.completed ? 'checked' : ''}"
+                          onclick="toggleEditHistorySetComplete(${exIdx}, ${setIdx})"
+                          title="Toggle set completion">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  <button type="button" class="delete-set-btn"
+                          onclick="deleteSetFromEditHistory(${exIdx}, ${setIdx})"
+                          title="Delete this set">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
+              `;
+            }).join('');
+          })()}
+
+          <div class="sets-action-buttons-row">
+            <button type="button" class="add-set-btn" onclick="addSetToEditHistory(${exIdx})">+ Working Set</button>
+            <button type="button" class="add-warmup-btn" onclick="addWarmupSetToEditHistory(${exIdx})">+ Warm-up Set</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const volEl = document.getElementById('edit-history-live-volume');
+  const setsEl = document.getElementById('edit-history-live-sets');
+  if (volEl) volEl.textContent = `${Math.round(totalVolume).toLocaleString()} ${unit}`;
+  if (setsEl) setsEl.textContent = totalCompletedSets;
+}
+window.renderEditHistoryExercises = renderEditHistoryExercises;
+
+window.updateEditHistorySet = function(exIdx, setIdx, field, val) {
+  if (!editingHistoryWorkout || !editingHistoryWorkout.exercises[exIdx]) return;
+  const set = editingHistoryWorkout.exercises[exIdx].sets[setIdx];
+  if (set) {
+    set[field] = Number(val) || 0;
+    renderEditHistoryExercises();
+  }
+};
+
+window.toggleEditHistorySetComplete = function(exIdx, setIdx) {
+  if (!editingHistoryWorkout || !editingHistoryWorkout.exercises[exIdx]) return;
+  const set = editingHistoryWorkout.exercises[exIdx].sets[setIdx];
+  if (set) {
+    set.completed = !set.completed;
+    renderEditHistoryExercises();
+    triggerHaptic([20]);
+  }
+};
+
+window.deleteSetFromEditHistory = function(exIdx, setIdx) {
+  if (!editingHistoryWorkout || !editingHistoryWorkout.exercises[exIdx]) return;
+  editingHistoryWorkout.exercises[exIdx].sets.splice(setIdx, 1);
+  renderEditHistoryExercises();
+  triggerHaptic([30]);
+};
+
+window.addSetToEditHistory = function(exIdx) {
+  if (!editingHistoryWorkout || !editingHistoryWorkout.exercises[exIdx]) return;
+  const ex = editingHistoryWorkout.exercises[exIdx];
+  const lastSet = ex.sets.filter(s => !s.isWarmup).slice(-1)[0] || ex.sets.slice(-1)[0];
+  const w = lastSet ? lastSet.weight : 40;
+  const r = lastSet ? lastSet.reps : 10;
+  ex.sets.push({ weight: w, reps: r, completed: true, isWarmup: false });
+  renderEditHistoryExercises();
+  triggerHaptic([30]);
+};
+
+window.addWarmupSetToEditHistory = function(exIdx) {
+  if (!editingHistoryWorkout || !editingHistoryWorkout.exercises[exIdx]) return;
+  const ex = editingHistoryWorkout.exercises[exIdx];
+  const baseWeight = (ex.sets && ex.sets[0]) ? Number(ex.sets[0].weight) : 40;
+  const warmupWeight = Math.max(10, Math.round((baseWeight * 0.5) / 2.5) * 2.5);
+  let insertIdx = 0;
+  while (insertIdx < ex.sets.length && ex.sets[insertIdx].isWarmup) {
+    insertIdx++;
+  }
+  ex.sets.splice(insertIdx, 0, {
+    weight: warmupWeight,
+    reps: 12,
+    completed: true,
+    isWarmup: true
+  });
+  renderEditHistoryExercises();
+  triggerHaptic([30]);
+};
+
+window.removeExerciseFromEditHistory = function(exIdx) {
+  if (!editingHistoryWorkout) return;
+  editingHistoryWorkout.exercises.splice(exIdx, 1);
+  renderEditHistoryExercises();
+  triggerHaptic([30]);
+};
+
+window.addExerciseToEditHistory = function(ex) {
+  if (!editingHistoryWorkout) return;
+  const pr = AppState.prs[ex.name];
+  const prevW = pr ? pr.weight : 40;
+  const prevR = pr ? pr.reps : 10;
+  editingHistoryWorkout.exercises.push({
+    name: ex.name,
+    category: ex.category || 'General',
+    sets: [
+      { weight: prevW, reps: prevR, completed: true, isWarmup: false },
+      { weight: prevW, reps: prevR, completed: true, isWarmup: false },
+      { weight: prevW, reps: prevR, completed: true, isWarmup: false }
+    ]
+  });
+  renderEditHistoryExercises();
+  showToast(`Added ${ex.name} to workout log.`);
 };
 
 window.saveHistoryWorkoutEdit = function(e) {
   e.preventDefault();
-  const id = document.getElementById('edit-history-id').value;
-  const item = AppState.history.find(h => (h.id === id || h.date === id));
-  if (!item) return;
+  if (!editingHistoryWorkout) return;
 
-  const newTitle = document.getElementById('edit-history-title').value.trim();
-  const newDate = document.getElementById('edit-history-date').value;
-  const newDurationMin = Number(document.getElementById('edit-history-duration').value) || 45;
-  const newVolume = Number(document.getElementById('edit-history-volume').value) || 0;
-  const newSets = Number(document.getElementById('edit-history-sets').value) || 1;
-  const newNotes = document.getElementById('edit-history-notes').value.trim();
+  const title = document.getElementById('edit-history-title').value.trim() || 'Logged Workout';
+  const dateVal = document.getElementById('edit-history-date').value;
+  const durationMin = Number(document.getElementById('edit-history-duration').value) || 45;
 
-  item.title = newTitle || item.title;
-  if (newDate) {
-    item.date = new Date(newDate).toISOString();
+  let totalVol = 0;
+  let totalSets = 0;
+  const recordedExercises = [];
+
+  editingHistoryWorkout.exercises.forEach(ex => {
+    let completedInEx = 0;
+    let bestWeight = 0;
+    let bestReps = 0;
+
+    ex.sets.forEach(set => {
+      if (set.completed) {
+        completedInEx++;
+        totalSets++;
+        const w = Number(set.weight) || 0;
+        const r = Number(set.reps) || 0;
+        totalVol += w * r;
+
+        if (!set.isWarmup && w > bestWeight) {
+          bestWeight = w;
+          bestReps = r;
+        } else if (bestWeight === 0 && w > bestWeight) {
+          bestWeight = w;
+          bestReps = r;
+        }
+      }
+    });
+
+    if (completedInEx > 0 || ex.sets.length > 0) {
+      recordedExercises.push({
+        name: ex.name,
+        category: ex.category,
+        setsCount: completedInEx || ex.sets.length,
+        bestWeight: bestWeight,
+        bestReps: bestReps,
+        sets: ex.sets.map(s => ({
+          weight: Number(s.weight) || 0,
+          reps: Number(s.reps) || 0,
+          completed: Boolean(s.completed),
+          isWarmup: Boolean(s.isWarmup)
+        }))
+      });
+
+      // Update PR if valid
+      const currentPR = AppState.prs[ex.name];
+      if (bestWeight > 0 && (!currentPR || bestWeight > currentPR.weight)) {
+        AppState.prs[ex.name] = {
+          weight: bestWeight,
+          reps: bestReps,
+          date: dateVal ? new Date(dateVal).toISOString() : new Date().toISOString()
+        };
+      }
+    }
+  });
+
+  const targetDateIso = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
+
+  if (editingHistoryWorkout.isNew) {
+    const newEntry = {
+      id: 'hist_' + Date.now(),
+      title: title,
+      date: targetDateIso,
+      durationSeconds: durationMin * 60,
+      volume: Math.round(totalVol),
+      unit: AppState.settings.unit || 'kg',
+      setsCount: totalSets,
+      exercises: recordedExercises
+    };
+    AppState.history.unshift(newEntry);
+  } else {
+    const existing = AppState.history.find(h => (h.id === editingHistoryWorkout.id || h.date === editingHistoryWorkout.id));
+    if (existing) {
+      existing.title = title;
+      existing.date = targetDateIso;
+      existing.durationSeconds = durationMin * 60;
+      existing.volume = Math.round(totalVol);
+      existing.setsCount = totalSets;
+      existing.exercises = recordedExercises;
+    }
   }
-  item.durationSeconds = newDurationMin * 60;
-  item.volume = Math.round(newVolume);
-  item.setsCount = newSets;
-  item.notes = newNotes;
 
   saveState();
   updateOverviewStats();
   renderHistory();
   closeModal('modal-edit-history');
   showToast('✅ Workout history successfully updated.');
-  triggerHaptic([30]);
+  triggerHaptic([30, 40]);
 };
 
 // --- PRs View ---
@@ -3118,6 +3444,10 @@ window.selectExercise = function(exId) {
     saveState();
     closeModal('modal-add-exercise');
     renderActiveWorkout();
+    triggerHaptic([40]);
+  } else if (activePickerTarget === 'edit_history') {
+    addExerciseToEditHistory(ex);
+    closeModal('modal-add-exercise');
     triggerHaptic([40]);
   } else if (activePickerTarget === 'routine_builder') {
     // 1-Tap toggle: add or remove from routine
@@ -6230,6 +6560,15 @@ function ensureWorkoutSplitState() {
         Sat: false,
         Sun: false
       },
+      customDays: {
+        Mon: 'Push (Chest, Shoulders & Triceps)',
+        Tue: 'Pull (Back & Biceps)',
+        Wed: 'Heavy Legs & Core',
+        Thu: 'Rest & Recovery',
+        Fri: 'Upper Body Hypertrophy',
+        Sat: 'Lower Body & Conditioning',
+        Sun: 'Rest & Mobility'
+      },
       reminderTime: '17:30',
       remindersEnabled: true,
       lastReminderDate: null
@@ -6238,6 +6577,17 @@ function ensureWorkoutSplitState() {
   if (!AppState.workoutSplit.schedule) {
     AppState.workoutSplit.schedule = {
       Mon: true, Tue: true, Wed: true, Thu: true, Fri: true, Sat: false, Sun: false
+    };
+  }
+  if (!AppState.workoutSplit.customDays) {
+    AppState.workoutSplit.customDays = {
+      Mon: 'Push (Chest, Shoulders & Triceps)',
+      Tue: 'Pull (Back & Biceps)',
+      Wed: 'Heavy Legs & Core',
+      Thu: 'Rest & Recovery',
+      Fri: 'Upper Body Hypertrophy',
+      Sat: 'Lower Body & Conditioning',
+      Sun: 'Rest & Mobility'
     };
   }
 }
@@ -6263,7 +6613,9 @@ function selectWorkoutSplitPreset(type) {
   AppState.workoutSplit.splitName = preset.name;
   AppState.workoutSplit.daysOn = preset.daysOn;
   AppState.workoutSplit.daysOff = preset.daysOff;
-  AppState.workoutSplit.schedule = { ...preset.schedule };
+  if (type !== 'Custom') {
+    AppState.workoutSplit.schedule = { ...preset.schedule };
+  }
 
   saveState();
   updateWorkoutSplitUI();
@@ -6312,6 +6664,104 @@ function toggleSplitDay(dayKey) {
   triggerHaptic([20]);
 }
 window.toggleSplitDay = toggleSplitDay;
+
+// 7-Day Dynamic Custom Split Builder Methods
+function renderCustomSplitBuilder() {
+  ensureWorkoutSplitState();
+  const ws = AppState.workoutSplit;
+  const listEl = document.getElementById('custom-split-days-list');
+  if (!listEl) return;
+
+  const dayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dayNames = {
+    Mon: 'Monday',
+    Tue: 'Tuesday',
+    Wed: 'Wednesday',
+    Thu: 'Thursday',
+    Fri: 'Friday',
+    Sat: 'Saturday',
+    Sun: 'Sunday'
+  };
+  const todayKey = getTodayDayKey();
+
+  listEl.innerHTML = dayKeys.map(day => {
+    const isRest = ws.schedule && ws.schedule[day] === false;
+    const isToday = day === todayKey;
+    const currentName = (ws.customDays && ws.customDays[day]) || (isRest ? 'Rest Day' : 'Workout Session');
+    return `
+      <div class="custom-split-day-row ${isRest ? 'is-rest' : 'is-lift'} ${isToday ? 'is-today' : ''}">
+        <div class="custom-day-header-col">
+          <span class="custom-day-abbr">${day}</span>
+          <span class="custom-day-full">${dayNames[day]}</span>
+          ${isToday ? '<span class="custom-day-today-tag">TODAY</span>' : ''}
+        </div>
+        <div class="custom-day-input-col">
+          <input 
+            type="text" 
+            class="custom-split-name-input ${isRest ? 'rest-muted' : ''}" 
+            value="${escapeHtml(currentName)}" 
+            placeholder="e.g. Heavy Legs & Core"
+            oninput="updateCustomSplitDayName('${day}', this.value)"
+            ${isRest ? 'readonly' : ''}
+          />
+        </div>
+        <div class="custom-day-action-col">
+          <button 
+            type="button" 
+            class="custom-day-status-btn ${isRest ? 'btn-rest' : 'btn-lift'}" 
+            onclick="toggleCustomSplitDayRest('${day}')"
+            title="Toggle between Training and Rest">
+            ${isRest ? '🧘 Rest' : '🏋️ Lift'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+window.renderCustomSplitBuilder = renderCustomSplitBuilder;
+
+function toggleCustomSplitDayRest(dayKey) {
+  ensureWorkoutSplitState();
+  if (!AppState.workoutSplit.schedule) AppState.workoutSplit.schedule = {};
+  const currentlyLift = AppState.workoutSplit.schedule[dayKey] !== false;
+  AppState.workoutSplit.schedule[dayKey] = !currentlyLift;
+
+  // Recalculate daysOn / daysOff
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  let countOn = 0;
+  days.forEach(d => {
+    if (AppState.workoutSplit.schedule[d] !== false) countOn++;
+  });
+  AppState.workoutSplit.daysOn = countOn;
+  AppState.workoutSplit.daysOff = 7 - countOn;
+  AppState.workoutSplit.splitType = 'Custom';
+  AppState.workoutSplit.splitName = 'Custom Split';
+
+  saveState();
+  renderCustomSplitBuilder();
+  updateWorkoutSplitUI();
+  triggerHaptic([25]);
+}
+window.toggleCustomSplitDayRest = toggleCustomSplitDayRest;
+
+function updateCustomSplitDayName(dayKey, value) {
+  ensureWorkoutSplitState();
+  if (!AppState.workoutSplit.customDays) AppState.workoutSplit.customDays = {};
+  AppState.workoutSplit.customDays[dayKey] = value;
+  AppState.workoutSplit.splitType = 'Custom';
+  saveState();
+  
+  // If today is this day, update banner description live
+  const todayKey = getTodayDayKey();
+  if (dayKey === todayKey) {
+    const isRest = isTodayRestDay();
+    const bannerDesc = document.getElementById('split-banner-desc');
+    if (bannerDesc && !isRest) {
+      bannerDesc.textContent = `Today's Focus: "${value || 'Training'}". Daily gym reminders are armed for ${AppState.workoutSplit.reminderTime || '17:30'}.`;
+    }
+  }
+}
+window.updateCustomSplitDayName = updateCustomSplitDayName;
 
 function toggleWorkoutSplitReminders(enabled) {
   ensureWorkoutSplitState();
@@ -6363,9 +6813,11 @@ function checkDailyGymReminder() {
   }
 
   // TRAINING DAY: Trigger notification
-  const splitTitle = ws.splitName || ws.splitType || 'Daily Workout';
+  const todayDayKey = getTodayDayKey();
+  const customTodayName = (ws.splitType === 'Custom' && ws.customDays && ws.customDays[todayDayKey]) ? ws.customDays[todayDayKey] : null;
+  const splitTitle = customTodayName || ws.splitName || ws.splitType || 'Daily Workout';
   triggerLocalPushNotification('🚀 Moon Fitness OS — Time to Lift!', {
-    body: `Today is a scheduled training day (${splitTitle}). Step up and take it to the moon!`,
+    body: `Today is a scheduled training day: ${splitTitle}. Step up and take it to the moon!`,
     tag: 'daily-gym-reminder',
     icon: 'moon_logo.png',
     requireInteraction: true
@@ -6380,16 +6832,17 @@ window.testDailyGymReminder = function() {
   const ws = AppState.workoutSplit;
   const day = getTodayDayKey();
   const isRest = isTodayRestDay();
-  const splitTitle = ws.splitName || ws.splitType || 'Daily Workout';
+  const customTodayName = (ws.splitType === 'Custom' && ws.customDays && ws.customDays[day]) ? ws.customDays[day] : null;
+  const splitTitle = customTodayName || ws.splitName || ws.splitType || 'Daily Workout';
 
   if (isRest) {
     showToast(`🛡️ Rest Day Active: Today (${day}) is marked as a Rest Day. Gym alert was safely SUPPRESSED.`);
     triggerHaptic([30, 20]);
     console.log(`[Test Reminder] Today (${day}) is a rest day. Alert suppressed.`);
   } else {
-    showToast(`🚀 Training Day Active: Today (${day}) is a training day. Triggering notification...`);
+    showToast(`🚀 Training Day Active: Today (${day}) is a training day (${splitTitle}). Triggering notification...`);
     triggerLocalPushNotification('🚀 Moon Fitness OS — Time to Lift!', {
-      body: `Today (${day}) is a scheduled training day (${splitTitle}). Time to crush your workout!`,
+      body: `Today (${day}) is a scheduled training day: ${splitTitle}. Time to crush your workout!`,
       tag: 'test-gym-reminder',
       icon: 'moon_logo.png',
       requireInteraction: true
@@ -6414,6 +6867,23 @@ function updateWorkoutSplitUI() {
   const ws = AppState.workoutSplit;
   const isRest = isTodayRestDay();
   const todayKey = getTodayDayKey();
+
+  // Sync Quick Dropdown
+  const splitDropdown = document.getElementById('split-type-dropdown');
+  if (splitDropdown) {
+    splitDropdown.value = ws.splitType || 'PPL';
+  }
+
+  // Toggle Custom Split Builder Panel
+  const builderPanel = document.getElementById('custom-split-builder-panel');
+  if (builderPanel) {
+    if (ws.splitType === 'Custom') {
+      builderPanel.classList.remove('hidden');
+      renderCustomSplitBuilder();
+    } else {
+      builderPanel.classList.add('hidden');
+    }
+  }
 
   // Summary label
   const summaryEl = document.getElementById('split-card-summary');
@@ -6442,7 +6912,8 @@ function updateWorkoutSplitUI() {
     } else {
       bannerIcon.textContent = '🔥';
       bannerTitle.textContent = 'Today is a Scheduled Training Day';
-      bannerDesc.textContent = `${ws.splitName} active. Daily gym reminders are armed for ${ws.reminderTime || '17:30'}.`;
+      const customTodayName = (ws.splitType === 'Custom' && ws.customDays && ws.customDays[todayKey]) ? ws.customDays[todayKey] : ws.splitName;
+      bannerDesc.textContent = `${customTodayName} active. Daily gym reminders are armed for ${ws.reminderTime || '17:30'}.`;
     }
   }
 

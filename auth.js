@@ -456,7 +456,11 @@
         userRoleEl.className = `user-role-badge ${u.role === 'Admin' ? 'admin' : 'standard'}`;
       }
       if (userAvatarEl) {
-        userAvatarEl.textContent = u.gender === 'female' ? '♀' : '♂';
+        if (u.avatar && (u.avatar.startsWith('data:image') || u.avatar.startsWith('http') || u.avatar.endsWith('.png') || u.avatar.endsWith('.jpg'))) {
+          userAvatarEl.innerHTML = `<img src="${u.avatar}" alt="PFP" class="header-pfp-img">`;
+        } else {
+          userAvatarEl.textContent = u.avatar || (u.gender === 'female' ? '♀' : '♂');
+        }
       }
 
       // Update athlete profile card in Settings
@@ -466,8 +470,15 @@
       const setHandle = document.getElementById('settings-user-handle');
       const setGender = document.getElementById('settings-user-gender');
       const setCoach = document.getElementById('settings-user-coach');
+      const setBio = document.getElementById('settings-user-bio');
 
-      if (setAvatar) setAvatar.textContent = u.avatar || (u.gender === 'female' ? '♀' : '♂');
+      if (setAvatar) {
+        if (u.avatar && (u.avatar.startsWith('data:image') || u.avatar.startsWith('http') || u.avatar.endsWith('.png') || u.avatar.endsWith('.jpg'))) {
+          setAvatar.innerHTML = `<img src="${u.avatar}" alt="PFP" class="athlete-pfp-img">`;
+        } else {
+          setAvatar.textContent = u.avatar || (u.gender === 'female' ? '♀' : '♂');
+        }
+      }
       if (setName) setName.textContent = u.displayName || u.username;
       if (setRole) {
         setRole.textContent = u.role.toUpperCase();
@@ -476,6 +487,21 @@
       if (setHandle) setHandle.textContent = `@${u.username}`;
       if (setGender) setGender.textContent = u.gender === 'female' ? '♀ Female Athlete' : '♂ Male Athlete';
       if (setCoach) setCoach.textContent = `⚡ Assigned AI: ${coach.name}`;
+      if (setBio) setBio.textContent = u.bio || 'Defying gravity, conquering every plateau. Taking it to the moon.';
+
+      // Update Bottom Tab Bar Avatar
+      const navTabPfp = document.getElementById('nav-tab-pfp-img');
+      const navTabIcon = document.getElementById('nav-tab-settings-icon');
+      if (navTabPfp && navTabIcon) {
+        if (u.avatar && (u.avatar.startsWith('data:image') || u.avatar.startsWith('http') || u.avatar.endsWith('.png') || u.avatar.endsWith('.jpg'))) {
+          navTabPfp.src = u.avatar;
+          navTabPfp.classList.remove('hidden');
+          navTabIcon.classList.add('hidden');
+        } else {
+          navTabPfp.classList.add('hidden');
+          navTabIcon.classList.remove('hidden');
+        }
+      }
 
       // Show/Hide Admin Action in Header and Settings
       const adminBtns = document.querySelectorAll('.admin-only-feature');
@@ -1019,7 +1045,7 @@ I cannot assist with queries outside of these specific training and nutritional 
                 <div class="lb-row ${isMe ? 'is-me' : ''}">
                   <span class="col-rank"><strong class="rank-pos">${medal}</strong></span>
                   <div class="col-athlete ath-info">
-                    <span class="ath-avatar">${ath.avatar || (ath.gender === 'female' ? '♀' : '♂')}</span>
+                    <span class="ath-avatar">${formatAvatarHtml(ath.avatar, ath.gender)}</span>
                     <div>
                       <strong class="ath-name">${escapeHtml(ath.displayName || ath.username)} ${isMe ? '<span class="you-pill">YOU</span>' : ''}</strong>
                       <span class="ath-handle">@${escapeHtml(ath.username)}</span>
@@ -1168,7 +1194,7 @@ I cannot assist with queries outside of these specific training and nutritional 
             ${this.users.map(u => `
               <div class="aut-row">
                 <div class="col-u-user aut-name-col">
-                  <span class="aut-avatar">${u.avatar || (u.gender === 'female' ? '♀' : '♂')}</span>
+                  <span class="aut-avatar">${formatAvatarHtml(u.avatar, u.gender)}</span>
                   <div>
                     <strong>${escapeHtml(u.displayName || u.username)}</strong>
                     <small>@${escapeHtml(u.username)}</small>
@@ -1362,6 +1388,143 @@ I cannot assist with queries outside of these specific training and nutritional 
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
+
+  function formatAvatarHtml(avatar, gender) {
+    if (avatar && (avatar.startsWith('data:image') || avatar.startsWith('http') || avatar.endsWith('.png') || avatar.endsWith('.jpg') || avatar.endsWith('.jpeg'))) {
+      return `<img src="${avatar}" alt="PFP" class="lb-avatar-img">`;
+    }
+    return avatar || (gender === 'female' ? '♀' : '♂');
+  }
+
+  // ==================== PROFILE CUSTOMIZATION & PFP LOGIC ====================
+  let tempSelectedPfp = null;
+
+  window.openEditProfileModal = function() {
+    const u = window.AuthSystem ? window.AuthSystem.getCurrentUser() : null;
+    if (!u) {
+      if (typeof window.openAuthModal === 'function') window.openAuthModal();
+      return;
+    }
+    const nameEl = document.getElementById('edit-profile-display-name');
+    const bioEl = document.getElementById('edit-profile-bio');
+    if (nameEl) nameEl.value = u.displayName || u.username;
+    if (bioEl) bioEl.value = u.bio || '';
+
+    tempSelectedPfp = u.avatar || (u.gender === 'female' ? '♀' : '♂');
+    updatePfpPreviewUI(tempSelectedPfp);
+    if (typeof openModal === 'function') {
+      openModal('modal-edit-profile');
+    }
+  };
+
+  function updatePfpPreviewUI(pfp) {
+    const symbolEl = document.getElementById('edit-pfp-preview-symbol');
+    const imgEl = document.getElementById('edit-pfp-preview-img');
+    if (!symbolEl || !imgEl) return;
+
+    if (pfp && (pfp.startsWith('data:image') || pfp.startsWith('http') || pfp.endsWith('.png') || pfp.endsWith('.jpg') || pfp.endsWith('.jpeg'))) {
+      imgEl.src = pfp;
+      imgEl.classList.remove('hidden');
+      symbolEl.classList.add('hidden');
+    } else {
+      symbolEl.textContent = pfp || '♂';
+      symbolEl.classList.remove('hidden');
+      imgEl.classList.add('hidden');
+    }
+  }
+  window.updatePfpPreviewUI = updatePfpPreviewUI;
+
+  window.handlePfpFileSelected = function(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const size = 180;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Draw cropped center square
+        const minDim = Math.min(img.width, img.height);
+        const sx = (img.width - minDim) / 2;
+        const sy = (img.height - minDim) / 2;
+        ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+
+        tempSelectedPfp = canvas.toDataURL('image/jpeg', 0.85);
+        updatePfpPreviewUI(tempSelectedPfp);
+        if (typeof showToast === 'function') {
+          showToast('📷 Photo loaded! Click Save to apply.');
+        }
+        if (typeof triggerHaptic === 'function') triggerHaptic([30]);
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.selectPresetPfp = function(emoji) {
+    tempSelectedPfp = emoji;
+    updatePfpPreviewUI(emoji);
+    if (typeof triggerHaptic === 'function') triggerHaptic([20]);
+  };
+
+  window.resetPfpToDefault = function() {
+    const u = window.AuthSystem ? window.AuthSystem.getCurrentUser() : null;
+    tempSelectedPfp = u && u.gender === 'female' ? '♀' : '♂';
+    updatePfpPreviewUI(tempSelectedPfp);
+    if (typeof showToast === 'function') showToast('Avatar reset to default symbol.');
+    if (typeof triggerHaptic === 'function') triggerHaptic([20]);
+  };
+
+  window.saveUserProfileEdit = function(e) {
+    e.preventDefault();
+    const u = window.AuthSystem ? window.AuthSystem.getCurrentUser() : null;
+    if (!u) return;
+
+    const newName = document.getElementById('edit-profile-display-name').value.trim();
+    const newBio = document.getElementById('edit-profile-bio').value.trim();
+
+    if (newName) u.displayName = newName;
+    u.bio = newBio;
+    if (tempSelectedPfp) u.avatar = tempSelectedPfp;
+
+    // Update in users array
+    const idx = window.AuthSystem.users.findIndex(x => x.id === u.id);
+    if (idx !== -1) {
+      window.AuthSystem.users[idx] = { ...u };
+    }
+
+    // Persist to storage
+    try {
+      localStorage.setItem('moon_users', JSON.stringify(window.AuthSystem.users));
+      localStorage.setItem('moon_session', JSON.stringify(u));
+      localStorage.setItem('moon_active_user_pfp', u.avatar);
+    } catch (err) {}
+
+    if (window.AppState) {
+      window.AppState.user = u;
+    }
+
+    window.AuthSystem.currentUser = u;
+    window.AuthSystem.updateAppForCurrentUser();
+
+    if (typeof window.renderLeaderboard === 'function') {
+      window.renderLeaderboard();
+    }
+
+    if (typeof closeModal === 'function') {
+      closeModal('modal-edit-profile');
+    }
+
+    if (typeof showToast === 'function') {
+      showToast('✅ Profile & PFP updated across the app!');
+    }
+    if (typeof triggerHaptic === 'function') triggerHaptic([30, 45]);
+  };
 
   // Auto-init on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', () => {

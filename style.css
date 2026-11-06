@@ -8788,13 +8788,72 @@ button:active,
    EDIT WORKOUT HISTORY MODAL
    ========================================================================== */
 .edit-history-modal-card {
-  max-width: 500px;
-  width: 94%;
+  max-width: 560px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   background: #0D070A;
   border: 1.5px solid rgba(224, 80, 106, 0.4);
   border-radius: 24px;
-  padding: 24px;
+  padding: 22px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(224, 80, 106, 0.15);
+  overflow: hidden;
+}
+
+.edit-history-body-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-right: 4px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.edit-history-stats-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(224, 80, 106, 0.25);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+
+.eh-stat-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.eh-stat-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.eh-stat-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  font-family: var(--font-mono);
+}
+
+.edit-history-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.edit-history-exercises-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 /* ==========================================================================
@@ -10495,6 +10554,310 @@ body.oled-true-black .streak-roadmap-card {
 #view-settings .workout-split-card:hover {
   border-color: rgba(168, 39, 65, 0.55) !important;
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 38px rgba(168, 39, 65, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ==========================================================================
+   PROFILE CUSTOMIZATION & PFP STYLES
+   ========================================================================== */
+.athlete-bio {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 4px;
+  font-style: italic;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.edit-profile-modal-card {
+  max-width: 460px;
+  width: 94%;
+  background: #0D070A;
+  border: 1.5px solid rgba(224, 80, 106, 0.4);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(224, 80, 106, 0.15);
+}
+
+.edit-pfp-uploader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.edit-pfp-avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2.5px solid var(--accent-maroon);
+  position: relative;
+  background: #140b10;
+  box-shadow: 0 0 20px rgba(168, 39, 65, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-pfp-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pfp-presets-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.pfp-preset-pill {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.pfp-preset-pill:hover,
+.pfp-preset-pill.active {
+  border-color: var(--accent-maroon);
+  background: rgba(224, 80, 106, 0.15);
+  transform: scale(1.1);
+}
+
+.nav-tab-pfp-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(224, 80, 106, 0.8);
+  box-shadow: 0 0 8px rgba(224, 80, 106, 0.5);
+  display: block;
+}
+
+.ath-avatar img,
+.aut-avatar img,
+#settings-user-avatar img,
+#user-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ==========================================================================
+   7-DAY DYNAMIC WORKOUT SPLIT BUILDER
+   ========================================================================== */
+.custom-split-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.split-select-menu {
+  width: 100%;
+  background: rgba(20, 12, 17, 0.95);
+  border: 1.5px solid rgba(168, 39, 65, 0.35);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.split-select-menu:focus {
+  border-color: var(--accent-maroon);
+  outline: none;
+  box-shadow: 0 0 12px rgba(168, 39, 65, 0.3);
+}
+
+.custom-split-builder-panel {
+  margin-top: 14px;
+  margin-bottom: 14px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1.5px solid rgba(168, 39, 65, 0.35);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.custom-builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.custom-builder-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.custom-builder-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+.custom-split-days-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.custom-split-day-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px 12px;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.custom-split-day-row.is-today {
+  border-color: rgba(224, 80, 106, 0.65);
+  box-shadow: 0 0 16px rgba(168, 39, 65, 0.25);
+  background: rgba(168, 39, 65, 0.08);
+}
+
+.custom-split-day-row.is-rest {
+  opacity: 0.78;
+  background: rgba(0, 0, 0, 0.35);
+  border-style: dashed;
+}
+
+.custom-day-header-col {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 68px;
+}
+
+.custom-day-abbr {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+
+.custom-day-full {
+  display: none;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+@media (min-width: 480px) {
+  .custom-day-header-col {
+    min-width: 100px;
+  }
+  .custom-day-full {
+    display: inline;
+  }
+}
+
+.custom-day-today-tag {
+  font-size: 0.58rem;
+  font-weight: 800;
+  background: var(--accent-maroon);
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.custom-day-input-col {
+  flex: 1;
+}
+
+.custom-split-name-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.84rem;
+  color: #fff;
+  transition: border-color 0.2s;
+}
+
+.custom-split-name-input:focus {
+  border-color: var(--accent-maroon);
+  outline: none;
+  box-shadow: 0 0 8px rgba(168, 39, 65, 0.3);
+}
+
+.custom-split-name-input.rest-muted {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.custom-day-action-col {
+  display: flex;
+  align-items: center;
+}
+
+.custom-day-status-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.custom-day-status-btn.btn-lift {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
+}
+
+.custom-day-status-btn.btn-lift:hover {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.custom-day-status-btn.btn-rest {
+  background: rgba(147, 51, 234, 0.15);
+  border: 1px solid rgba(147, 51, 234, 0.45);
+  color: #c084fc;
+}
+
+.custom-day-status-btn.btn-rest:hover {
+  background: rgba(147, 51, 234, 0.25);
 }
 
 

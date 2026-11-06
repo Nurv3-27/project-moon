@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=67">
+  <link rel="stylesheet" href="style.css?v=68">
 </head>
 <body>
   <!-- ANIMATED THREE-STAGE INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
@@ -727,6 +727,9 @@
             <span class="greeting-subtitle">LOGBOOK</span>
             <h1 class="hero-title">Workout History</h1>
           </div>
+          <button type="button" class="primary-glow-btn small-btn" onclick="openEditHistoryModal(null)" title="Log a missed workout session set-by-set">
+            + Log Missed Workout
+          </button>
         </div>
 
         <div id="history-list" class="history-list">
@@ -1590,9 +1593,11 @@
                 <span class="athlete-gender-pill" id="settings-user-gender">♂ Male Athlete</span>
                 <span class="athlete-coach-pill" id="settings-user-coach">⚡ Assigned AI: Coach Nurv</span>
               </div>
+              <p class="athlete-bio" id="settings-user-bio">Defying gravity, conquering every plateau. Taking it to the moon.</p>
             </div>
           </div>
           <div class="athlete-profile-actions">
+            <button type="button" class="primary-glow-btn small-btn" onclick="openEditProfileModal()">✏️ Edit Profile</button>
             <button type="button" class="secondary-btn small-btn" onclick="openAICoachModal()">💬 Talk to Coach</button>
             <button type="button" class="secondary-btn small-btn" onclick="window.AuthSystem.toggleCoach()" title="Toggle between Coach Nurv and Coach Maryam">🔄 Switch AI Coach</button>
             <button type="button" class="secondary-btn small-btn" onclick="openAuthModal()">Switch / Sign In</button>
@@ -1696,9 +1701,26 @@
               </div>
             </div>
 
-            <!-- Split Presets Grid -->
+            <!-- Split Presets & Dropdown -->
             <div class="split-section-block">
-              <label class="split-field-label">SELECT YOUR WORKOUT SPLIT</label>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label class="split-field-label" style="margin:0;">SELECT YOUR WORKOUT SPLIT</label>
+                <span class="custom-split-tag">7-Day Adaptive</span>
+              </div>
+
+              <!-- Quick Dropdown with Custom option -->
+              <div class="split-dropdown-container" style="margin-bottom:12px;">
+                <select id="split-type-dropdown" class="ios-select split-select-menu" onchange="selectWorkoutSplitPreset(this.value)">
+                  <option value="PPL">Push / Pull / Legs (PPL) • 5 Days On / 2 Off</option>
+                  <option value="UpperLower">Upper / Lower • 4 Days On / 3 Off</option>
+                  <option value="FullBody">Full Body (3x) • 3 Days On / 4 Off</option>
+                  <option value="Arnold">Arnold Split (6x) • 6 Days On / 1 Off</option>
+                  <option value="BroSplit">Bro Split (5x) • 5 Days On / 2 Off</option>
+                  <option value="Custom">Custom • 7-Day Personalized Schedule Builder</option>
+                </select>
+              </div>
+
+              <!-- Visual Preset Chips Grid -->
               <div class="split-presets-grid" id="split-presets-grid">
                 <button type="button" class="split-preset-btn active" data-split-type="PPL" onclick="selectWorkoutSplitPreset('PPL')">
                   <span class="sp-name">Push / Pull / Legs (PPL)</span>
@@ -1724,6 +1746,22 @@
                   <span class="sp-name">Custom Split</span>
                   <span class="sp-desc">Personalized Training &amp; Rest Days</span>
                 </button>
+              </div>
+            </div>
+
+            <!-- Dynamic 7-Day Custom Split Builder (Revealed when Custom is selected) -->
+            <div id="custom-split-builder-panel" class="custom-split-builder-panel hidden">
+              <div class="custom-builder-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:1.1rem;">🗓️</span>
+                  <div>
+                    <h4 class="custom-builder-title">7-Day Custom Split Builder</h4>
+                    <span class="custom-builder-sub">Type your daily workout focus or toggle as Rest. Reminders fire strictly to this schedule.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="custom-split-days-list" id="custom-split-days-list">
+                <!-- Dynamically populated with Monday through Sunday inputs -->
               </div>
             </div>
 
@@ -2254,10 +2292,13 @@
       </button>
 
       <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
+        <div class="nav-tab-avatar-wrap">
+          <svg class="tab-icon" id="nav-tab-settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <img id="nav-tab-pfp-img" class="nav-tab-pfp-img hidden" alt="PFP">
+        </div>
         <span class="tab-label">Settings</span>
       </button>
     </nav>
@@ -2969,15 +3010,92 @@
     </div>
   </div>
 
-  <!-- ==================== EDIT WORKOUT HISTORY MODAL ==================== -->
+  <!-- ==================== EDIT ATHLETE PROFILE MODAL ==================== -->
+  <div id="modal-edit-profile" class="modal-overlay hidden" onclick="if(event.target===this)closeModal('modal-edit-profile')">
+    <div class="modal-card edit-profile-modal-card">
+      <div class="cyber-corner-bracket top-left"></div>
+      <div class="cyber-corner-bracket bottom-right"></div>
+      <div class="modal-header">
+        <div class="modal-header-left" style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.4rem;">👤</span>
+          <div>
+            <h3>Edit Athlete Profile</h3>
+            <span class="admin-badge-sub">Custom avatar picture, display identity &amp; personal bio</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('modal-edit-profile')">&times;</button>
+      </div>
+
+      <form id="edit-profile-form" onsubmit="saveUserProfileEdit(event)" class="edit-profile-form">
+        <!-- PFP Preview & Uploader -->
+        <div class="edit-pfp-uploader-container">
+          <div class="edit-pfp-avatar-preview" id="edit-pfp-preview-wrap">
+            <span id="edit-pfp-preview-symbol">♂</span>
+            <img id="edit-pfp-preview-img" class="edit-pfp-img hidden" alt="PFP Preview">
+          </div>
+          <div class="edit-pfp-btn-group">
+            <button type="button" class="primary-glow-btn small-btn" onclick="document.getElementById('edit-profile-pfp-input').click()">
+              📷 Upload Custom PFP
+            </button>
+            <input type="file" id="edit-profile-pfp-input" accept="image/*" style="display:none;" onchange="handlePfpFileSelected(event)">
+            <button type="button" class="secondary-btn small-btn" onclick="resetPfpToDefault()">
+              🔄 Reset Avatar
+            </button>
+          </div>
+        </div>
+
+        <!-- Preset Avatar Badges Row -->
+        <div class="edit-pfp-presets-row">
+          <span class="preset-label">OR QUICK ICON:</span>
+          <div class="pfp-presets-list">
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('♂')">♂</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('♀')">♀</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('👑')">👑</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('⚡')">⚡</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🐺')">🐺</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🦁')">🦁</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🦾')">🦾</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🚀')">🚀</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🌑')">🌑</button>
+          </div>
+        </div>
+
+        <!-- Display Name -->
+        <div class="form-group" style="margin-top:14px;margin-bottom:12px;">
+          <label class="form-label" for="edit-profile-display-name" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">DISPLAY NAME</label>
+          <input type="text" id="edit-profile-display-name" class="ios-input" required placeholder="Your Athlete Name">
+        </div>
+
+        <!-- Personal Bio -->
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label" for="edit-profile-bio" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">PERSONAL ATHLETE BIO</label>
+          <textarea id="edit-profile-bio" class="notes-textarea" rows="3" maxlength="280" placeholder="Type your personal fitness bio, PR goals, or motto..."></textarea>
+          <span class="form-help-sub" style="font-size:0.7rem;color:var(--text-muted);display:block;margin-top:4px;">Displayed on your athlete profile card in Settings and Obsidian Citadel leaderboards.</span>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="submit" class="primary-glow-btn full-width">
+            <span>💾 Save Profile</span>
+          </button>
+          <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="closeModal('modal-edit-profile')">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== EDIT WORKOUT HISTORY MODAL (ACTIVE WORKOUT UI REDESIGN) ==================== -->
   <div id="modal-edit-history" class="modal-overlay hidden">
     <div class="modal-card edit-history-modal-card">
+      <div class="cyber-corner-bracket top-left"></div>
+      <div class="cyber-corner-bracket bottom-right"></div>
       <div class="modal-header">
         <div class="modal-header-left" style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:1.4rem;">✏️</span>
           <div>
-            <h3>Edit Workout History</h3>
-            <span class="admin-badge-sub">Alter logged duration, date, weights or notes</span>
+            <h3 id="edit-history-modal-heading">Edit Workout History</h3>
+            <span class="admin-badge-sub">Log missed sets, exercises, and weights set-by-set</span>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeModal('modal-edit-history')">&times;</button>
@@ -2988,12 +3106,12 @@
         
         <div class="form-group" style="margin-bottom:12px;">
           <label class="form-label" for="edit-history-title" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">WORKOUT ROUTINE TITLE</label>
-          <input type="text" id="edit-history-title" class="ios-input" required placeholder="e.g. Chest & Triceps">
+          <input type="text" id="edit-history-title" class="ios-input" required placeholder="e.g. Legs Hypertrophy">
         </div>
 
         <div class="form-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
           <div class="form-group">
-            <label class="form-label" for="edit-history-date" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">LOGGED DATE</label>
+            <label class="form-label" for="edit-history-date" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">LOGGED DATE &amp; TIME</label>
             <input type="datetime-local" id="edit-history-date" class="ios-input" required>
           </div>
           <div class="form-group">
@@ -3002,31 +3120,45 @@
           </div>
         </div>
 
-        <div class="form-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-          <div class="form-group">
-            <label class="form-label" for="edit-history-volume" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">TOTAL VOLUME (KG/LBS)</label>
-            <input type="number" id="edit-history-volume" class="ios-input" min="0" step="1" required placeholder="e.g. 5400">
+        <!-- Live Volume & Sets Summary Bar -->
+        <div class="edit-history-stats-bar">
+          <div class="eh-stat-pill">
+            <span class="eh-stat-label">TOTAL VOLUME:</span>
+            <strong id="edit-history-live-volume" class="eh-stat-val">0 KG</strong>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="edit-history-sets" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">COMPLETED SETS</label>
-            <input type="number" id="edit-history-sets" class="ios-input" min="1" max="100" required placeholder="e.g. 12">
+          <div class="eh-stat-pill">
+            <span class="eh-stat-label">COMPLETED SETS:</span>
+            <strong id="edit-history-live-sets" class="eh-stat-val">0</strong>
           </div>
         </div>
 
-        <div class="form-group" style="margin-bottom:16px;">
-          <label class="form-label" for="edit-history-notes" style="display:block;margin-bottom:6px;font-size:0.75rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;">EXERCISES &amp; NOTES SUMMARY</label>
-          <textarea id="edit-history-notes" class="notes-textarea" rows="3" placeholder="Exercises performed, time constraints notes..."></textarea>
+        <!-- Exercises Section Header with Add Exercise Button -->
+        <div class="edit-history-section-header">
+          <div style="display:flex; flex-direction:column;">
+            <span class="edit-section-title">LOGGED EXERCISES</span>
+            <span class="edit-section-sub">Configure sets, weights &amp; reps mirroring active workout UI</span>
+          </div>
+          <button type="button" class="primary-glow-btn small-btn" onclick="openExercisePicker('edit_history')">
+            + Add Exercise
+          </button>
         </div>
 
-        <div class="modal-actions-row">
+        <!-- Scrollable Exercises Container (Mirroring Active Workout Session Cards) -->
+        <div id="edit-history-exercises-list" class="edit-history-exercises-list">
+          <!-- Populated dynamically with .exercise-session-card elements -->
+        </div>
+
+        <div class="modal-actions-row" style="margin-top:16px;">
           <button type="submit" class="primary-glow-btn full-width">
-            <span>💾 Save Changes</span>
+            <span>💾 Save Workout History</span>
           </button>
           <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="closeModal('modal-edit-history')">
             Cancel
           </button>
         </div>
       </form>
+    </div>
+  </div>
     </div>
   </div>
 
@@ -3175,8 +3307,8 @@
   </div>
 
   <script src="i18n.js?v=67"></script>
-  <script src="auth.js?v=67"></script>
-  <script src="app.js?v=67"></script>
+  <script src="auth.js?v=68"></script>
+  <script src="app.js?v=68"></script>
   <script src="camera.js?v=67"></script>
   <script src="ranks.js?v=67"></script>
 </body>

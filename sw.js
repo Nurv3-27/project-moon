@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v65';
+const CACHE_NAME = 'moon-v66';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,6 +12,11 @@ const ASSETS_TO_CACHE = [
   './NativeTabPager.js',
   './ig_webview_injection.js',
   './moon_logo.png',
+  './cosmic_moon_asset.png',
+  './cosmic_earth_asset.png',
+  './cosmic_chrome_asset.png',
+  './cosmic_rose_asset.png',
+  './cosmic_nebula_asset.png',
   './marvel_coaches.png',
   './coach_spiderman.png',
   './coach_blackcat.png',

@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=65">
+  <link rel="stylesheet" href="style.css?v=66">
 </head>
 <body>
   <!-- ANIMATED THREE-STAGE INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
@@ -341,26 +341,45 @@
 
             <!-- Mission Status Bar -->
             <div class="cosmic-status-bar">
-              <span id="cosmic-distance-text"><strong>10 Days Remaining</strong> to Moon Landing</span>
+              <div class="cosmic-distance-wrap">
+                <span id="cosmic-distance-text"><strong>10 Days Remaining</strong> to Moon Landing <span class="cosmic-station-badge">(Station 0/10)</span></span>
+              </div>
               <div class="cosmic-quick-controls">
                 <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(0)" title="Reset to Earth">Earth</button>
-                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(3)" title="Jump to Day 3">Day 3</button>
-                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(7)" title="Jump to Day 7">Day 7</button>
+                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(7)" title="Jump to Day 7">Titan</button>
+                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(8)" title="Jump to Day 8">Rose</button>
+                <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(9)" title="Jump to Day 9">Chrome</button>
                 <button type="button" class="cosmic-sim-btn" onclick="setDemoStreak(10)" title="Land on Moon">Moon</button>
               </div>
             </div>
 
-            <!-- Winding Cosmic Roadmap Stage -->
+            <!-- Winding Cosmic Roadmap Stage with Textured Celestial Asteroids & Spaced Path -->
             <div class="cosmic-roadmap-stage">
+              <!-- Orbit track SVG connector flowing between stations -->
+              <svg class="cosmic-orbit-track-svg" viewBox="0 0 360 880" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="cosmicPathGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.5"/>
+                    <stop offset="35%" stop-color="#e2e8f0" stop-opacity="0.45"/>
+                    <stop offset="65%" stop-color="#fb7185" stop-opacity="0.5"/>
+                    <stop offset="85%" stop-color="#c084fc" stop-opacity="0.55"/>
+                    <stop offset="100%" stop-color="#e11d48" stop-opacity="0.75"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 180 840 C 180 760, 290 730, 290 650 C 290 570, 180 540, 180 460 C 180 380, 70 350, 70 270 C 70 190, 180 150, 180 60"
+                      fill="none" stroke="url(#cosmicPathGrad)" stroke-width="3" stroke-dasharray="8 8" stroke-linecap="round"/>
+              </svg>
+
               <div class="cosmic-nodes-track">
                 <!-- Node 0: EARTH (Start Station • Day 0) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node active-station" id="celestial-node-0" onclick="inspectAsteroidNode(0)">
                     <div class="earth-planet-body">
+                      <img src="cosmic_earth_asset.png" alt="Earth" class="celestial-texture-img" onerror="this.style.display='none';">
                       <span class="earth-continent-swirl">🌍</span>
                     </div>
                     <div class="celestial-node-meta">
-                      <span class="node-title">🌍 EARTH</span>
+                      <span class="node-title earth-node-title">Earth</span>
                       <span class="node-sub">Launchpad &bull; Day 0</span>
                     </div>
                   </div>
@@ -369,7 +388,9 @@
                 <!-- Node 1: Ruby Igniter (Day 1) -->
                 <div class="cosmic-node-row pos-left">
                   <div class="celestial-node" id="celestial-node-1" onclick="inspectAsteroidNode(1)">
-                    <div class="asteroid-rock-body ast-color-ruby">1</div>
+                    <div class="asteroid-rock-body ast-color-ruby">
+                      <span class="ast-crater-num">1</span>
+                    </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Ruby Igniter</span>
                       <span class="node-sub">Day 1 Streak</span>
@@ -380,7 +401,9 @@
                 <!-- Node 2: Amber Thruster (Day 2) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-2" onclick="inspectAsteroidNode(2)">
-                    <div class="asteroid-rock-body ast-color-amber">2</div>
+                    <div class="asteroid-rock-body ast-color-amber">
+                      <span class="ast-crater-num">2</span>
+                    </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Amber Thruster</span>
                       <span class="node-sub">Day 2 Streak</span>
@@ -391,7 +414,9 @@
                 <!-- Node 3: Golden Sling (Day 3) -->
                 <div class="cosmic-node-row pos-right">
                   <div class="celestial-node" id="celestial-node-3" onclick="inspectAsteroidNode(3)">
-                    <div class="asteroid-rock-body ast-color-gold">3</div>
+                    <div class="asteroid-rock-body ast-color-gold">
+                      <span class="ast-crater-num">3</span>
+                    </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Golden Sling</span>
                       <span class="node-sub">Day 3 Streak</span>
@@ -402,7 +427,9 @@
                 <!-- Node 4: Emerald Belt (Day 4) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-4" onclick="inspectAsteroidNode(4)">
-                    <div class="asteroid-rock-body ast-color-emerald">4</div>
+                    <div class="asteroid-rock-body ast-color-emerald">
+                      <span class="ast-crater-num">4</span>
+                    </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Emerald Belt</span>
                       <span class="node-sub">Day 4 Streak</span>
@@ -413,7 +440,9 @@
                 <!-- Node 5: Cyan Comet (Day 5) -->
                 <div class="cosmic-node-row pos-left">
                   <div class="celestial-node" id="celestial-node-5" onclick="inspectAsteroidNode(5)">
-                    <div class="asteroid-rock-body ast-color-cyan">5</div>
+                    <div class="asteroid-rock-body ast-color-cyan">
+                      <span class="ast-crater-num">5</span>
+                    </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Cyan Comet</span>
                       <span class="node-sub">Day 5 Streak</span>
@@ -424,7 +453,9 @@
                 <!-- Node 6: Cobalt Void (Day 6) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-6" onclick="inspectAsteroidNode(6)">
-                    <div class="asteroid-rock-body ast-color-sapphire">6</div>
+                    <div class="asteroid-rock-body ast-color-sapphire">
+                      <span class="ast-crater-num">6</span>
+                    </div>
                     <div class="celestial-node-meta">
                       <span class="node-title">Cobalt Void</span>
                       <span class="node-sub">Day 6 Streak</span>
@@ -432,49 +463,58 @@
                   </div>
                 </div>
 
-                <!-- Node 7: Nebula Crown (Day 7 Milestone) -->
-                <div class="cosmic-node-row pos-right">
+                <!-- Node 7: Nebula Crown / Titan (Day 7 Milestone) -->
+                <div class="cosmic-node-row pos-left">
                   <div class="celestial-node" id="celestial-node-7" onclick="inspectAsteroidNode(7)">
-                    <div class="asteroid-rock-body ast-color-amethyst">7</div>
+                    <div class="asteroid-rock-body ast-textured-body ast-color-amethyst">
+                      <img src="cosmic_nebula_asset.png" alt="Nebula Crown" class="celestial-texture-img" onerror="this.style.display='none';">
+                      <span class="ast-crater-num">7</span>
+                    </div>
                     <div class="celestial-node-meta">
-                      <span class="node-title">Nebula Crown</span>
-                      <span class="node-sub">1-Week Titan</span>
+                      <span class="node-title nebula-node-title">Nebula Crown</span>
+                      <span class="node-sub">Titan Station &bull; Day 7 Streak</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Node 8: Rose Valkyrie (Day 8) -->
+                <!-- Node 8: Rose Valkyrie (Day 8 Milestone) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-8" onclick="inspectAsteroidNode(8)">
-                    <div class="asteroid-rock-body ast-color-rose">8</div>
+                    <div class="asteroid-rock-body ast-textured-body ast-color-rose">
+                      <img src="cosmic_rose_asset.png" alt="Rose Valkyrie" class="celestial-texture-img" onerror="this.style.display='none';">
+                      <span class="ast-crater-num">8</span>
+                    </div>
                     <div class="celestial-node-meta">
-                      <span class="node-title">Rose Valkyrie</span>
+                      <span class="node-title rose-node-title">Rose Valkyrie</span>
                       <span class="node-sub">Day 8 Streak</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Node 9: Chrome Sentinel (Day 9) -->
-                <div class="cosmic-node-row pos-left">
+                <!-- Node 9: Chrome Sentinel (Day 9 Milestone) -->
+                <div class="cosmic-node-row pos-right">
                   <div class="celestial-node" id="celestial-node-9" onclick="inspectAsteroidNode(9)">
-                    <div class="asteroid-rock-body ast-color-chrome">9</div>
+                    <div class="asteroid-rock-body ast-textured-body ast-color-chrome">
+                      <img src="cosmic_chrome_asset.png" alt="Chrome Sentinel" class="celestial-texture-img" onerror="this.style.display='none';">
+                      <span class="ast-crater-num">9</span>
+                    </div>
                     <div class="celestial-node-meta">
-                      <span class="node-title">Chrome Sentinel</span>
+                      <span class="node-title chrome-node-title">Chrome Sentinel</span>
                       <span class="node-sub">Day 9 Streak</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Node 10: MAROON MOON (Destination • Day 10+ Lunar Conqueror) -->
+                <!-- Node 10: MAROON MOON (Destination • Lunar Citadel) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-10" onclick="inspectAsteroidNode(10)">
                     <div class="maroon-moon-body">
-                      <span class="moon-crater-texture">🌑</span>
+                      <img src="cosmic_moon_asset.png" alt="Maroon Moon" class="celestial-texture-img" onerror="this.style.display='none';">
                       <span class="moon-flag-badge">🚩 MOON CITADEL</span>
                     </div>
                     <div class="celestial-node-meta">
-                      <span class="node-title" style="color:#FFA8BA;">MAROON MOON</span>
-                      <span class="node-sub">Target Destination</span>
+                      <span class="node-title moon-node-title">MAROON MOON</span>
+                      <span class="node-sub moon-node-sub">Target Destination</span>
                     </div>
                   </div>
                 </div>
@@ -2787,23 +2827,25 @@
   <div id="modal-session-destination" class="modal-overlay hidden" onclick="handleDestinationOverlayClick(event)">
     <div class="modal-card destination-modal-card">
       <div class="modal-header destination-modal-header">
-        <div class="auth-brand-badge">
-          <span class="auth-brand-dot"></span>
+        <div class="auth-brand-badge session-router-badge">
+          <span class="auth-brand-dot session-router-dot"></span>
           <span>SESSION ROUTER</span>
         </div>
-        <button class="modal-close-btn" onclick="closeModal('modal-session-destination')">&times;</button>
+        <button class="modal-close-btn" onclick="closeModal('modal-session-destination')" aria-label="Close Router">&times;</button>
       </div>
 
       <div class="destination-hero-copy">
-        <h2 class="destination-title" data-i18n="destination_modal_title">Choose Your Destination</h2>
-        <p class="destination-sub" id="destination-user-greeting">Welcome back, Athlete &bull; Select your initial destination for this session:</p>
+        <h2 class="destination-title" data-i18n="destination_modal_title">CHOOSE YOUR DESTINATION</h2>
+        <p class="destination-sub" id="destination-user-greeting">Welcome back, Moon Architect &bull; Select your initial destination for this session:</p>
       </div>
 
       <div class="destination-choice-grid">
-        <!-- FOCUS BUTTON: Large Interactive Button -->
+        <!-- FOCUS BUTTON: Centered Interactive Card Component -->
         <button type="button" class="dest-large-choice-btn dest-choice-focus" id="btn-dest-choice-focus" onclick="selectSessionDestination('focus')">
           <div class="dest-icon-circle focus-icon-circle">
-            <span>🛡️</span>
+            <svg class="dest-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
           </div>
           <div class="dest-btn-info">
             <span class="dest-kicker-tag">ANTI-SCROLL SHIELD</span>
@@ -2813,10 +2855,12 @@
           <span class="dest-arrow-icon">&rarr;</span>
         </button>
 
-        <!-- WORKOUT BUTTON: Large Interactive Button -->
+        <!-- WORKOUT BUTTON: Centered Interactive Card Component -->
         <button type="button" class="dest-large-choice-btn dest-choice-workout" id="btn-dest-choice-workout" onclick="selectSessionDestination('workout')">
           <div class="dest-icon-circle workout-icon-circle">
-            <span>🏋️</span>
+            <svg class="dest-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"/>
+            </svg>
           </div>
           <div class="dest-btn-info">
             <span class="dest-kicker-tag">TRAINING &amp; PROGRESSION</span>
@@ -3029,11 +3073,11 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=65"></script>
-  <script src="auth.js?v=65"></script>
-  <script src="app.js?v=65"></script>
-  <script src="camera.js?v=65"></script>
-  <script src="ranks.js?v=65"></script>
+  <script src="i18n.js?v=66"></script>
+  <script src="auth.js?v=66"></script>
+  <script src="app.js?v=66"></script>
+  <script src="camera.js?v=66"></script>
+  <script src="ranks.js?v=66"></script>
 </body>
 </html>
 

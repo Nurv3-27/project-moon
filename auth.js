@@ -611,7 +611,7 @@
       if (typeof window.openModal === 'function') {
         const greetingEl = document.getElementById('destination-user-greeting');
         if (greetingEl) {
-          const name = user && (user.displayName || user.name || user.username) ? (user.displayName || user.name || user.username) : 'Athlete';
+          const name = user && (user.displayName || user.name || user.username) ? (user.displayName || user.name || user.username) : 'Moon Architect';
           greetingEl.textContent = `Welcome back, ${name} \u2022 Select your initial destination for this session:`;
         }
         window.openModal('modal-session-destination');

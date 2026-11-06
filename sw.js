@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v66';
+const CACHE_NAME = 'moon-v67';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -17,6 +17,12 @@ const ASSETS_TO_CACHE = [
   './cosmic_chrome_asset.png',
   './cosmic_rose_asset.png',
   './cosmic_nebula_asset.png',
+  './cosmic_ruby_asset.png',
+  './cosmic_amber_asset.png',
+  './cosmic_gold_asset.png',
+  './cosmic_emerald_asset.png',
+  './cosmic_cyan_asset.png',
+  './cosmic_sapphire_asset.png',
   './marvel_coaches.png',
   './coach_spiderman.png',
   './coach_blackcat.png',

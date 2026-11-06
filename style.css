@@ -5411,35 +5411,94 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   opacity: 1;
 }
 
-/* --- Settings: Athlete Profile & Admin CTA --- */
+/* --- Settings: Athlete Profile & Admin CTA with Futuristic Graphics --- */
 .athlete-profile-card {
-  background: var(--bg-card);
-  border: 1.5px solid rgba(224, 80, 106, 0.25);
-  border-radius: 20px;
-  padding: 20px;
-  margin-bottom: 18px;
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
+  position: relative;
+  background: linear-gradient(135deg, rgba(28, 10, 18, 0.85) 0%, rgba(14, 7, 12, 0.95) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(168, 39, 65, 0.4);
+  border-radius: 22px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75), 0 0 32px rgba(168, 39, 65, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  overflow: hidden;
 }
 .athlete-profile-top {
   display: flex;
   gap: 16px;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 .athlete-avatar-wrap {
+  position: relative;
   width: 58px;
   height: 58px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #2E0B14, #4A0E1C);
-  border: 1.5px solid var(--accent-lime);
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #4a0e1c 0%, #1e060d 100%) !important;
+  border: 1.5px solid rgba(224, 80, 106, 0.6) !important;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.7rem;
-  box-shadow: 0 4px 16px rgba(224, 80, 106, 0.25);
+  box-shadow: 0 0 22px rgba(168, 39, 65, 0.4) !important;
   flex-shrink: 0;
+}
+.athlete-avatar-svg-frame {
+  position: absolute;
+  width: 68px;
+  height: 68px;
+  top: -5px;
+  left: -5px;
+  pointer-events: none;
+  animation: avatarRingSpin 20s linear infinite;
+}
+@keyframes avatarRingSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.athlete-card-svg-bg,
+.admin-card-svg-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+.cyber-corner-bracket {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 3;
+}
+.cyber-corner-bracket.top-left {
+  top: 7px;
+  left: 7px;
+  border-top: 2px solid rgba(168, 39, 65, 0.85);
+  border-left: 2px solid rgba(168, 39, 65, 0.85);
+}
+.cyber-corner-bracket.bottom-right {
+  bottom: 7px;
+  right: 7px;
+  border-bottom: 2px solid rgba(168, 39, 65, 0.85);
+  border-right: 2px solid rgba(168, 39, 65, 0.85);
+}
+.cyber-corner-bracket.gold.top-left {
+  border-top-color: #ffd60a;
+  border-left-color: #ffd60a;
+}
+.cyber-corner-bracket.gold.bottom-right {
+  border-bottom-color: #ffd60a;
+  border-right-color: #ffd60a;
 }
 .athlete-profile-meta {
   flex: 1;
+  position: relative;
+  z-index: 2;
 }
 .athlete-title-row {
   display: flex;
@@ -5448,7 +5507,7 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   flex-wrap: wrap;
 }
 .athlete-display-name {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: #FFF;
   margin: 0;
@@ -5483,6 +5542,8 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   gap: 8px;
   margin-top: 16px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
 }
 .danger-ghost-btn {
   background: transparent;
@@ -5501,18 +5562,33 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
 }
 
 .admin-citadel-cta-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 14px;
-  background: linear-gradient(135deg, #1C0A11 0%, #2E0A17 100%);
-  border: 1.5px solid #FFD60A;
+  background: linear-gradient(140deg, #18080f 0%, #290a16 50%, #12040a 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 214, 10, 0.55);
   border-radius: 22px;
   padding: 24px 22px;
   margin-bottom: 24px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(255, 214, 10, 0.12);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.8), 0 0 35px rgba(168, 39, 65, 0.35), 0 0 25px rgba(255, 214, 10, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15);
   width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
+}
+.admin-cta-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+.admin-citadel-svg-crest {
+  filter: drop-shadow(0 0 10px rgba(255, 214, 10, 0.5));
 }
 .admin-cta-badge {
   font-size: 0.72rem;
@@ -5522,18 +5598,21 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 214, 10, 0.12);
-  border: 1px solid rgba(255, 214, 10, 0.35);
-  padding: 4px 12px;
+  background: rgba(255, 214, 10, 0.14);
+  border: 1px solid rgba(255, 214, 10, 0.4);
+  padding: 5px 14px;
   border-radius: 99px;
   margin: 0;
   text-transform: uppercase;
+  box-shadow: 0 0 12px rgba(255, 214, 10, 0.2);
 }
 .admin-cta-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 .admin-citadel-cta-card h3,
 .admin-cta-title {
@@ -5554,7 +5633,7 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
 .admin-cta-desc {
   font-family: var(--font-sans);
   font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.76);
   margin: 0;
   line-height: 1.55;
   word-break: break-word;
@@ -5562,6 +5641,10 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   white-space: normal;
   width: 100%;
   text-align: left;
+}
+.admin-citadel-cta-card .primary-glow-btn {
+  position: relative;
+  z-index: 2;
 }
 
 /* --- Auth Modal & Pitch-Black Pitch --- */
@@ -7718,11 +7801,7 @@ body.has-active-rest-bar .tab-coach-chat-bubble {
   overflow: hidden;
 }
 .earth-continent-swirl {
-  position: absolute;
-  font-size: 2.2rem;
-  line-height: 1;
-  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.8));
-  pointer-events: none;
+  display: none !important;
 }
 
 /* Custom Maroon Moon Body (Top Station 10) */
@@ -10138,6 +10217,284 @@ body.oled-true-black .streak-roadmap-card {
 
 .setting-btn-demo:active {
   transform: scale(0.96) !important;
+}
+
+/* ==================== EDIT WORKOUT HISTORY UI FIX ==================== */
+/* Match 'KG' and 'REPS' inputs: dark background, subtle maroon border, rounded corners, light text */
+.notes-textarea,
+#edit-history-notes {
+  background: #0d0d14 !important;
+  border: 1.5px solid rgba(168, 39, 65, 0.45) !important;
+  color: #f1f5f9 !important;
+  border-radius: 10px !important;
+  padding: 12px 14px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  resize: vertical !important;
+  min-height: 90px !important;
+  line-height: 1.55 !important;
+  transition: all 0.2s ease !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+.notes-textarea:focus,
+#edit-history-notes:focus {
+  background: #141420 !important;
+  border-color: #a82741 !important;
+  box-shadow: 0 0 16px rgba(168, 39, 65, 0.45), inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+.notes-textarea::placeholder,
+#edit-history-notes::placeholder {
+  color: rgba(241, 245, 249, 0.4) !important;
+}
+
+.edit-history-modal-card .ios-input {
+  background: #0d0d14 !important;
+  border: 1.5px solid rgba(168, 39, 65, 0.38) !important;
+  color: #f1f5f9 !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35) !important;
+}
+
+.edit-history-modal-card .ios-input:focus {
+  background: #141420 !important;
+  border-color: #a82741 !important;
+  box-shadow: 0 0 14px rgba(168, 39, 65, 0.45) !important;
+}
+
+/* ==================== CELESTIAL ASTEROID 3D VIEWER MODAL ==================== */
+.asteroid-viewer-modal-card {
+  --asteroid-accent: #a82741;
+  position: relative;
+  background: linear-gradient(145deg, rgba(22, 10, 18, 0.96) 0%, rgba(12, 6, 14, 0.98) 100%) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1.5px solid rgba(168, 39, 65, 0.5) !important;
+  border-radius: 24px !important;
+  padding: 24px 22px !important;
+  max-width: 440px !important;
+  width: 92% !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 45px rgba(168, 39, 65, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: modalScaleUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.asteroid-viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.asteroid-station-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.asteroid-station-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: rgba(168, 39, 65, 0.2);
+  border: 1px solid rgba(168, 39, 65, 0.45);
+  color: #fecdd3;
+  text-transform: uppercase;
+}
+
+.asteroid-status-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+.asteroid-status-tag.status-active {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fde68a;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+}
+
+.asteroid-status-tag.status-unlocked {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #a7f3d0;
+}
+
+.asteroid-status-tag.status-locked {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 3D Showcase Container */
+.asteroid-showcase-container {
+  position: relative;
+  width: 100%;
+  height: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(35, 12, 24, 0.45) 0%, rgba(10, 5, 10, 0.85) 75%);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.asteroid-atmospheric-halo {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  box-shadow: 0 0 75px #a82741, inset 0 0 35px #a82741;
+  background: radial-gradient(circle, rgba(168, 39, 65, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+  animation: haloPulse 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes haloPulse {
+  0% { transform: scale(0.92); opacity: 0.65; }
+  100% { transform: scale(1.08); opacity: 0.95; }
+}
+
+.asteroid-full-3d-asset {
+  position: relative;
+  z-index: 2;
+  width: 175px;
+  height: 175px;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.9));
+  animation: asteroidFloat 4s ease-in-out infinite alternate;
+}
+
+@keyframes asteroidFloat {
+  0% { transform: translateY(-4px) rotate(0deg); }
+  50% { transform: translateY(3px) rotate(1.5deg); }
+  100% { transform: translateY(-4px) rotate(-1.5deg); }
+}
+
+.asteroid-scanner-reticle {
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: reticleSpin 25s linear infinite;
+}
+
+@keyframes reticleSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Telemetry Information */
+.asteroid-telemetry-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.asteroid-viewer-title {
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 16px rgba(224, 80, 106, 0.4);
+}
+
+.asteroid-viewer-subtitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: -2px;
+}
+
+.asteroid-viewer-lore {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 4px 0 8px 0;
+}
+
+/* Telemetry Grid */
+.asteroid-telemetry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.telemetry-cell {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(168, 39, 65, 0.25);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+}
+
+.telemetry-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.asteroid-viewer-actions {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ==================== SETTINGS SCREEN ENHANCED FIDELITY ==================== */
+#view-settings .settings-group,
+#view-settings .ios-install-hero-card,
+#view-settings .workout-split-card {
+  background: rgba(18, 10, 15, 0.8) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1.5px solid rgba(168, 39, 65, 0.3) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.72), 0 0 30px rgba(168, 39, 65, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+#view-settings .settings-group:hover,
+#view-settings .ios-install-hero-card:hover,
+#view-settings .workout-split-card:hover {
+  border-color: rgba(168, 39, 65, 0.55) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 38px rgba(168, 39, 65, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
 }
 
 

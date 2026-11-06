@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=66">
+  <link rel="stylesheet" href="style.css?v=67">
 </head>
 <body>
   <!-- ANIMATED THREE-STAGE INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
@@ -375,8 +375,7 @@
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node active-station" id="celestial-node-0" onclick="inspectAsteroidNode(0)">
                     <div class="earth-planet-body">
-                      <img src="cosmic_earth_asset.png" alt="Earth" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="earth-continent-swirl">🌍</span>
+                      <img src="cosmic_earth_asset.png" alt="Earth Launchpad" class="celestial-texture-img" onerror="this.style.display='none';">
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title earth-node-title">Earth</span>
@@ -388,7 +387,8 @@
                 <!-- Node 1: Ruby Igniter (Day 1) -->
                 <div class="cosmic-node-row pos-left">
                   <div class="celestial-node" id="celestial-node-1" onclick="inspectAsteroidNode(1)">
-                    <div class="asteroid-rock-body ast-color-ruby">
+                    <div class="asteroid-rock-body ast-textured-body ast-color-ruby">
+                      <img src="cosmic_ruby_asset.png" alt="Ruby Igniter" class="celestial-texture-img" onerror="this.style.display='none';">
                       <span class="ast-crater-num">1</span>
                     </div>
                     <div class="celestial-node-meta">
@@ -401,7 +401,8 @@
                 <!-- Node 2: Amber Thruster (Day 2) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-2" onclick="inspectAsteroidNode(2)">
-                    <div class="asteroid-rock-body ast-color-amber">
+                    <div class="asteroid-rock-body ast-textured-body ast-color-amber">
+                      <img src="cosmic_amber_asset.png" alt="Amber Thruster" class="celestial-texture-img" onerror="this.style.display='none';">
                       <span class="ast-crater-num">2</span>
                     </div>
                     <div class="celestial-node-meta">
@@ -414,7 +415,8 @@
                 <!-- Node 3: Golden Sling (Day 3) -->
                 <div class="cosmic-node-row pos-right">
                   <div class="celestial-node" id="celestial-node-3" onclick="inspectAsteroidNode(3)">
-                    <div class="asteroid-rock-body ast-color-gold">
+                    <div class="asteroid-rock-body ast-textured-body ast-color-gold">
+                      <img src="cosmic_gold_asset.png" alt="Golden Sling" class="celestial-texture-img" onerror="this.style.display='none';">
                       <span class="ast-crater-num">3</span>
                     </div>
                     <div class="celestial-node-meta">
@@ -427,7 +429,8 @@
                 <!-- Node 4: Emerald Belt (Day 4) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-4" onclick="inspectAsteroidNode(4)">
-                    <div class="asteroid-rock-body ast-color-emerald">
+                    <div class="asteroid-rock-body ast-textured-body ast-color-emerald">
+                      <img src="cosmic_emerald_asset.png" alt="Emerald Belt" class="celestial-texture-img" onerror="this.style.display='none';">
                       <span class="ast-crater-num">4</span>
                     </div>
                     <div class="celestial-node-meta">
@@ -440,7 +443,8 @@
                 <!-- Node 5: Cyan Comet (Day 5) -->
                 <div class="cosmic-node-row pos-left">
                   <div class="celestial-node" id="celestial-node-5" onclick="inspectAsteroidNode(5)">
-                    <div class="asteroid-rock-body ast-color-cyan">
+                    <div class="asteroid-rock-body ast-textured-body ast-color-cyan">
+                      <img src="cosmic_cyan_asset.png" alt="Cyan Comet" class="celestial-texture-img" onerror="this.style.display='none';">
                       <span class="ast-crater-num">5</span>
                     </div>
                     <div class="celestial-node-meta">
@@ -453,7 +457,8 @@
                 <!-- Node 6: Cobalt Void (Day 6) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-6" onclick="inspectAsteroidNode(6)">
-                    <div class="asteroid-rock-body ast-color-sapphire">
+                    <div class="asteroid-rock-body ast-textured-body ast-color-sapphire">
+                      <img src="cosmic_sapphire_asset.png" alt="Cobalt Void" class="celestial-texture-img" onerror="this.style.display='none';">
                       <span class="ast-crater-num">6</span>
                     </div>
                     <div class="celestial-node-meta">
@@ -1552,8 +1557,27 @@
 
         <!-- Athlete Profile & Role Card -->
         <div class="athlete-profile-card">
+          <div class="cyber-corner-bracket top-left"></div>
+          <div class="cyber-corner-bracket bottom-right"></div>
+          <svg class="athlete-card-svg-bg" viewBox="0 0 400 160" preserveAspectRatio="none">
+            <path d="M0,0 L120,0 L140,24 L400,24 L400,160 L0,160 Z" fill="none" stroke="rgba(168, 39, 65, 0.12)" stroke-width="1.5"/>
+            <circle cx="360" cy="40" r="30" stroke="rgba(168, 39, 65, 0.08)" stroke-width="1" fill="none"/>
+            <circle cx="360" cy="40" r="18" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1" stroke-dasharray="3 3" fill="none"/>
+          </svg>
+
           <div class="athlete-profile-top">
             <div class="athlete-avatar-wrap">
+              <svg class="athlete-avatar-svg-frame" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="29" stroke="url(#athleteShieldGrad)" stroke-width="2" stroke-dasharray="8 4"/>
+                <circle cx="32" cy="32" r="24" stroke="rgba(224, 80, 106, 0.4)" stroke-width="1"/>
+                <defs>
+                  <linearGradient id="athleteShieldGrad" x1="0" y1="0" x2="64" y2="64">
+                    <stop offset="0%" stop-color="#fb7185"/>
+                    <stop offset="50%" stop-color="#a82741"/>
+                    <stop offset="100%" stop-color="#38bdf8"/>
+                  </linearGradient>
+                </defs>
+              </svg>
               <span class="athlete-big-avatar" id="settings-user-avatar">♂</span>
             </div>
             <div class="athlete-profile-meta">
@@ -1578,7 +1602,27 @@
 
         <!-- Protected Admin Citadel Card (Admin Role Only) -->
         <div class="admin-citadel-cta-card admin-only-feature" style="display:none;">
-          <div class="admin-cta-badge">👑 RESTRICTED ADMIN ACCESS</div>
+          <div class="cyber-corner-bracket gold top-left"></div>
+          <div class="cyber-corner-bracket gold bottom-right"></div>
+          <svg class="admin-card-svg-bg" viewBox="0 0 400 180" preserveAspectRatio="none">
+            <path d="M0,20 L30,0 L370,0 L400,20 L400,160 L370,180 L30,180 L0,160 Z" fill="none" stroke="rgba(255, 214, 10, 0.12)" stroke-width="1.5"/>
+            <line x1="20" y1="90" x2="380" y2="90" stroke="rgba(255, 214, 10, 0.05)" stroke-dasharray="4 4"/>
+          </svg>
+          <div class="admin-cta-header-row">
+            <svg class="admin-citadel-svg-crest" width="34" height="34" viewBox="0 0 48 48" fill="none">
+              <path d="M24 4L34 16L40 38L24 44L8 38L14 16L24 4Z" stroke="url(#citadelGoldGrad)" stroke-width="2" fill="rgba(255, 214, 10, 0.08)"/>
+              <path d="M24 4V44M8 38L40 38M14 16L34 16" stroke="url(#citadelGoldGrad)" stroke-width="1.5" stroke-dasharray="2 2"/>
+              <circle cx="24" cy="20" r="4" fill="#FFD60A"/>
+              <defs>
+                <linearGradient id="citadelGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FFE082"/>
+                  <stop offset="50%" stop-color="#FFD60A"/>
+                  <stop offset="100%" stop-color="#A82741"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="admin-cta-badge">👑 RESTRICTED ADMIN ACCESS</div>
+          </div>
           <div class="admin-cta-content">
             <h3 class="admin-cta-title">Obsidian Citadel Control Center</h3>
             <p class="admin-cta-desc">Monitor male &amp; female leaderboards side-by-side without gender filters, manage all athlete accounts, and oversee app updates.</p>
@@ -3053,6 +3097,63 @@
     </div>
   </div>
 
+  <!-- ==================== CELESTIAL ASTEROID 3D VIEWER MODAL ==================== -->
+  <div id="modal-asteroid-viewer" class="modal-overlay hidden" onclick="if(event.target===this)closeModal('modal-asteroid-viewer')">
+    <div class="modal-card asteroid-viewer-modal-card">
+      <div class="cyber-corner-bracket top-left"></div>
+      <div class="cyber-corner-bracket bottom-right"></div>
+      <div class="asteroid-viewer-header">
+        <div class="asteroid-station-tag-row">
+          <span id="asteroid-modal-station-badge" class="asteroid-station-pill">STATION 05</span>
+          <span id="asteroid-modal-status-badge" class="asteroid-status-tag">LOCKED</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('modal-asteroid-viewer')">&times;</button>
+      </div>
+
+      <!-- Full Uncropped 3D Asset Showcase -->
+      <div class="asteroid-showcase-container" id="asteroid-showcase-wrap">
+        <div class="asteroid-atmospheric-halo" id="asteroid-modal-halo"></div>
+        <img id="asteroid-modal-img" src="cosmic_cyan_asset.png" alt="Celestial Rock" class="asteroid-full-3d-asset">
+        <div class="asteroid-scanner-reticle"></div>
+      </div>
+
+      <!-- Information & Telemetry -->
+      <div class="asteroid-telemetry-meta">
+        <h2 id="asteroid-modal-title" class="asteroid-viewer-title">Cyan Comet</h2>
+        <div id="asteroid-modal-sub" class="asteroid-viewer-subtitle">Streak Day 5 &bull; Deep Cryogenic Core</div>
+        <p id="asteroid-modal-lore" class="asteroid-viewer-lore">
+          A high-velocity cryogenic comet core laced with frozen methane and luminescent azure dust veins. Passing this gravity well catapults orbital momentum toward the Maroon Moon Citadel.
+        </p>
+
+        <!-- 4-Stat Telemetry Grid -->
+        <div class="asteroid-telemetry-grid">
+          <div class="telemetry-cell">
+            <span class="telemetry-label">STREAK TARGET</span>
+            <strong id="asteroid-modal-streak-req" class="telemetry-val">5 Days</strong>
+          </div>
+          <div class="telemetry-cell">
+            <span class="telemetry-label">GRAVITY CLASS</span>
+            <strong id="asteroid-modal-gravity" class="telemetry-val">0.38G / Hyper</strong>
+          </div>
+          <div class="telemetry-cell">
+            <span class="telemetry-label">CORE MINERAL</span>
+            <strong id="asteroid-modal-composition" class="telemetry-val">Methane Ice</strong>
+          </div>
+          <div class="telemetry-cell">
+            <span class="telemetry-label">SURFACE TEMP</span>
+            <strong id="asteroid-modal-temp" class="telemetry-val">-185°C</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="asteroid-viewer-actions">
+        <button type="button" class="primary-glow-btn full-width" onclick="closeModal('modal-asteroid-viewer')">
+          <span>Close Telemetry View</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== PROTECTED ADMIN CITADEL DASHBOARD MODAL ==================== -->
   <div id="modal-admin-dashboard" class="modal-overlay hidden">
     <div class="modal-card admin-modal-card">
@@ -3073,11 +3174,11 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=66"></script>
-  <script src="auth.js?v=66"></script>
-  <script src="app.js?v=66"></script>
-  <script src="camera.js?v=66"></script>
-  <script src="ranks.js?v=66"></script>
+  <script src="i18n.js?v=67"></script>
+  <script src="auth.js?v=67"></script>
+  <script src="app.js?v=67"></script>
+  <script src="camera.js?v=67"></script>
+  <script src="ranks.js?v=67"></script>
 </body>
 </html>
 

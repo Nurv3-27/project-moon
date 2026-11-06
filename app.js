@@ -1884,17 +1884,160 @@ function renderRoutines() {
 
 // --- Cosmic Streak Progression Logic & Roadmap ---
 const ASTEROID_STATIONS = [
-  { index: 0, id: 'celestial-node-0', name: 'Earth Launchpad', sub: 'Day 0 Streak • Home Planet', type: 'earth' },
-  { index: 1, id: 'celestial-node-1', name: 'Ruby Igniter', sub: 'Asteroid 1 • Day 1 Streak', type: 'asteroid' },
-  { index: 2, id: 'celestial-node-2', name: 'Amber Thruster', sub: 'Asteroid 2 • Day 2 Streak', type: 'asteroid' },
-  { index: 3, id: 'celestial-node-3', name: 'Golden Sling', sub: 'Asteroid 3 • Day 3 Streak', type: 'asteroid' },
-  { index: 4, id: 'celestial-node-4', name: 'Emerald Belt', sub: 'Asteroid 4 • Day 4 Streak', type: 'asteroid' },
-  { index: 5, id: 'celestial-node-5', name: 'Cyan Comet', sub: 'Asteroid 5 • Day 5 Streak', type: 'asteroid' },
-  { index: 6, id: 'celestial-node-6', name: 'Cobalt Void', sub: 'Asteroid 6 • Day 6 Streak', type: 'asteroid' },
-  { index: 7, id: 'celestial-node-7', name: 'Nebula Crown', sub: 'Asteroid 7 • 1-Week Milestone', type: 'asteroid' },
-  { index: 8, id: 'celestial-node-8', name: 'Rose Valkyrie', sub: 'Asteroid 8 • Day 8 Streak', type: 'asteroid' },
-  { index: 9, id: 'celestial-node-9', name: 'Chrome Sentinel', sub: 'Asteroid 9 • Day 9 Streak', type: 'asteroid' },
-  { index: 10, id: 'celestial-node-10', name: 'Maroon Moon Citadel', sub: 'Day 10+ • Lunar Sovereign', type: 'moon' }
+  {
+    index: 0,
+    id: 'celestial-node-0',
+    name: 'Earth Launchpad',
+    sub: 'Home Planet • Day 0 Launch Station',
+    type: 'earth',
+    streakReq: 0,
+    assetImg: 'cosmic_earth_asset.png',
+    themeColor: '#38bdf8',
+    gravity: '1.00G (Terran)',
+    composition: 'Nitrogen / Silicate',
+    temp: '15°C',
+    lore: 'The initial launchpad of your athletic odyssey. From here, every consecutive day of discipline builds the orbital momentum necessary to escape gravity and reach the Maroon Moon Citadel.'
+  },
+  {
+    index: 1,
+    id: 'celestial-node-1',
+    name: 'Ruby Igniter',
+    sub: 'Asteroid 1 • Day 1 Streak Ignition',
+    type: 'asteroid',
+    streakReq: 1,
+    assetImg: 'cosmic_ruby_asset.png',
+    themeColor: '#f43f5e',
+    gravity: '0.18G / Pyrite',
+    composition: 'Volcanic Ruby Ore',
+    temp: '420°C',
+    lore: 'A hyper-dense crimson celestial body rich in fiery pyroxenes. Ignited on your first consecutive workout day, marking the initial thrust into lunar space.'
+  },
+  {
+    index: 2,
+    id: 'celestial-node-2',
+    name: 'Amber Thruster',
+    sub: 'Asteroid 2 • Day 2 Streak Vector',
+    type: 'asteroid',
+    streakReq: 2,
+    assetImg: 'cosmic_amber_asset.png',
+    themeColor: '#f59e0b',
+    gravity: '0.24G / Class-A',
+    composition: 'Molten Amber Topaz',
+    temp: '280°C',
+    lore: 'Surrounded by incandescent amber magma fissures that accelerate propulsion. Crossing this orbital waypoint doubles your kinetic streak momentum.'
+  },
+  {
+    index: 3,
+    id: 'celestial-node-3',
+    name: 'Golden Sling',
+    sub: 'Asteroid 3 • Day 3 Streak Graviton',
+    type: 'asteroid',
+    streakReq: 3,
+    assetImg: 'cosmic_gold_asset.png',
+    themeColor: '#eab308',
+    gravity: '0.31G / Auric',
+    composition: 'Solar Gold Crystalline',
+    temp: '140°C',
+    lore: 'An auric asteroid laced with pure metallic gold veins and shimmering solar crust. Its micro-gravitational field acts as a slingshot toward deeper deep-space belts.'
+  },
+  {
+    index: 4,
+    id: 'celestial-node-4',
+    name: 'Emerald Belt',
+    sub: 'Asteroid 4 • Day 4 Streak Harmonic',
+    type: 'asteroid',
+    streakReq: 4,
+    assetImg: 'cosmic_emerald_asset.png',
+    themeColor: '#10b981',
+    gravity: '0.35G / Silicate',
+    composition: 'Jade Crystalline Core',
+    temp: '12°C',
+    lore: 'A luminescent emerald cluster vibrating with steady rhythmic frequencies. Sustaining 4 consecutive days stabilizes your neuromuscular endurance.'
+  },
+  {
+    index: 5,
+    id: 'celestial-node-5',
+    name: 'Cyan Comet',
+    sub: 'Asteroid 5 • Day 5 Streak Cryo-Core',
+    type: 'asteroid',
+    streakReq: 5,
+    assetImg: 'cosmic_cyan_asset.png',
+    themeColor: '#06b6d4',
+    gravity: '0.38G / Hyper',
+    composition: 'Cryogenic Methane Ice',
+    temp: '-185°C',
+    lore: 'A supersonic interstellar comet core forged from compressed cryogenic methane and frozen azure dust. Passing this waypoint triggers orbital acceleration toward the Maroon Moon Citadel.'
+  },
+  {
+    index: 6,
+    id: 'celestial-node-6',
+    name: 'Cobalt Void',
+    sub: 'Asteroid 6 • Day 6 Streak Abyss',
+    type: 'asteroid',
+    streakReq: 6,
+    assetImg: 'cosmic_sapphire_asset.png',
+    themeColor: '#6366f1',
+    gravity: '0.49G / Magnetic',
+    composition: 'Interstellar Cobalt Ferrite',
+    temp: '-220°C',
+    lore: 'A dense interstellar monolith radiating dark electromagnetic pulses. Navigating past Cobalt Void demands relentless focus before entering the Titan milestone belt.'
+  },
+  {
+    index: 7,
+    id: 'celestial-node-7',
+    name: 'Nebula Crown',
+    sub: 'Asteroid 7 • 1-Week Titan Milestone',
+    type: 'asteroid',
+    streakReq: 7,
+    assetImg: 'cosmic_nebula_asset.png',
+    themeColor: '#c084fc',
+    gravity: '0.62G / Titan',
+    composition: 'Amethyst Quartz Nebula',
+    temp: '-95°C',
+    lore: 'A majestic purple nebula asteroid cloaked in ionizing cosmic stardust. Commemorates a full 7-day unbroken training week and grants Titan orbital status.'
+  },
+  {
+    index: 8,
+    id: 'celestial-node-8',
+    name: 'Rose Valkyrie',
+    sub: 'Asteroid 8 • Day 8 Streak Citadel Vanguard',
+    type: 'asteroid',
+    streakReq: 8,
+    assetImg: 'cosmic_rose_asset.png',
+    themeColor: '#fb7185',
+    gravity: '0.74G / Vanguard',
+    composition: 'Rose Carbonate Alloy',
+    temp: '45°C',
+    lore: 'An ancient guardian rock glowing with iridescent pink-crimson quartz. Named in honor of the elite Valkyries that watch the perimeter of the lunar territory.'
+  },
+  {
+    index: 9,
+    id: 'celestial-node-9',
+    name: 'Chrome Sentinel',
+    sub: 'Asteroid 9 • Day 9 Streak Final Gate',
+    type: 'asteroid',
+    streakReq: 9,
+    assetImg: 'cosmic_chrome_asset.png',
+    themeColor: '#e2e8f0',
+    gravity: '0.88G / Fortress',
+    composition: 'Liquid Chrome Ferrite',
+    temp: '-110°C',
+    lore: 'A mirror-finish metallic sentinel reflecting starlight across the abyss. The final gateway asteroid standing before the sovereign orbit of the Maroon Moon Citadel.'
+  },
+  {
+    index: 10,
+    id: 'celestial-node-10',
+    name: 'Maroon Moon Citadel',
+    sub: 'Target Destination • Lunar Citadel Sovereign',
+    type: 'moon',
+    streakReq: 10,
+    assetImg: 'cosmic_moon_asset.png',
+    themeColor: '#e11d48',
+    gravity: '0.16G (Lunar Citadel)',
+    composition: 'Crimson Basalt / Obsidian',
+    temp: '-130°C',
+    lore: 'The ultimate pinnacle of physical and mental mastery. Conquering the Maroon Moon Citadel solidifies supreme hypertrophy discipline and unlocks legendary Citadel sovereignty.'
+  }
 ];
 
 function getConsecutiveWorkoutStreak() {
@@ -2012,13 +2155,75 @@ function inspectAsteroidNode(index) {
   const station = ASTEROID_STATIONS.find(s => s.index === index);
   if (!station) return;
   const currentStreak = getConsecutiveWorkoutStreak();
-  if (index === 0) {
-    showToast(`🌍 Earth Launchpad: Starting base. Current consecutive streak: ${currentStreak} days.`);
-  } else if (index === 10) {
-    showToast(`🌑 Maroon Moon Citadel: Final destination (10+ day streak). Current position: ${currentStreak >= 10 ? 'Landed!' : `${10 - currentStreak} days to go`}`);
-  } else {
-    showToast(`☄️ ${station.name}: Streak Day ${index}. Keep training consecutively to advance!`);
+
+  // Populate Asteroid 3D Viewer Modal
+  const imgEl = document.getElementById('asteroid-modal-img');
+  const titleEl = document.getElementById('asteroid-modal-title');
+  const subEl = document.getElementById('asteroid-modal-sub');
+  const loreEl = document.getElementById('asteroid-modal-lore');
+  const stationBadgeEl = document.getElementById('asteroid-modal-station-badge');
+  const statusBadgeEl = document.getElementById('asteroid-modal-status-badge');
+  const streakReqEl = document.getElementById('asteroid-modal-streak-req');
+  const gravityEl = document.getElementById('asteroid-modal-gravity');
+  const compEl = document.getElementById('asteroid-modal-composition');
+  const tempEl = document.getElementById('asteroid-modal-temp');
+  const haloEl = document.getElementById('asteroid-modal-halo');
+  const cardEl = document.querySelector('.asteroid-viewer-modal-card');
+
+  if (imgEl) {
+    imgEl.src = station.assetImg;
+    imgEl.alt = station.name;
   }
+  if (titleEl) titleEl.textContent = station.name;
+  if (subEl) subEl.textContent = station.sub;
+  if (loreEl) loreEl.textContent = station.lore;
+  if (stationBadgeEl) {
+    stationBadgeEl.textContent = index === 0 ? 'START // LAUNCHPAD' : (index === 10 ? 'DESTINATION // CITADEL' : `STATION 0${index} // STREAK DAY ${index}`);
+  }
+
+  const isUnlocked = currentStreak >= station.streakReq;
+  const isActive = currentStreak === station.streakReq;
+
+  if (statusBadgeEl) {
+    statusBadgeEl.className = 'asteroid-status-tag';
+    if (isActive) {
+      statusBadgeEl.classList.add('status-active');
+      statusBadgeEl.textContent = 'CURRENT POSITION 📍';
+    } else if (isUnlocked) {
+      statusBadgeEl.classList.add('status-unlocked');
+      statusBadgeEl.textContent = 'UNLOCKED / PASSED ✨';
+    } else {
+      const remaining = station.streakReq - currentStreak;
+      statusBadgeEl.classList.add('status-locked');
+      statusBadgeEl.textContent = `${remaining} DAY${remaining === 1 ? '' : 'S'} TO REACH 🔒`;
+    }
+  }
+
+  if (streakReqEl) {
+    streakReqEl.textContent = station.streakReq === 0 ? 'Day 0 (Base)' : `${station.streakReq} Day${station.streakReq === 1 ? '' : 's'}`;
+  }
+  if (gravityEl) gravityEl.textContent = station.gravity || '0.35G';
+  if (compEl) compEl.textContent = station.composition || 'Interstellar';
+  if (tempEl) tempEl.textContent = station.temp || '-100°C';
+
+  if (haloEl && station.themeColor) {
+    haloEl.style.boxShadow = `0 0 75px ${station.themeColor}, inset 0 0 35px ${station.themeColor}`;
+    haloEl.style.background = `radial-gradient(circle, ${station.themeColor}33 0%, transparent 70%)`;
+  }
+
+  if (cardEl && station.themeColor) {
+    cardEl.style.setProperty('--asteroid-accent', station.themeColor);
+  }
+
+  // Open the centered modal
+  if (typeof openModal === 'function') {
+    openModal('modal-asteroid-viewer');
+  }
+
+  // Also trigger a light haptic pulse
+  try {
+    triggerHaptic([35, 40]);
+  } catch (err) {}
 }
 window.inspectAsteroidNode = inspectAsteroidNode;
 

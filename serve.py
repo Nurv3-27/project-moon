@@ -11,6 +11,12 @@ import webbrowser
 import os
 import sys
 import json
+
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+try:
+    os.chdir(APP_DIR)
+except Exception:
+    pass
 import time
 import re
 import urllib.parse
@@ -447,6 +453,10 @@ def get_lan_ip():
             return "127.0.0.1"
 
 class MoonHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        kwargs["directory"] = APP_DIR
+        super().__init__(*args, **kwargs)
+
     def end_headers(self):
         clean_path = getattr(self, 'path', '').split('?')[0].lower()
         if any(clean_path.endswith(ext) for ext in ('.png', '.jpg', '.jpeg', '.ico', '.svg', '.webp')):

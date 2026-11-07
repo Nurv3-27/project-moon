@@ -124,3 +124,4 @@ class handler(BaseHTTPRequestHandler):
                 'error': str(e),
                 'reply': "Coach link interrupted. Re-centering focus... What was your target exercise?"
             })
+

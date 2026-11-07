@@ -126,3 +126,4 @@ def handle_cors_options(handler_instance):
     handler_instance.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     handler_instance.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
     handler_instance.end_headers()
+

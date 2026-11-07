@@ -5,10 +5,10 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
     inputs:
-      moon_public_url:
-        description: 'Live production URL for Moon Fitness OS'
+      notes:
+        description: 'Build notes'
         required: false
-        default: 'https://project-moon.vercel.app'
+        default: 'Production release'
 
 permissions:
   contents: write
@@ -42,8 +42,6 @@ jobs:
           gradle-version: '8.2'
 
       - name: Package Assets & Compile Standalone Release APK
-        env:
-          MOON_PUBLIC_URL: ${{ inputs.moon_public_url || vars.MOON_PUBLIC_URL || 'https://project-moon.vercel.app' }}
         run: |
           ROOT_DIR=$(pwd)
           if [ -d "fitness_tracker_app/android" ]; then
@@ -58,7 +56,7 @@ jobs:
           echo "Android directory: $ANDROID_DIR"
 
           mkdir -p "$ANDROID_DIR/app/src/main/assets"
-          cp -r "$APP_DIR"/*.html "$APP_DIR"/*.js "$APP_DIR"/*.css "$APP_DIR"/*.png "$APP_DIR"/*.mp3 "$ANDROID_DIR/app/src/main/assets/" 2>/dev/null || true
+          find "$APP_DIR" -maxdepth 1 -type f \( -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.png" -o -name "*.mp3" -o -name "*.json" -o -name "*.svg" -o -name "*.ico" \) -exec cp {} "$ANDROID_DIR/app/src/main/assets/" \;
 
           cd "$ANDROID_DIR"
           gradle wrapper --gradle-version 8.2

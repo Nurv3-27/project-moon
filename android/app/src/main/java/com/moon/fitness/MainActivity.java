@@ -61,9 +61,9 @@ public class MainActivity extends Activity {
 
         mWebView.setWebChromeClient(new WebChromeClient());
 
-        // Launch into the live web app (auth gateway). Falls back to bundled assets if no URL configured.
-        final String live = BuildConfig.MOON_PUBLIC_URL;
-        mWebView.loadUrl(live != null && live.length() > 0 ? live : APP_URL);
+        // Strictly load the authentic bundled Moon Fitness OS assets
+        // (dark maroon theme, Cosmic Progression Map, Workout Hub, and Odyssey Auth Gateway)
+        mWebView.loadUrl(APP_URL);
     }
 
     public class MoonNativeBridge {

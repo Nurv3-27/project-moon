@@ -29,3 +29,4 @@ class handler(BaseHTTPRequestHandler):
             'athletes': athletes,
             'count': len(athletes)
         })
+

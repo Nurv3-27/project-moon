@@ -80,9 +80,6 @@
   // Configurable Live Backend Host:
   window.getMoonApiUrl = function (path) {
     let base = window.MOON_BACKEND_URL || localStorage.getItem('moon_backend_host') || '';
-    if (!base && typeof window !== 'undefined' && window.location.protocol === 'file:') {
-      base = 'https://project-moon.vercel.app';
-    }
     return (base ? base.replace(/\/+$/, '') : '') + path;
   };
 

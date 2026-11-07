@@ -26,3 +26,4 @@ class handler(BaseHTTPRequestHandler):
             return send_response_json(self, {'status': 'ok'})
         except Exception as e:
             return send_response_json(self, {'error': str(e)}, status=500)
+

@@ -31,3 +31,4 @@ class handler(BaseHTTPRequestHandler):
             'iosUrl': f'{base}/' if base else '/',
             'apkAvailable': True
         })
+

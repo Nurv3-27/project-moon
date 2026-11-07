@@ -276,3 +276,4 @@ class handler(BaseHTTPRequestHandler):
             })
 
         return send_response_json(self, {'ok': False, 'error': f'Route not found: {self.path}'}, status=404)
+

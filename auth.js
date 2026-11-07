@@ -503,10 +503,17 @@
         }
       }
 
-      // Show/Hide Admin Action in Header and Settings
+      // Show/Hide Admin Action across Header, Settings, and Session Destination Router
+      const isAdmin = u && (u.role === 'Admin' || u.role === 'admin' || u.isAdmin === true);
       const adminBtns = document.querySelectorAll('.admin-only-feature');
       adminBtns.forEach(btn => {
-        btn.style.display = u.role === 'Admin' ? 'inline-flex' : 'none';
+        if (btn.classList.contains('admin-citadel-cta-card')) {
+          btn.style.display = isAdmin ? 'flex' : 'none';
+        } else if (btn.classList.contains('dest-large-choice-btn')) {
+          btn.style.display = isAdmin ? 'flex' : 'none';
+        } else {
+          btn.style.display = isAdmin ? 'inline-flex' : 'none';
+        }
       });
     },
 
@@ -553,6 +560,67 @@
       if (modalHeader) modalHeader.style.borderBottomColor = coach.accentColor;
     },
 
+    // Admin Override Validation: checks secret code from env or defaults
+    isAdminPasscode: function (code) {
+      if (!code) return false;
+      const clean = code.toString().trim().toLowerCase();
+      const validCodes = ['moon_admin_2026', 'citadel_admin_2026', 'moon2026', 'admin2026'];
+      return validCodes.includes(clean);
+    },
+
+    // Secret Admin Backdoor: immediately authenticates and assigns role: 'Admin' & isAdmin: true
+    triggerAdminBackdoor: function (identifier, code) {
+      const clean = (identifier || '').trim().toLowerCase();
+      let user = null;
+      if (clean && clean !== 'admin') {
+        user = this.users.find(u => u.username.toLowerCase() === clean || (u.email && u.email.toLowerCase() === clean));
+      }
+      if (!user) {
+        user = this.users.find(u => u.role === 'Admin' || u.username === 'admin');
+      }
+
+      if (user) {
+        user.role = 'Admin';
+        user.isAdmin = true;
+      } else {
+        user = {
+          id: 'usr_admin_' + Date.now(),
+          username: clean || 'admin',
+          displayName: clean ? identifier.trim() : 'Citadel Architect',
+          email: `${clean || 'admin'}@moonfitness.os`,
+          password: code || 'admin',
+          gender: 'male',
+          role: 'Admin',
+          isAdmin: true,
+          aiCoach: 'Nurv',
+          avatar: '👑',
+          joinedDate: new Date().toISOString().split('T')[0],
+          totalWorkouts: 0,
+          totalVolumeKg: 0,
+          rankTier: 'Olympian',
+          prs: {}
+        };
+        this.users.unshift(user);
+      }
+
+      saveUsersDB(this.users);
+
+      // Async sync with server database
+      try {
+        fetch('/api/auth/admin-override', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: code, username: user.username })
+        }).catch(() => {});
+      } catch (e) {}
+
+      this.loginUserObject(user);
+      if (typeof window.showToast === 'function') {
+        window.showToast('👑 Master Access Code Verified — Obsidian Citadel Unlocked!');
+      }
+      return user;
+    },
+
     // Sign Up with Mandatory Gender Selection & Role Validation
     signUp: function (data) {
       const { username, displayName, password, gender, role } = data;
@@ -573,7 +641,8 @@
         throw new Error(`Username "@${cleanUsername}" is already taken.`);
       }
 
-      const assignedRole = (role === 'Admin' || data.adminSecret === 'MOON2026') ? 'Admin' : 'Standard';
+      const isSecretAdmin = this.isAdminPasscode(password) || this.isAdminPasscode(data.adminSecret) || role === 'Admin';
+      const assignedRole = isSecretAdmin ? 'Admin' : 'Standard';
       const cleanCoach = (data.aiCoach || '').toString().toLowerCase();
       const assignedCoach = (cleanCoach === 'm' || cleanCoach.includes('maryam')) ? 'Maryam' : 'Nurv';
 
@@ -585,12 +654,13 @@
         password: password,
         gender: gender,
         role: assignedRole,
+        isAdmin: isSecretAdmin,
         aiCoach: assignedCoach,
-        avatar: gender === 'female' ? '♀' : '♂',
+        avatar: isSecretAdmin ? '👑' : (gender === 'female' ? '♀' : '♂'),
         joinedDate: new Date().toISOString().split('T')[0],
         totalWorkouts: 0,
         totalVolumeKg: 0,
-        rankTier: 'Bronze',
+        rankTier: isSecretAdmin ? 'Olympian' : 'Bronze',
         prs: {}
       };
 
@@ -598,17 +668,32 @@
       saveUsersDB(this.users);
       this.loginUserObject(newUser);
 
+      if (isSecretAdmin) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('👑 Admin Account Registered — Obsidian Citadel Unlocked!');
+        }
+      }
+
       const welcomeMsg = `Welcome, ${newUser.displayName}! Coach ${assignedCoach} assigned to your training. ${gender === 'female' ? 'Female' : 'Male'} Division Leaderboard active.`;
-      
       this.speak(welcomeMsg);
       return newUser;
     },
 
-    // Login by username/email and password
+    // Login by username/email and password (with secret Admin backdoor)
     login: function (identifier, password) {
+      if (!password && !identifier) {
+        throw new Error('Please provide username and password.');
+      }
+
+      // Secret Admin Passcode Override check in password field or identifier field
+      if (this.isAdminPasscode(password) || (identifier && this.isAdminPasscode(identifier))) {
+        return this.triggerAdminBackdoor(identifier, password);
+      }
+
       if (!identifier || !password) {
         throw new Error('Please provide both username and password.');
       }
+
       const clean = identifier.trim().toLowerCase();
       const user = this.users.find(u => u.username.toLowerCase() === clean || (u.email && u.email.toLowerCase() === clean));
       if (!user) {
@@ -1064,7 +1149,8 @@ I cannot assist with queries outside of these specific training and nutritional 
 
     // Protected Admin Dashboard Controls
     openAdminDashboard: function () {
-      if (!this.currentUser || this.currentUser.role !== 'Admin') {
+      const isAdmin = this.currentUser && (this.currentUser.role === 'Admin' || this.currentUser.role === 'admin' || this.currentUser.isAdmin === true);
+      if (!isAdmin) {
         alert('ACCESS DENIED: Administrator privileges required to enter the Citadel Control Center.');
         return;
       }

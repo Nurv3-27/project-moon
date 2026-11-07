@@ -7035,11 +7035,25 @@ window.handleAuthSignIn = function(e) {
   if (e) e.preventDefault();
   const idInput = document.getElementById('signin-identifier');
   const passInput = document.getElementById('signin-password');
-  if (!idInput || !passInput) return;
+  const codeInput = document.getElementById('signin-access-code');
+  if (!idInput && !passInput) return;
+
+  const idVal = idInput ? idInput.value.trim() : '';
+  const passVal = passInput ? passInput.value : '';
+  const codeVal = codeInput ? codeInput.value.trim() : '';
 
   try {
     if (window.AuthSystem) {
-      window.AuthSystem.login(idInput.value, passInput.value);
+      // Check if secret admin override passcode is in access code input or password input
+      if (codeInput && codeVal && window.AuthSystem.isAdminPasscode(codeVal)) {
+        window.AuthSystem.triggerAdminBackdoor(idVal, codeVal);
+        return;
+      }
+      if (passVal && window.AuthSystem.isAdminPasscode(passVal)) {
+        window.AuthSystem.triggerAdminBackdoor(idVal, passVal);
+        return;
+      }
+      window.AuthSystem.login(idVal, passVal);
     }
   } catch (err) {
     if (typeof showToast === 'function') {
@@ -7112,33 +7126,134 @@ window.toggleCoachVoice = function() {
   }
 };
 
-window.askCoachPrompt = function(promptText) {
+// ==================== DYNAMIC AI COACH CONVERSATION ENGINE ====================
+window.coachMessagesHistory = window.coachMessagesHistory || [];
+
+function formatCoachMarkdown(raw) {
+  if (!raw) return '';
+  let str = escapeHtml(raw);
+  // Bold **text**
+  str = str.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Line breaks
+  str = str.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+  return str;
+}
+
+window.askCoachPrompt = async function(promptText) {
   const stream = document.getElementById('coach-chat-stream');
+  const input = document.getElementById('coach-chat-input');
+  const submitBtn = input && input.form ? input.form.querySelector('button[type="submit"]') : null;
   if (!stream || !window.AuthSystem) return;
 
-  const coach = window.AuthSystem && window.AuthSystem.getCoach ? window.AuthSystem.getCoach() : { sigilText: 'Nurv', accentColor: '#E0506A' };
+  const query = (promptText || '').trim();
+  if (!query) return;
 
-  // Append user message
+  const coach = window.AuthSystem.getCoach ? window.AuthSystem.getCoach() : { name: 'Coach Nurv', sigilText: 'Nurv', accentColor: '#E0506A', gender: 'male' };
+  const avatarSrc = coach.avatarImg || (coach.gender === 'female' ? 'coach_blackcat.png' : 'coach_spiderman.png');
+
+  // Ensure conversation history starts with coach greeting
+  if (window.coachMessagesHistory.length === 0) {
+    const welcomeBubble = document.getElementById('coach-welcome-bubble');
+    const greetingText = welcomeBubble ? welcomeBubble.textContent.trim() : `Greetings, athlete. Coach ${coach.name} locked in.`;
+    window.coachMessagesHistory.push({ role: 'assistant', content: greetingText });
+  }
+
+  // 1. Append User Message
+  window.coachMessagesHistory.push({ role: 'user', content: query });
   const userMsgDiv = document.createElement('div');
   userMsgDiv.className = 'coach-msg user';
-  userMsgDiv.innerHTML = `
-    <div class="coach-msg-bubble">${escapeHtml(promptText)}</div>
-  `;
+  userMsgDiv.innerHTML = `<div class="coach-msg-bubble">${escapeHtml(query)}</div>`;
   stream.appendChild(userMsgDiv);
+  stream.scrollTop = stream.scrollHeight;
 
-  // Get AI reply
-  const reply = window.AuthSystem.askCoach(promptText);
+  // 2. Disable input during generation
+  if (input) input.disabled = true;
+  if (submitBtn) submitBtn.disabled = true;
 
-  // Append Coach reply
+  // 3. Show Dynamic 'Typing...' Loading State
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'coach-msg assistant coach-typing-row';
+  typingDiv.id = 'coach-typing-indicator';
+  typingDiv.innerHTML = `
+    <div class="coach-msg-avatar" style="border-color:${coach.accentColor || '#E0506A'}">
+      <img src="${avatarSrc}" alt="${coach.name}" class="coach-avatar-img">
+    </div>
+    <div class="coach-msg-bubble coach-typing-bubble">
+      <span class="typing-label">${coach.name || 'Coach'} is analyzing</span>
+      <span class="typing-dots"><span></span><span></span><span></span></span>
+    </div>
+  `;
+  stream.appendChild(typingDiv);
+  stream.scrollTop = stream.scrollHeight;
+  triggerHaptic([20]);
+
+  // 4. Transmit Payload to Backend LLM API
+  let replyText = '';
+  try {
+    const payload = {
+      messages: window.coachMessagesHistory,
+      coach: {
+        name: coach.name,
+        gender: coach.gender,
+        accentColor: coach.accentColor
+      },
+      athlete: {
+        displayName: window.AuthSystem?.currentUser?.displayName || 'Athlete',
+        gender: window.AuthSystem?.currentUser?.gender || 'male',
+        workoutSplit: AppState?.settings?.workoutSplit || 'PPL',
+        streak: AppState?.streak || 0
+      }
+    };
+
+    const resp = await fetch('/api/coach-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (resp.ok) {
+      const data = await resp.json();
+      replyText = data.reply || '';
+    } else {
+      throw new Error(`Server returned HTTP ${resp.status}`);
+    }
+  } catch (err) {
+    console.warn('[AI Coach] Backend LLM fetch failed, activating contextual fallback engine:', err);
+    // Contextual local engine fallback so coach never blocks or fails
+    replyText = window.AuthSystem.askCoach ? window.AuthSystem.askCoach(query) : `Coach ${coach.name}: Re-centering focus on progressive overload and biomechanical execution. Stay relentless.`;
+  }
+
+  // 5. Remove Typing Indicator
+  const typingEl = document.getElementById('coach-typing-indicator');
+  if (typingEl) typingEl.remove();
+
+  // 6. Append Dynamic Coach Reply
+  window.coachMessagesHistory.push({ role: 'assistant', content: replyText });
   const coachMsgDiv = document.createElement('div');
   coachMsgDiv.className = 'coach-msg assistant';
   coachMsgDiv.innerHTML = `
-    <div class="coach-msg-avatar" style="border-color:${coach.accentColor || '#E0506A'}"><img src="${coach.avatarImg || (coach.gender === 'female' ? 'coach_blackcat.png' : 'coach_spiderman.png')}" alt="${coach.name || 'Coach'}" class="coach-avatar-img"></div>
-    <div class="coach-msg-bubble">${escapeHtml(reply)}</div>
+    <div class="coach-msg-avatar" style="border-color:${coach.accentColor || '#E0506A'}">
+      <img src="${avatarSrc}" alt="${coach.name || 'Coach'}" class="coach-avatar-img">
+    </div>
+    <div class="coach-msg-bubble">${formatCoachMarkdown(replyText)}</div>
   `;
   stream.appendChild(coachMsgDiv);
   stream.scrollTop = stream.scrollHeight;
-  triggerHaptic([30]);
+
+  // 7. Voice readback if enabled
+  if (window.AuthSystem && window.AuthSystem.voiceEnabled && typeof window.AuthSystem.speak === 'function') {
+    // Strip markdown tags for natural speech
+    const cleanSpeech = replyText.replace(/[*#•_-]/g, '').slice(0, 240);
+    window.AuthSystem.speak(cleanSpeech);
+  }
+
+  // 8. Re-enable Input
+  if (input) {
+    input.disabled = false;
+    input.focus();
+  }
+  if (submitBtn) submitBtn.disabled = false;
+  triggerHaptic([35, 45]);
 };
 
 window.handleCoachChatSubmit = function(e) {

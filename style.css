@@ -34,10 +34,10 @@
   --text-muted: #A8979C;
   --text-dim: #6F5F64;
 
-  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-main: 'Inter', 'System', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 'Cairo', 'Tajawal', "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+  --font-sans: 'Inter', 'System', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 'Cairo', 'Tajawal', "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+  --font-display: 'Montserrat', 'Inter', 'System', -apple-system, BlinkMacSystemFont, 'Cairo', 'Tajawal', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --font-mono: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", monospace;
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -194,8 +194,8 @@
   user-select: none;
 }
 
-input, button, select, textarea {
-  font-family: inherit;
+input, button, select, textarea, option {
+  font-family: var(--font-main);
   user-select: auto;
 }
 
@@ -8431,7 +8431,7 @@ button:active,
    [dir="rtl"] and .rtl-mode overrides
    ========================================================== */
 [dir="rtl"], [dir="rtl"] body {
-  font-family: 'Tajawal', 'Cairo', 'Amiri', 'Outfit', -apple-system, sans-serif !important;
+  font-family: 'Tajawal', 'Cairo', 'Amiri', 'Outfit', 'System', -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif !important;
   direction: rtl !important;
   text-align: right;
 }
@@ -8441,7 +8441,7 @@ button:active,
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
 [dir="rtl"] .splash-dest-heading,
 [dir="rtl"] .modal-header h3 {
-  font-family: 'Cairo', 'Tajawal', 'Cinzel', sans-serif !important;
+  font-family: 'Cairo', 'Tajawal', 'Cinzel', 'System', -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
   letter-spacing: 0 !important;
 }
 

@@ -193,7 +193,7 @@ const DEFAULT_EXERCISES = [
   { id: 'ex_245', name: 'Dumbbell Lat Pullover', category: 'Back' },
   { id: 'ex_246', name: 'Reverse Hyper Extension', category: 'Back' },
   { id: 'ex_247', name: 'Underhand Inverted Row', category: 'Back' },
-  { id: 'ex_248', name: 'Weighted 45Â° Back Extension', category: 'Back' },
+  { id: 'ex_248', name: 'Weighted 45° Back Extension', category: 'Back' },
   { id: 'ex_249', name: 'Superman Hold (Arch Body)', category: 'Back' },
 
   // --- SHOULDERS EXPANSION ---
@@ -649,7 +649,7 @@ async function triggerLocalPushNotification(title, options = {}) {
 window.triggerLocalPushNotification = triggerLocalPushNotification;
 
 function notifyRestOver() {
-  const title = 'â±ï¸ Rest Complete â€” Time to Lift!';
+  const title = '⏱️ Rest Complete — Time to Lift!';
   const body = 'Your rest period is over. Step up for the next set!';
   
   // Audio & Haptics
@@ -672,8 +672,8 @@ function requestNotifyPermission(userTriggered = false) {
     if ('Notification' in window) {
       Notification.requestPermission().then(perm => {
         if (perm === 'granted') {
-          showToast('ðŸ”” OS Push Notifications Enabled');
-          triggerLocalPushNotification('Moon Fitness OS ðŸš€', {
+          showToast('🔔 OS Push Notifications Enabled');
+          triggerLocalPushNotification('Moon Fitness OS 🚀', {
             body: 'Mission alerts active! Rest timers, focus blocks, and daily gym reminders are set.',
             tag: 'permission-granted-welcome'
           });
@@ -757,7 +757,7 @@ function triggerRestTimer(seconds) {
       navigator.serviceWorker.controller.postMessage({
         type: 'SCHEDULE_REST_TIMER',
         delayMs: restTotalDuration * 1000,
-        title: 'Moon Fitness - Rest Target Reached! ðŸ””',
+        title: 'Moon Fitness - Rest Target Reached! 🔔',
         body: 'Time for your next set! Mechanical tension awaits.'
       });
     }
@@ -1787,14 +1787,14 @@ function renderRoutines() {
   if (customRoutines.length === 0) {
     container.innerHTML = `
       <div class="idle-placeholder" style="grid-column: 1 / -1; padding: 32px 16px; text-align: center;">
-        <div style="font-size: 2.2rem; margin-bottom: 8px;">ðŸ“‹</div>
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">📋</div>
         <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 6px;">No Custom Routines Saved</h3>
         <p style="color: var(--text-muted); font-size: 0.82rem; max-width: 320px; margin: 0 auto 16px;">
           Build your own custom split or load one from our recommended featured workouts.
         </p>
         <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
           <button type="button" class="primary-glow-btn small-btn" onclick="openModal('modal-create-routine')">+ New Routine</button>
-          <button type="button" class="secondary-btn small-btn" onclick="openCreateRoutineWithFeatured()">â˜… Featured Templates</button>
+          <button type="button" class="secondary-btn small-btn" onclick="openCreateRoutineWithFeatured()">★ Featured Templates</button>
         </div>
       </div>
     `;
@@ -1834,7 +1834,7 @@ function renderRoutines() {
             <button class="start-routine-btn" onclick="startWorkoutFromRoutine('${routine.id}')">Start &rarr;</button>
           </div>
         </div>
-        <p class="routine-exercises-preview">${escapeHtml(exNames.join(' â€¢ '))}</p>
+        <p class="routine-exercises-preview">${escapeHtml(exNames.join(' • '))}</p>
         <div class="routine-card-footer">
           <span class="routine-meta-info">${routine.exerciseIds.length} Exercises</span>
           <span class="routine-meta-info">Estimated 45m</span>
@@ -1865,154 +1865,154 @@ const ASTEROID_STATIONS = [
     index: 0,
     id: 'celestial-node-0',
     name: 'Earth Launchpad',
-    sub: 'Home Planet â€¢ Day 0 Launch Station',
+    sub: 'Home Planet • Day 0 Launch Station',
     type: 'earth',
     streakReq: 0,
     assetImg: 'cosmic_earth_asset.png',
     themeColor: '#38bdf8',
     gravity: '1.00G (Terran)',
     composition: 'Nitrogen / Silicate',
-    temp: '15Â°C',
+    temp: '15°C',
     lore: 'The initial launchpad of your athletic odyssey. From here, every consecutive day of discipline builds the orbital momentum necessary to escape gravity and reach the Maroon Moon Citadel.'
   },
   {
     index: 1,
     id: 'celestial-node-1',
     name: 'Ruby Igniter',
-    sub: 'Asteroid 1 â€¢ Day 1 Streak Ignition',
+    sub: 'Asteroid 1 • Day 1 Streak Ignition',
     type: 'asteroid',
     streakReq: 1,
     assetImg: 'cosmic_ruby_asset.png',
     themeColor: '#f43f5e',
     gravity: '0.18G / Pyrite',
     composition: 'Volcanic Ruby Ore',
-    temp: '420Â°C',
+    temp: '420°C',
     lore: 'A hyper-dense crimson celestial body rich in fiery pyroxenes. Ignited on your first consecutive workout day, marking the initial thrust into lunar space.'
   },
   {
     index: 2,
     id: 'celestial-node-2',
     name: 'Amber Thruster',
-    sub: 'Asteroid 2 â€¢ Day 2 Streak Vector',
+    sub: 'Asteroid 2 • Day 2 Streak Vector',
     type: 'asteroid',
     streakReq: 2,
     assetImg: 'cosmic_amber_asset.png',
     themeColor: '#f59e0b',
     gravity: '0.24G / Class-A',
     composition: 'Molten Amber Topaz',
-    temp: '280Â°C',
+    temp: '280°C',
     lore: 'Surrounded by incandescent amber magma fissures that accelerate propulsion. Crossing this orbital waypoint doubles your kinetic streak momentum.'
   },
   {
     index: 3,
     id: 'celestial-node-3',
     name: 'Golden Sling',
-    sub: 'Asteroid 3 â€¢ Day 3 Streak Graviton',
+    sub: 'Asteroid 3 • Day 3 Streak Graviton',
     type: 'asteroid',
     streakReq: 3,
     assetImg: 'cosmic_gold_asset.png',
     themeColor: '#eab308',
     gravity: '0.31G / Auric',
     composition: 'Solar Gold Crystalline',
-    temp: '140Â°C',
+    temp: '140°C',
     lore: 'An auric asteroid laced with pure metallic gold veins and shimmering solar crust. Its micro-gravitational field acts as a slingshot toward deeper deep-space belts.'
   },
   {
     index: 4,
     id: 'celestial-node-4',
     name: 'Emerald Belt',
-    sub: 'Asteroid 4 â€¢ Day 4 Streak Harmonic',
+    sub: 'Asteroid 4 • Day 4 Streak Harmonic',
     type: 'asteroid',
     streakReq: 4,
     assetImg: 'cosmic_emerald_asset.png',
     themeColor: '#10b981',
     gravity: '0.35G / Silicate',
     composition: 'Jade Crystalline Core',
-    temp: '12Â°C',
+    temp: '12°C',
     lore: 'A luminescent emerald cluster vibrating with steady rhythmic frequencies. Sustaining 4 consecutive days stabilizes your neuromuscular endurance.'
   },
   {
     index: 5,
     id: 'celestial-node-5',
     name: 'Cyan Comet',
-    sub: 'Asteroid 5 â€¢ Day 5 Streak Cryo-Core',
+    sub: 'Asteroid 5 • Day 5 Streak Cryo-Core',
     type: 'asteroid',
     streakReq: 5,
     assetImg: 'cosmic_cyan_asset.png',
     themeColor: '#06b6d4',
     gravity: '0.38G / Hyper',
     composition: 'Cryogenic Methane Ice',
-    temp: '-185Â°C',
+    temp: '-185°C',
     lore: 'A supersonic interstellar comet core forged from compressed cryogenic methane and frozen azure dust. Passing this waypoint triggers orbital acceleration toward the Maroon Moon Citadel.'
   },
   {
     index: 6,
     id: 'celestial-node-6',
     name: 'Cobalt Void',
-    sub: 'Asteroid 6 â€¢ Day 6 Streak Abyss',
+    sub: 'Asteroid 6 • Day 6 Streak Abyss',
     type: 'asteroid',
     streakReq: 6,
     assetImg: 'cosmic_sapphire_asset.png',
     themeColor: '#6366f1',
     gravity: '0.49G / Magnetic',
     composition: 'Interstellar Cobalt Ferrite',
-    temp: '-220Â°C',
+    temp: '-220°C',
     lore: 'A dense interstellar monolith radiating dark electromagnetic pulses. Navigating past Cobalt Void demands relentless focus before entering the Titan milestone belt.'
   },
   {
     index: 7,
     id: 'celestial-node-7',
     name: 'Nebula Crown',
-    sub: 'Asteroid 7 â€¢ 1-Week Titan Milestone',
+    sub: 'Asteroid 7 • 1-Week Titan Milestone',
     type: 'asteroid',
     streakReq: 7,
     assetImg: 'cosmic_nebula_asset.png',
     themeColor: '#c084fc',
     gravity: '0.62G / Titan',
     composition: 'Amethyst Quartz Nebula',
-    temp: '-95Â°C',
+    temp: '-95°C',
     lore: 'A majestic purple nebula asteroid cloaked in ionizing cosmic stardust. Commemorates a full 7-day unbroken training week and grants Titan orbital status.'
   },
   {
     index: 8,
     id: 'celestial-node-8',
     name: 'Rose Valkyrie',
-    sub: 'Asteroid 8 â€¢ Day 8 Streak Citadel Vanguard',
+    sub: 'Asteroid 8 • Day 8 Streak Citadel Vanguard',
     type: 'asteroid',
     streakReq: 8,
     assetImg: 'cosmic_rose_asset.png',
     themeColor: '#fb7185',
     gravity: '0.74G / Vanguard',
     composition: 'Rose Carbonate Alloy',
-    temp: '45Â°C',
+    temp: '45°C',
     lore: 'An ancient guardian rock glowing with iridescent pink-crimson quartz. Named in honor of the elite Valkyries that watch the perimeter of the lunar territory.'
   },
   {
     index: 9,
     id: 'celestial-node-9',
     name: 'Chrome Sentinel',
-    sub: 'Asteroid 9 â€¢ Day 9 Streak Final Gate',
+    sub: 'Asteroid 9 • Day 9 Streak Final Gate',
     type: 'asteroid',
     streakReq: 9,
     assetImg: 'cosmic_chrome_asset.png',
     themeColor: '#e2e8f0',
     gravity: '0.88G / Fortress',
     composition: 'Liquid Chrome Ferrite',
-    temp: '-110Â°C',
+    temp: '-110°C',
     lore: 'A mirror-finish metallic sentinel reflecting starlight across the abyss. The final gateway asteroid standing before the sovereign orbit of the Maroon Moon Citadel.'
   },
   {
     index: 10,
     id: 'celestial-node-10',
     name: 'Maroon Moon Citadel',
-    sub: 'Target Destination â€¢ Lunar Citadel Sovereign',
+    sub: 'Target Destination • Lunar Citadel Sovereign',
     type: 'moon',
     streakReq: 10,
     assetImg: 'cosmic_moon_asset.png',
     themeColor: '#e11d48',
     gravity: '0.16G (Lunar Citadel)',
     composition: 'Crimson Basalt / Obsidian',
-    temp: '-130Â°C',
+    temp: '-130°C',
     lore: 'The ultimate pinnacle of physical and mental mastery. Conquering the Maroon Moon Citadel solidifies supreme hypertrophy discipline and unlocks legendary Citadel sovereignty.'
   }
 ];
@@ -2076,7 +2076,7 @@ function renderStreakProgressionMap() {
 
   if (distanceTextEl) {
     if (activeStationIdx >= 10) {
-      distanceTextEl.innerHTML = `<strong>ðŸŒ• Moon Landed!</strong> Day ${streak} Streak &bull; Lunar Conqueror Station`;
+      distanceTextEl.innerHTML = `<strong>🌕 Moon Landed!</strong> Day ${streak} Streak &bull; Lunar Conqueror Station`;
     } else {
       const remaining = 10 - activeStationIdx;
       distanceTextEl.innerHTML = `<strong>${remaining} Day${remaining === 1 ? '' : 's'} Remaining</strong> to Moon Landing (Station ${activeStationIdx}/10)`;
@@ -2104,7 +2104,7 @@ function renderStreakProgressionMap() {
       rocket.className = 'cosmic-rocket-indicator';
       const label = station.index === 0 ? 'START' : (station.index === 10 ? 'LANDED' : `DAY ${streak}`);
       rocket.innerHTML = `
-        <span class="rocket-ship-emoji">ðŸš€</span>
+        <span class="rocket-ship-emoji">🚀</span>
         <span class="rocket-badge-tag">${label}</span>
       `;
       nodeEl.appendChild(rocket);
@@ -2156,14 +2156,14 @@ function inspectAsteroidNode(index) {
     statusBadgeEl.className = 'asteroid-status-tag';
     if (isActive) {
       statusBadgeEl.classList.add('status-active');
-      statusBadgeEl.textContent = 'CURRENT POSITION ðŸ“';
+      statusBadgeEl.textContent = 'CURRENT POSITION 📍';
     } else if (isUnlocked) {
       statusBadgeEl.classList.add('status-unlocked');
-      statusBadgeEl.textContent = 'UNLOCKED / PASSED âœ¨';
+      statusBadgeEl.textContent = 'UNLOCKED / PASSED ✨';
     } else {
       const remaining = station.streakReq - currentStreak;
       statusBadgeEl.classList.add('status-locked');
-      statusBadgeEl.textContent = `${remaining} DAY${remaining === 1 ? '' : 'S'} TO REACH ðŸ”’`;
+      statusBadgeEl.textContent = `${remaining} DAY${remaining === 1 ? '' : 'S'} TO REACH 🔒`;
     }
   }
 
@@ -2172,7 +2172,7 @@ function inspectAsteroidNode(index) {
   }
   if (gravityEl) gravityEl.textContent = station.gravity || '0.35G';
   if (compEl) compEl.textContent = station.composition || 'Interstellar';
-  if (tempEl) tempEl.textContent = station.temp || '-100Â°C';
+  if (tempEl) tempEl.textContent = station.temp || '-100°C';
 
   if (haloEl && station.themeColor) {
     haloEl.style.boxShadow = `0 0 75px ${station.themeColor}, inset 0 0 35px ${station.themeColor}`;
@@ -2215,7 +2215,7 @@ function updateOverviewStats() {
   let totalVol = 0;
   history.forEach(h => totalVol += (h.volume || 0));
   if (volEl) volEl.textContent = Math.round(totalVol).toLocaleString();
-  if (volUnitEl) volUnitEl.textContent = `TOTAL ${AppState.settings.unit.toUpperCase()} âš¡`;
+  if (volUnitEl) volUnitEl.textContent = `TOTAL ${AppState.settings.unit.toUpperCase()} ⚡`;
 
   // Update Cosmic Progression Map
   renderStreakProgressionMap();
@@ -2254,11 +2254,11 @@ function updateGoalsUI() {
     cardWorkouts.classList.remove('near-target', 'target-met');
     if (workoutsPct >= 100) {
       cardWorkouts.classList.add('target-met');
-      if (noteWorkouts) noteWorkouts.textContent = 'ðŸŽ¯ Target Crushed! Consistency unlocked.';
-      if (badgeWorkouts) badgeWorkouts.textContent = `${workoutsPct}% âš¡`;
+      if (noteWorkouts) noteWorkouts.textContent = '🎯 Target Crushed! Consistency unlocked.';
+      if (badgeWorkouts) badgeWorkouts.textContent = `${workoutsPct}% ⚡`;
     } else if (workoutsPct >= 75) {
       cardWorkouts.classList.add('near-target');
-      if (noteWorkouts) noteWorkouts.textContent = `ðŸ”¥ Final push! ${workoutsTarget - workoutsCount} session to go.`;
+      if (noteWorkouts) noteWorkouts.textContent = `🔥 Final push! ${workoutsTarget - workoutsCount} session to go.`;
     } else {
       if (noteWorkouts) noteWorkouts.textContent = `${Math.max(0, workoutsTarget - workoutsCount)} sessions remaining this week.`;
     }
@@ -2285,11 +2285,11 @@ function updateGoalsUI() {
     cardVol.classList.remove('near-target', 'target-met');
     if (volPct >= 100) {
       cardVol.classList.add('target-met');
-      if (noteVol) noteVol.textContent = 'ðŸ† Iron Milestone Met! Legendary volume.';
-      if (badgeVol) badgeVol.textContent = `${volPct}% âš¡`;
+      if (noteVol) noteVol.textContent = '🏆 Iron Milestone Met! Legendary volume.';
+      if (badgeVol) badgeVol.textContent = `${volPct}% ⚡`;
     } else if (volPct >= 75) {
       cardVol.classList.add('near-target');
-      if (noteVol) noteVol.textContent = `âš¡ Approaching target! ${Math.round(volTarget - thisWeekVol).toLocaleString()} ${unit} left.`;
+      if (noteVol) noteVol.textContent = `⚡ Approaching target! ${Math.round(volTarget - thisWeekVol).toLocaleString()} ${unit} left.`;
     } else {
       if (noteVol) noteVol.textContent = `${Math.round(Math.max(0, volTarget - thisWeekVol)).toLocaleString()} ${unit} to target.`;
     }
@@ -2314,11 +2314,11 @@ function updateGoalsUI() {
     cardStreak.classList.remove('near-target', 'target-met');
     if (streakPct >= 100) {
       cardStreak.classList.add('target-met');
-      if (noteStreak) noteStreak.textContent = 'ðŸŒ‘ Landed on Maroon Moon Citadel!';
-      if (badgeStreak) badgeStreak.textContent = `${streakPct}% ðŸš€`;
+      if (noteStreak) noteStreak.textContent = '🌑 Landed on Maroon Moon Citadel!';
+      if (badgeStreak) badgeStreak.textContent = `${streakPct}% 🚀`;
     } else if (streakPct >= 75) {
       cardStreak.classList.add('near-target');
-      if (noteStreak) noteStreak.textContent = `ðŸš€ Orbiting close! ${streakTarget - streak} days to Moon.`;
+      if (noteStreak) noteStreak.textContent = `🚀 Orbiting close! ${streakTarget - streak} days to Moon.`;
     } else {
       if (noteStreak) noteStreak.textContent = `${Math.max(0, streakTarget - streak)} days remaining to Moon.`;
     }
@@ -2344,11 +2344,11 @@ function updateGoalsUI() {
     cardScroll.classList.remove('near-target', 'target-met');
     if (scrollPct >= 100) {
       cardScroll.classList.add('target-met');
-      if (noteScroll) noteScroll.textContent = 'ðŸ›¡ï¸ Focus Shield Mastered! Clean discipline.';
-      if (badgeScroll) badgeScroll.textContent = `${scrollPct}% ðŸ›¡ï¸`;
+      if (noteScroll) noteScroll.textContent = '🛡️ Focus Shield Mastered! Clean discipline.';
+      if (badgeScroll) badgeScroll.textContent = `${scrollPct}% 🛡️`;
     } else if (scrollPct >= 75) {
       cardScroll.classList.add('near-target');
-      if (noteScroll) noteScroll.textContent = `ðŸ›¡ï¸ Almost at target! ${scrollTargetMin - earnedMin} min left.`;
+      if (noteScroll) noteScroll.textContent = `🛡️ Almost at target! ${scrollTargetMin - earnedMin} min left.`;
     } else {
       if (noteScroll) noteScroll.textContent = 'Earned strictly via workout sets & push-ups.';
     }
@@ -2404,7 +2404,7 @@ window.saveGoalsConfig = function(event) {
   saveState();
   updateGoalsUI();
   closeGoalsConfigModal();
-  showToast('ðŸŽ¯ Target milestones updated successfully!');
+  showToast('🎯 Target milestones updated successfully!');
   triggerHaptic([35, 20, 35]);
 };
 
@@ -2525,7 +2525,7 @@ function renderActiveWorkout() {
 
   listEl.innerHTML = AppState.activeWorkout.exercises.map((ex, exIndex) => {
     const pr = AppState.prs[ex.name];
-    const prevText = pr ? `${pr.weight} ${AppState.settings.unit} Ã— ${pr.reps}` : '-';
+    const prevText = pr ? `${pr.weight} ${AppState.settings.unit} × ${pr.reps}` : '-';
 
     return `
       <div class="exercise-session-card" data-ex-index="${exIndex}">
@@ -2686,7 +2686,7 @@ window.addWarmupSetToActiveExercise = function(exIndex) {
   saveState();
   renderActiveWorkout();
   triggerHaptic([30]);
-  showToast('ðŸ”¥ Warm-up set added');
+  showToast('🔥 Warm-up set added');
 };
 
 window.addSetToActiveExercise = function(exIndex) {
@@ -2869,26 +2869,26 @@ function renderHistory() {
           </div>
           <div class="history-actions-row">
             <button type="button" class="history-action-btn edit" onclick="openEditHistoryModal('${escapeHtml(itemId)}')" title="Edit logged workout data">
-              âœï¸ Edit
+              ✏️ Edit
             </button>
             <button type="button" class="history-action-btn delete" onclick="deleteHistoryWorkout('${escapeHtml(itemId)}')" title="Delete workout history">
-              ðŸ—‘ï¸ Delete
+              🗑️ Delete
             </button>
           </div>
         </div>
 
         <div class="history-stats-row">
-          <div class="history-stat-item">â±ï¸ <strong>${formatDuration(item.durationSeconds)}</strong></div>
-          <div class="history-stat-item">âš¡ <strong>${item.volume.toLocaleString()} ${item.unit}</strong></div>
-          <div class="history-stat-item">ðŸŽ¯ <strong>${item.setsCount} sets</strong></div>
+          <div class="history-stat-item">⏱️ <strong>${formatDuration(item.durationSeconds)}</strong></div>
+          <div class="history-stat-item">⚡ <strong>${item.volume.toLocaleString()} ${item.unit}</strong></div>
+          <div class="history-stat-item">🎯 <strong>${item.setsCount} sets</strong></div>
         </div>
 
         <div class="history-ex-tags">
           ${item.exercises ? item.exercises.map(ex => `
-            <span class="history-tag">${escapeHtml(ex.name)} (${ex.bestWeight || 0}${item.unit} Ã— ${ex.bestReps || 0})</span>
+            <span class="history-tag">${escapeHtml(ex.name)} (${ex.bestWeight || 0}${item.unit} × ${ex.bestReps || 0})</span>
           `).join('') : ''}
         </div>
-        ${item.notes ? `<div style="font-size:0.75rem;color:var(--text-muted);font-style:italic;margin-top:4px;">ðŸ“ ${escapeHtml(item.notes)}</div>` : ''}
+        ${item.notes ? `<div style="font-size:0.75rem;color:var(--text-muted);font-style:italic;margin-top:4px;">📝 ${escapeHtml(item.notes)}</div>` : ''}
       </div>
     `;
   }).join('');
@@ -2905,7 +2905,7 @@ window.deleteHistoryWorkout = function(id) {
   updateOverviewStats();
   renderHistory();
   if (typeof renderPRs === 'function') renderPRs();
-  showToast('ðŸ—‘ï¸ Workout history entry permanently deleted.');
+  showToast('🗑️ Workout history entry permanently deleted.');
   triggerHaptic([30, 40]);
 };
 
@@ -3009,7 +3009,7 @@ function renderEditHistoryExercises() {
   if (!editingHistoryWorkout.exercises || editingHistoryWorkout.exercises.length === 0) {
     container.innerHTML = `
       <div class="idle-placeholder" style="padding:26px 16px; text-align:center;">
-        <span style="font-size:2rem;display:block;margin-bottom:8px;">ðŸ‹ï¸</span>
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">🏋️</span>
         <p style="margin:0;color:var(--text-muted);font-size:0.88rem;">No exercises in this session yet.</p>
         <button type="button" class="primary-glow-btn small-btn" style="margin-top:12px;" onclick="openExercisePicker('edit_history')">
           + Add Exercise
@@ -3025,7 +3025,7 @@ function renderEditHistoryExercises() {
 
   container.innerHTML = editingHistoryWorkout.exercises.map((ex, exIdx) => {
     const pr = AppState.prs[ex.name];
-    const prevText = pr ? `${pr.weight} ${unit.toLowerCase()} Ã— ${pr.reps}` : '-';
+    const prevText = pr ? `${pr.weight} ${unit.toLowerCase()} × ${pr.reps}` : '-';
 
     return `
       <div class="exercise-session-card edit-history-ex-card" data-ex-index="${exIdx}">
@@ -3290,7 +3290,7 @@ window.saveHistoryWorkoutEdit = function(e) {
   updateOverviewStats();
   renderHistory();
   closeModal('modal-edit-history');
-  showToast('âœ… Workout history successfully updated.');
+  showToast('✅ Workout history successfully updated.');
   triggerHaptic([30, 40]);
 };
 
@@ -3327,12 +3327,12 @@ function renderPRs() {
       <div class="pr-card">
         <div class="pr-card-header">
           <span class="pr-cat">${escapeHtml(cat)}</span>
-          <span style="font-size: 1.1rem;">ðŸ†</span>
+          <span style="font-size: 1.1rem;">🏆</span>
         </div>
         <div class="pr-name" title="${escapeHtml(name)}">${escapeHtml(name)}</div>
         <div class="pr-value-box">
           <span class="pr-value">${data.weight}</span>
-          <span class="pr-unit">${AppState.settings.unit} Ã— ${data.reps} reps</span>
+          <span class="pr-unit">${AppState.settings.unit} × ${data.reps} reps</span>
         </div>
         <span class="pr-date">${dateStr}</span>
       </div>
@@ -3502,7 +3502,7 @@ window.renderFeaturedRoutineTemplates = function() {
             Load Template &rarr;
           </button>
         </div>
-        <p class="template-exercises-preview">${escapeHtml(exNames.join(' â€¢ '))}</p>
+        <p class="template-exercises-preview">${escapeHtml(exNames.join(' • '))}</p>
       </div>
     `;
   }).join('');
@@ -3902,7 +3902,7 @@ function toggleInstantBlock() {
   ensureFocusBlockState();
   if (AppState.focusBlock.instantActive) {
     if (AppState.settings && AppState.settings.strictFocusLock) {
-      showToast('ðŸ”’ Strict Focus Lock is active! You cannot cancel or pause an active lockdown.');
+      showToast('🔒 Strict Focus Lock is active! You cannot cancel or pause an active lockdown.');
       triggerHaptic([60, 40, 60]);
       return;
     }
@@ -3919,7 +3919,7 @@ function toggleInstantBlock() {
     triggerHaptic([35, 20]);
     const alertMsg = window.t
       ? window.t('hold_protected_alert')
-      : 'âš ï¸ Active lockdown protected! Press and hold the Cancel button for 3 seconds.';
+      : '⚠️ Active lockdown protected! Press and hold the Cancel button for 3 seconds.';
     showToast(alertMsg);
   } else {
     startInstantBlock(AppState.focusBlock.instantDurationMinutes || 15);
@@ -3948,14 +3948,14 @@ function startInstantBlock(mins) {
   updateFocusBlockUI();
   syncScrollToServer();
 
-  showToast('âš¡ INSTANT BLOCK ACTIVE! YouTube Shorts, games, and distracting feeds locked.');
+  showToast('⚡ INSTANT BLOCK ACTIVE! YouTube Shorts, games, and distracting feeds locked.');
 }
 window.startInstantBlock = startInstantBlock;
 
 function stopInstantBlock(force = false) {
   ensureFocusBlockState();
   if (!force && AppState.settings && AppState.settings.strictFocusLock && AppState.focusBlock.instantActive) {
-    showToast('ðŸ”’ Strict Focus Lock is active! Lockdown cannot be cancelled.');
+    showToast('🔒 Strict Focus Lock is active! Lockdown cannot be cancelled.');
     triggerHaptic([60, 40, 60]);
     return;
   }
@@ -3965,7 +3965,7 @@ function stopInstantBlock(force = false) {
   saveState();
   updateFocusBlockUI();
   syncScrollToServer();
-  showToast('âš¡ Instant Block deactivated.');
+  showToast('⚡ Instant Block deactivated.');
 }
 window.stopInstantBlock = stopInstantBlock;
 
@@ -4003,7 +4003,7 @@ function initHoldToCancel() {
     }
     if (countdownEl) {
       const isRTL = window.I18N && window.I18N.isRTL();
-      countdownEl.textContent = isRTL ? 'Ø§Ø¶ØºØ· 3 Ø«ÙˆØ§Ù†Ù' : 'Hold 3s';
+      countdownEl.textContent = isRTL ? 'اضغط 3 ثوانٍ' : 'Hold 3s';
     }
     if (holdWrapper) {
       holdWrapper.classList.remove('is-holding');
@@ -4014,7 +4014,7 @@ function initHoldToCancel() {
   function onPointerDown(e) {
     ensureFocusBlockState();
     if (AppState.settings && AppState.settings.strictFocusLock) {
-      showToast('ðŸ”’ Strict Focus Lock is active! You cannot cancel an active lockdown.');
+      showToast('🔒 Strict Focus Lock is active! You cannot cancel an active lockdown.');
       triggerHaptic([60, 40, 60]);
       return;
     }
@@ -4055,7 +4055,7 @@ function initHoldToCancel() {
       const remainingSec = Math.max(0, (HOLD_CANCEL_DURATION_MS - elapsed) / 1000);
       const isRTL = window.I18N && window.I18N.isRTL();
       if (countdownEl) {
-        countdownEl.textContent = `${remainingSec.toFixed(1)}${isRTL ? ' Ø«' : 's'}`;
+        countdownEl.textContent = `${remainingSec.toFixed(1)}${isRTL ? ' ث' : 's'}`;
       }
 
       // Haptic pulse for each full second held
@@ -4083,7 +4083,7 @@ function initHoldToCancel() {
 
         const successMsg = window.t
           ? window.t('hold_cancelled_toast')
-          : 'ðŸ›‘ Lockdown successfully cancelled after 3s hold!';
+          : '🛑 Lockdown successfully cancelled after 3s hold!';
         showToast(successMsg);
 
         resetHoldVisuals();
@@ -4107,7 +4107,7 @@ function initHoldToCancel() {
       triggerHaptic([15]);
       const earlyMsg = window.t
         ? window.t('hold_early_toast')
-        : 'âš ï¸ Keep holding for full 3 seconds to break lockdown!';
+        : '⚠️ Keep holding for full 3 seconds to break lockdown!';
       showToast(earlyMsg);
     }
   }
@@ -4132,7 +4132,7 @@ function toggleScheduledBlockEnabled(enabled) {
   saveState();
   updateFocusBlockUI();
   syncScrollToServer();
-  showToast(`â° Scheduled Block ${enabled ? 'ENABLED' : 'PAUSED'}.`);
+  showToast(`⏰ Scheduled Block ${enabled ? 'ENABLED' : 'PAUSED'}.`);
 }
 window.toggleScheduledBlockEnabled = toggleScheduledBlockEnabled;
 
@@ -4254,7 +4254,7 @@ function updateFocusBlockUI() {
         fb.instantActive = false;
         fb.instantEndsAt = null;
         saveState();
-        showToast('âš¡ Instant Block completed!');
+        showToast('⚡ Instant Block completed!');
         syncScrollToServer();
       }
     }
@@ -4278,7 +4278,7 @@ function updateFocusBlockUI() {
       strictBanner = document.createElement('div');
       strictBanner.id = 'strict-lock-banner';
       strictBanner.className = 'strict-lock-banner';
-      strictBanner.innerHTML = 'ðŸ”’ <strong>Strict Focus Lock Active</strong> &bull; Active lockdown cannot be cancelled';
+      strictBanner.innerHTML = '🔒 <strong>Strict Focus Lock Active</strong> &bull; Active lockdown cannot be cancelled';
       holdContainer.parentNode.insertBefore(strictBanner, holdContainer);
     }
     if (strictBanner) strictBanner.classList.remove('hidden');
@@ -4293,26 +4293,26 @@ function updateFocusBlockUI() {
   if (opalInstantTitle) {
     const isRTL = window.I18N && window.I18N.isRTL();
     if (fb.instantActive) {
-      opalInstantTitle.textContent = isRTL ? 'Ø¥ØºÙ„Ø§Ù‚ ÙÙˆØ±ÙŠ Ù…Ø´Ø¯Ø¯' : 'Instant Lockdown';
+      opalInstantTitle.textContent = isRTL ? 'إغلاق فوري مشدد' : 'Instant Lockdown';
     } else {
-      opalInstantTitle.textContent = isRTL ? 'Ø­Ø¸Ø± ÙÙˆØ±ÙŠ' : 'Instant Block';
+      opalInstantTitle.textContent = isRTL ? 'حظر فوري' : 'Instant Block';
     }
   }
   if (opalInstantSub) {
     const isRTL = window.I18N && window.I18N.isRTL();
     if (fb.instantActive) {
       if (isRTL) {
-        opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} Ù…ØªØ¨Ù‚ÙŠØ© â€¢ Ø§Ù„ØªØ·Ø¨ÙŠÙ‚Ø§Øª Ù…Ù‚ÙŠØ¯Ø©` : 'Ù†Ø´Ø· â€¢ Ø§Ù„ØªØ·Ø¨ÙŠÙ‚Ø§Øª Ù…Ù‚ÙŠØ¯Ø©';
+        opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} متبقية • التطبيقات مقيدة` : 'نشط • التطبيقات مقيدة';
       } else {
-        opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} REMAINING â€¢ APPS LOCKED` : 'ACTIVE â€¢ APPS RESTRICTED';
+        opalInstantSub.textContent = fb.instantEndsAt ? `${formatDuration(remSec)} REMAINING • APPS LOCKED` : 'ACTIVE • APPS RESTRICTED';
       }
     } else {
       const mins = fb.instantDurationMinutes;
-      const durText = (mins === 0 || mins === '0') ? (isRTL ? 'Ù…ÙØªÙˆØ­' : 'INDEFINITE') : (mins >= 60 ? `${mins / 60}${isRTL ? 'Ø³' : 'H'}` : `${mins || 15}${isRTL ? 'Ø¯' : 'M'}`);
+      const durText = (mins === 0 || mins === '0') ? (isRTL ? 'مفتوح' : 'INDEFINITE') : (mins >= 60 ? `${mins / 60}${isRTL ? 'س' : 'H'}` : `${mins || 15}${isRTL ? 'د' : 'M'}`);
       if (isRTL) {
-        opalInstantSub.textContent = `Ø­Ø¸Ø± Ù„Ù…Ø¯Ø© ${durText} â€¢ Ø§Ù„Ù…Ø³ Ù„Ù„Ø¨Ø¯Ø¡`;
+        opalInstantSub.textContent = `حظر لمدة ${durText} • المس للبدء`;
       } else {
-        opalInstantSub.textContent = `${durText} LOCKDOWN â€¢ TAP TO BEGIN`;
+        opalInstantSub.textContent = `${durText} LOCKDOWN • TAP TO BEGIN`;
       }
     }
   }
@@ -4320,10 +4320,10 @@ function updateFocusBlockUI() {
     const isRTL = window.I18N && window.I18N.isRTL();
     if (fb.instantActive) {
       opalInstantBadge.className = 'opal-badge-pill lockdown';
-      opalInstantBadge.textContent = isRTL ? 'Ø¥Ù†Ù‡Ø§Ø¡' : 'END';
+      opalInstantBadge.textContent = isRTL ? 'إنهاء' : 'END';
     } else {
       opalInstantBadge.className = 'opal-badge-pill';
-      opalInstantBadge.textContent = isRTL ? 'Ø¨Ø¯Ø¡' : 'START';
+      opalInstantBadge.textContent = isRTL ? 'بدء' : 'START';
     }
   }
 
@@ -4344,10 +4344,10 @@ function updateFocusBlockUI() {
   if (btnToggle) {
     if (fb.instantActive) {
       btnToggle.className = 'danger-btn full-width';
-      btnToggle.innerHTML = '<span>ðŸ›‘ End Instant Block</span>';
+      btnToggle.innerHTML = '<span>🛑 End Instant Block</span>';
     } else {
       btnToggle.className = 'primary-glow-btn full-width';
-      btnToggle.innerHTML = '<span>âš¡ Start Instant Block</span>';
+      btnToggle.innerHTML = '<span>⚡ Start Instant Block</span>';
     }
   }
 
@@ -4378,12 +4378,12 @@ function updateFocusBlockUI() {
   // Update Opal Scheduled Block Pill
   if (opalSchedSub) {
     if (isSchedActive) {
-      opalSchedSub.textContent = `ACTIVE NOW â€¢ RESTRICTING (${fb.schedule.startTime} - ${fb.schedule.endTime})`;
+      opalSchedSub.textContent = `ACTIVE NOW • RESTRICTING (${fb.schedule.startTime} - ${fb.schedule.endTime})`;
     } else if (fb.schedule.enabled) {
       const daysStr = (fb.schedule.days && fb.schedule.days.length) ? fb.schedule.days.join(', ') : 'MON-FRI';
-      opalSchedSub.textContent = `${daysStr} â€¢ ${fb.schedule.startTime} - ${fb.schedule.endTime}`;
+      opalSchedSub.textContent = `${daysStr} • ${fb.schedule.startTime} - ${fb.schedule.endTime}`;
     } else {
-      opalSchedSub.textContent = 'SCHEDULE PAUSED â€¢ TAP TO CONFIGURE';
+      opalSchedSub.textContent = 'SCHEDULE PAUSED • TAP TO CONFIGURE';
     }
   }
   if (opalSchedBadge) {
@@ -4404,7 +4404,7 @@ function updateFocusBlockUI() {
   }
   if (statusText) {
     if (isSchedActive) {
-      statusText.innerHTML = `<strong>âš¡ ACTIVE NOW:</strong> Restricting apps (${fb.schedule.startTime} &ndash; ${fb.schedule.endTime})`;
+      statusText.innerHTML = `<strong>⚡ ACTIVE NOW:</strong> Restricting apps (${fb.schedule.startTime} &ndash; ${fb.schedule.endTime})`;
     } else if (fb.schedule.enabled) {
       statusText.innerHTML = `Schedule Ready &bull; Active ${fb.schedule.days.join(', ')} (${fb.schedule.startTime} &ndash; ${fb.schedule.endTime})`;
     } else {
@@ -4589,20 +4589,20 @@ function scrollTick() {
       const timeWindow = sched && sched.startTime && sched.endTime ? ` (${sched.startTime} - ${sched.endTime})` : '';
       if (currentSchedActive) {
         // Scheduled block STARTED
-        triggerLocalPushNotification('ðŸ›¡ï¸ Scheduled Focus Block Started', {
+        triggerLocalPushNotification('🛡️ Scheduled Focus Block Started', {
           body: `Your scheduled focus block has begun${timeWindow}. Feeds and distractions locked.`,
           tag: 'focus-block-start',
           icon: 'moon_logo.png'
         });
-        showToast(`ðŸ›¡ï¸ Scheduled Focus Block Started${timeWindow}`);
+        showToast(`🛡️ Scheduled Focus Block Started${timeWindow}`);
       } else {
         // Scheduled block FINISHED
-        triggerLocalPushNotification('âœ¨ Scheduled Focus Block Finished', {
+        triggerLocalPushNotification('✨ Scheduled Focus Block Finished', {
           body: 'Your scheduled focus session has concluded. Great job maintaining discipline!',
           tag: 'focus-block-end',
           icon: 'moon_logo.png'
         });
-        showToast('âœ¨ Scheduled Focus Block Finished');
+        showToast('✨ Scheduled Focus Block Finished');
       }
       AppState._lastScheduledBlockActive = currentSchedActive;
     }
@@ -5604,7 +5604,7 @@ function exportWorkoutDataCSV() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  showToast('ðŸ“¥ Workout logs and PRs downloaded as CSV!');
+  showToast('📥 Workout logs and PRs downloaded as CSV!');
   triggerHaptic([30, 20, 30]);
 }
 window.exportWorkoutDataCSV = exportWorkoutDataCSV;
@@ -6054,7 +6054,7 @@ document.addEventListener('DOMContentLoaded', () => {
       AppState.settings.strictFocusLock = e.target.checked;
       saveState();
       updateFocusBlockUI();
-      showToast(e.target.checked ? 'ðŸ”’ Strict Focus Lock enabled (blocks cannot be cancelled)' : 'Strict Focus Lock disabled');
+      showToast(e.target.checked ? '🔒 Strict Focus Lock enabled (blocks cannot be cancelled)' : 'Strict Focus Lock disabled');
       triggerHaptic([35]);
     });
   }
@@ -6073,7 +6073,7 @@ document.addEventListener('DOMContentLoaded', () => {
     oledToggle.checked = Boolean(AppState.settings.oledTrueBlack);
     oledToggle.addEventListener('change', (e) => {
       toggleOledTrueBlack(e.target.checked);
-      showToast(e.target.checked ? 'ðŸŒ‘ OLED True Black enabled (#000000)' : 'Standard theme backgrounds restored');
+      showToast(e.target.checked ? '🌑 OLED True Black enabled (#000000)' : 'Standard theme backgrounds restored');
       triggerHaptic([25]);
     });
   }
@@ -6140,7 +6140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Phase 1: Fade in the central app logo (moon_logo.png) on a pitch-black background.
 // Phase 2: While the logo is on screen, fade in the central quote
 //          'Are you ready to take it to the moon?' and the bottom-right text
-//          'In the loving memory of 27 / Ù…Ù†'.
+//          'In the loving memory of 27 / من'.
 // Phase 3: Fade all elements out smoothly.
 // ==========================================================================
 
@@ -6374,8 +6374,8 @@ function promptNotificationPermissionOnFirstLogin() {
     setTimeout(() => {
       Notification.requestPermission().then((perm) => {
         if (perm === 'granted') {
-          showToast('ðŸ”” OS Push Notifications Enabled â€” Rest timer & gym alerts active!');
-          triggerLocalPushNotification('Moon Fitness OS ðŸš€', {
+          showToast('🔔 OS Push Notifications Enabled — Rest timer & gym alerts active!');
+          triggerLocalPushNotification('Moon Fitness OS 🚀', {
             body: 'Mission alerts active! Rest timers, focus blocks, and workout reminders are set.',
             tag: 'initial-welcome-notif'
           });
@@ -6600,7 +6600,7 @@ function renderCustomSplitBuilder() {
             class="custom-day-status-btn ${isRest ? 'btn-rest' : 'btn-lift'}" 
             onclick="toggleCustomSplitDayRest('${day}')"
             title="Toggle between Training and Rest">
-            ${isRest ? 'ðŸ§˜ Rest' : 'ðŸ‹ï¸ Lift'}
+            ${isRest ? '🧘 Rest' : '🏋️ Lift'}
           </button>
         </div>
       </div>
@@ -6658,7 +6658,7 @@ function toggleWorkoutSplitReminders(enabled) {
   saveState();
   updateWorkoutSplitUI();
   triggerHaptic([25]);
-  showToast(enabled ? 'ðŸ”” Daily Gym Reminders armed (suppressed on rest days)' : 'Gym Reminders muted');
+  showToast(enabled ? '🔔 Daily Gym Reminders armed (suppressed on rest days)' : 'Gym Reminders muted');
 }
 window.toggleWorkoutSplitReminders = toggleWorkoutSplitReminders;
 
@@ -6705,7 +6705,7 @@ function checkDailyGymReminder() {
   const todayDayKey = getTodayDayKey();
   const customTodayName = (ws.splitType === 'Custom' && ws.customDays && ws.customDays[todayDayKey]) ? ws.customDays[todayDayKey] : null;
   const splitTitle = customTodayName || ws.splitName || ws.splitType || 'Daily Workout';
-  triggerLocalPushNotification('ðŸš€ Moon Fitness OS â€” Time to Lift!', {
+  triggerLocalPushNotification('🚀 Moon Fitness OS — Time to Lift!', {
     body: `Today is a scheduled training day: ${splitTitle}. Step up and take it to the moon!`,
     tag: 'daily-gym-reminder',
     icon: 'moon_logo.png',
@@ -6725,12 +6725,12 @@ window.testDailyGymReminder = function() {
   const splitTitle = customTodayName || ws.splitName || ws.splitType || 'Daily Workout';
 
   if (isRest) {
-    showToast(`ðŸ›¡ï¸ Rest Day Active: Today (${day}) is marked as a Rest Day. Gym alert was safely SUPPRESSED.`);
+    showToast(`🛡️ Rest Day Active: Today (${day}) is marked as a Rest Day. Gym alert was safely SUPPRESSED.`);
     triggerHaptic([30, 20]);
     console.log(`[Test Reminder] Today (${day}) is a rest day. Alert suppressed.`);
   } else {
-    showToast(`ðŸš€ Training Day Active: Today (${day}) is a training day (${splitTitle}). Triggering notification...`);
-    triggerLocalPushNotification('ðŸš€ Moon Fitness OS â€” Time to Lift!', {
+    showToast(`🚀 Training Day Active: Today (${day}) is a training day (${splitTitle}). Triggering notification...`);
+    triggerLocalPushNotification('🚀 Moon Fitness OS — Time to Lift!', {
       body: `Today (${day}) is a scheduled training day: ${splitTitle}. Time to crush your workout!`,
       tag: 'test-gym-reminder',
       icon: 'moon_logo.png',
@@ -6777,14 +6777,14 @@ function updateWorkoutSplitUI() {
   // Summary label
   const summaryEl = document.getElementById('split-card-summary');
   if (summaryEl) {
-    summaryEl.textContent = `${ws.daysOn} Days On / ${ws.daysOff} Days Off â€¢ ${ws.splitName}`;
+    summaryEl.textContent = `${ws.daysOn} Days On / ${ws.daysOff} Days Off • ${ws.splitName}`;
   }
 
   // Today Status Pill
   const pillEl = document.getElementById('split-today-status-badge');
   if (pillEl) {
     pillEl.className = 'split-today-pill ' + (isRest ? 'rest' : 'training');
-    pillEl.textContent = isRest ? 'TODAY: REST DAY ðŸ§˜' : 'TODAY: TRAINING DAY ðŸ”¥';
+    pillEl.textContent = isRest ? 'TODAY: REST DAY 🧘' : 'TODAY: TRAINING DAY 🔥';
   }
 
   // Status Banner
@@ -6795,11 +6795,11 @@ function updateWorkoutSplitUI() {
   if (bannerEl && bannerTitle && bannerDesc && bannerIcon) {
     bannerEl.className = 'split-status-banner ' + (isRest ? 'rest-day' : 'training-day');
     if (isRest) {
-      bannerIcon.textContent = 'ðŸ§˜';
+      bannerIcon.textContent = '🧘';
       bannerTitle.textContent = 'Today is a Designated Rest Day';
       bannerDesc.textContent = 'Rest Day Shield Active: "Time to lift" notifications are automatically suppressed for recovery.';
     } else {
-      bannerIcon.textContent = 'ðŸ”¥';
+      bannerIcon.textContent = '🔥';
       bannerTitle.textContent = 'Today is a Scheduled Training Day';
       const customTodayName = (ws.splitType === 'Custom' && ws.customDays && ws.customDays[todayKey]) ? ws.customDays[todayKey] : ws.splitName;
       bannerDesc.textContent = `${customTodayName} active. Daily gym reminders are armed for ${ws.reminderTime || '17:30'}.`;
@@ -6816,7 +6816,7 @@ function updateWorkoutSplitUI() {
   // Cadence Display & Active Buttons
   const cadenceDisp = document.getElementById('split-cadence-display');
   if (cadenceDisp) {
-    cadenceDisp.textContent = `${ws.daysOn} Days On â€¢ ${ws.daysOff} Days Off`;
+    cadenceDisp.textContent = `${ws.daysOn} Days On • ${ws.daysOff} Days Off`;
   }
   const cadenceBtns = document.querySelectorAll('.cadence-pill-btn');
   const cadenceKey = `${ws.daysOn}on${ws.daysOff}off`;
@@ -6835,7 +6835,7 @@ function updateWorkoutSplitUI() {
       return `
         <div class="split-day-card ${isLift ? 'training-day' : 'rest-day'} ${isToday ? 'is-today' : ''}" onclick="toggleSplitDay('${day}')" title="Tap to toggle ${day}">
           <span class="split-day-name">${dayLabels[day]}</span>
-          <span class="split-day-badge">${isLift ? 'LIFT ðŸ‹ï¸' : 'REST ðŸ§˜'}</span>
+          <span class="split-day-badge">${isLift ? 'LIFT 🏋️' : 'REST 🧘'}</span>
         </div>
       `;
     }).join('');
@@ -6951,7 +6951,7 @@ window.handleAuthSignIn = async function(e) {
     }
   } catch (err) {
     if (typeof showToast === 'function') {
-      showToast('âš ï¸ ' + err.message);
+      showToast('⚠️ ' + err.message);
     } else {
       alert(err.message);
     }
@@ -7009,7 +7009,7 @@ window.handleAuthSignUp = async function(e) {
     }
   } catch (err) {
     if (typeof showToast === 'function') {
-      showToast('âš ï¸ ' + err.message);
+      showToast('⚠️ ' + err.message);
     } else {
       alert(err.message);
     }
@@ -7028,7 +7028,7 @@ window.toggleCoachVoice = function() {
     const voiceLabel = document.getElementById('coach-voice-label');
     const voiceIcon = document.getElementById('coach-voice-icon');
     if (voiceLabel) voiceLabel.textContent = v ? 'Voice: ON' : 'Voice: OFF';
-    if (voiceIcon) voiceIcon.textContent = v ? 'ðŸ”Š' : 'ðŸ”‡';
+    if (voiceIcon) voiceIcon.textContent = v ? '🔊' : '🔇';
     if (typeof showToast === 'function') {
       showToast(`Coach voice audio: ${v ? 'ENABLED' : 'MUTED'}`);
     }
@@ -7153,7 +7153,7 @@ window.askCoachPrompt = async function(promptText) {
   // 7. Voice readback if enabled
   if (window.AuthSystem && window.AuthSystem.voiceEnabled && typeof window.AuthSystem.speak === 'function') {
     // Strip markdown tags for natural speech
-    const cleanSpeech = replyText.replace(/[*#â€¢_-]/g, '').slice(0, 240);
+    const cleanSpeech = replyText.replace(/[*#•_-]/g, '').slice(0, 240);
     window.AuthSystem.speak(cleanSpeech);
   }
 
@@ -7174,6 +7174,7 @@ window.handleCoachChatSubmit = function(e) {
   input.value = '';
   window.askCoachPrompt(query);
 };
+
 
 // ==========================================================================
 // ONBOARDING: Admin QR distribution, iOS PWA install prompt, unified auth gate

@@ -247,9 +247,9 @@ def generate_contextual_coach_engine(messages, coach_name, coach_gender, ath_nam
         
         return (
             f"{prefix}Listen closely, {ath_name}. Pain is a protective biomechanical signal, not something to push through blindly.\n\n"
-            f"â€¢ Triage for {target}: {fix}\n"
-            f"â€¢ Execution rule: Control the eccentric tempo with a 3-second descent and a 1-second pause at mechanical reversal.\n\n"
-            f"âš ï¸ Medical Protocol: If the sensation is sharp, pinching, or accompanied by joint swelling, cease the exercise immediately and consult a sports physiotherapist."
+            f"• Triage for {target}: {fix}\n"
+            f"• Execution rule: Control the eccentric tempo with a 3-second descent and a 1-second pause at mechanical reversal.\n\n"
+            f"⚠️ Medical Protocol: If the sensation is sharp, pinching, or accompanied by joint swelling, cease the exercise immediately and consult a sports physiotherapist."
         )
 
     # Check for Form Cues & Biomechanics
@@ -258,13 +258,13 @@ def generate_contextual_coach_engine(messages, coach_name, coach_gender, ath_nam
             return (
                 f"{prefix}Bench Press Mechanics for {ath_name}:\n\n"
                 f"1. Setup & Scapulae: Retract and depress your shoulder blades into the bench. Arch naturally through thoracic spine while keeping glutes cemented.\n"
-                f"2. Bar Path & Elbows: Do not flare out at 90Â°. Tuck elbows to ~45-60Â°, pull the bar down with your lats, and touch the lower sternum.\n"
+                f"2. Bar Path & Elbows: Do not flare out at 90°. Tuck elbows to ~45-60°, pull the bar down with your lats, and touch the lower sternum.\n"
                 f"3. Neural Drive: 'Bend the bar in half' as you press in a slight backward J-curve to lockout over your upper chest."
             )
         elif "squat" in q:
             return (
                 f"{prefix}Squat Architecture for {ath_name}:\n\n"
-                f"1. Foot Stance: Shoulder-width, toes angled 15-30Â° out. Actively 'spread the floor' with the lateral borders of your shoes to prevent knee valgus.\n"
+                f"1. Foot Stance: Shoulder-width, toes angled 15-30° out. Actively 'spread the floor' with the lateral borders of your shoes to prevent knee valgus.\n"
                 f"2. Core Cylinder: Take a deep belly breath and brace against your abdominal wall before breaking hips and knees simultaneously.\n"
                 f"3. Depth & Drive: Break parallel with a neutral lumbar spine, then explode upward through midfoot, driving the earth away."
             )
@@ -287,18 +287,18 @@ def generate_contextual_coach_engine(messages, coach_name, coach_gender, ath_nam
     if any(k in q for k in ["diet", "food", "protein", "calorie", "calories", "macro", "macros", "creatine", "bulk", "cut"]):
         return (
             f"{prefix}Fueling Protocol for {ath_name}:\n\n"
-            f"â€¢ Protein Target: Aim for 1.8g to 2.2g of protein per kilogram of body weight (approx. 0.8g-1.0g per lb) divided across 3-4 meals.\n"
-            f"â€¢ Caloric Strategy: For a lean surplus (hypertrophy), maintain +250 to +350 kcal above maintenance. For fat loss, keep a controlled -400 to -500 kcal deficit while keeping protein high.\n"
-            f"â€¢ Hydration & Supplements: 3-4 liters of water daily plus 5g daily creatine monohydrate. Consistent fuel builds the foundation for PRs on the Cosmic Roadmap."
+            f"• Protein Target: Aim for 1.8g to 2.2g of protein per kilogram of body weight (approx. 0.8g-1.0g per lb) divided across 3-4 meals.\n"
+            f"• Caloric Strategy: For a lean surplus (hypertrophy), maintain +250 to +350 kcal above maintenance. For fat loss, keep a controlled -400 to -500 kcal deficit while keeping protein high.\n"
+            f"• Hydration & Supplements: 3-4 liters of water daily plus 5g daily creatine monohydrate. Consistent fuel builds the foundation for PRs on the Cosmic Roadmap."
         )
 
     # Check for Workout Splits / Routine
     if any(k in q for k in ["split", "routine", "schedule", "program", "ppl", "upper lower", "frequency", "days"]):
         return (
             f"{prefix}Workout Split Recommendation for {ath_name}:\n\n"
-            f"â€¢ 4 Days/Week: Upper / Lower split (Mon/Tue/Thu/Fri). Excellent frequency (2x per muscle group) with 3 full recovery days.\n"
-            f"â€¢ 5-6 Days/Week: Push / Pull / Legs (PPL). Maximum volume distribution and targeted muscle isolation.\n"
-            f"â€¢ Golden Rule: Each muscle group benefits most from 10 to 18 high-quality working sets per week taken to 1-2 Reps in Reserve (RIR). Quality trumps junk volume every time."
+            f"• 4 Days/Week: Upper / Lower split (Mon/Tue/Thu/Fri). Excellent frequency (2x per muscle group) with 3 full recovery days.\n"
+            f"• 5-6 Days/Week: Push / Pull / Legs (PPL). Maximum volume distribution and targeted muscle isolation.\n"
+            f"• Golden Rule: Each muscle group benefits most from 10 to 18 high-quality working sets per week taken to 1-2 Reps in Reserve (RIR). Quality trumps junk volume every time."
         )
 
     # Default Dynamic Contextual Response
@@ -693,8 +693,6 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if clean == '/api/distribution':
-            # Public web URL: PUBLIC_URL env var wins; otherwise derive from the request,
-            # swapping localhost for the LAN IP so phones can actually reach it.
             public = os.environ.get('PUBLIC_URL', '').strip().rstrip('/')
             if not public:
                 host = (self.headers.get('X-Forwarded-Host') or self.headers.get('Host') or '').strip()
@@ -882,7 +880,7 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                 return self._send(json.dumps({
                     'ok': False,
                     'error': str(e),
-                    'reply': "âš ï¸ Coach network link interrupted. Re-centering focus... What was your target exercise?"
+                    'reply': "⚠️ Coach network link interrupted. Re-centering focus... What was your target exercise?"
                 }), code=200, ctype='application/json; charset=utf-8')
 
         if clean in ('/api/auth/admin-override', '/api/admin/override'):
@@ -921,7 +919,7 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                             'role': 'Admin',
                             'isAdmin': True,
                             'aiCoach': 'Nurv',
-                            'avatar': 'ðŸ‘‘',
+                            'avatar': '👑',
                             'joinedDate': time.strftime('%Y-%m-%d'),
                             'totalWorkouts': 0,
                             'totalVolumeKg': 0,
@@ -1000,7 +998,7 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                     'role': 'Admin' if is_admin else 'Standard',
                     'isAdmin': is_admin,
                     'aiCoach': 'Maryam' if (ai_coach.lower() in ('m', 'maryam')) else 'Nurv',
-                    'avatar': 'ðŸ‘‘' if is_admin else ('â™€' if gender == 'female' else 'â™‚'),
+                    'avatar': '👑' if is_admin else ('♀' if gender == 'female' else '♂'),
                     'joinedDate': time.strftime('%Y-%m-%d'),
                     'totalWorkouts': 0,
                     'totalVolumeKg': 0,
@@ -1067,7 +1065,7 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                             'role': 'Admin',
                             'isAdmin': True,
                             'aiCoach': 'Nurv',
-                            'avatar': 'ðŸ‘‘',
+                            'avatar': '👑',
                             'joinedDate': time.strftime('%Y-%m-%d'),
                             'totalWorkouts': 0,
                             'totalVolumeKg': 0,
@@ -1249,26 +1247,26 @@ def run():
     https_port = start_https(handler, all_ips)
 
     print("=" * 64)
-    print("   âš¡ MOON FITNESS TRACKER - LOCAL SERVER RUNNING âš¡")
+    print("   ⚡ MOON FITNESS TRACKER - LOCAL SERVER RUNNING ⚡")
     print("=" * 64)
-    print(f"\nðŸ–¥ï¸  On this Computer:   {local_url}")
-    print("ðŸ“±  On your iPhone - try each address until one loads:")
+    print(f"\n🖥️  On this Computer:   {local_url}")
+    print("📱  On your iPhone - try each address until one loads:")
     for ip in all_ips:
         print(f"      http://{ip}:{PORT}")
     print()
     if https_port:
-        print("ðŸ“·  CAMERA TRACKING needs HTTPS. On the iPhone open (accept the")
+        print("📷  CAMERA TRACKING needs HTTPS. On the iPhone open (accept the")
         print("    certificate warning once: Show Details > visit this website):")
         for ip in all_ips:
             print(f"      https://{ip}:{https_port}")
     else:
-        print("âš ï¸  HTTPS unavailable (run: pip install cryptography). Camera works on this PC only.")
+        print("⚠️  HTTPS unavailable (run: pip install cryptography). Camera works on this PC only.")
     print()
     print("=" * 64)
     print("  HOW TO DOWNLOAD & INSTALL ON YOUR iPHONE:")
     print("  1. Make sure your iPhone is connected to the SAME Wi-Fi.")
     print(f"  2. Open Safari on iPhone and type:  {iphone_url}")
-    print("  3. Tap the Share button (square with arrow up âŽ‹).")
+    print("  3. Tap the Share button (square with arrow up ⎋).")
     print("  4. Scroll down and tap 'Add to Home Screen' (+).")
     print("  5. Tap 'Add' in the top right corner.")
     print("  --> Moon is now installed on your iPhone like a native app!")

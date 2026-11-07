@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-v73-prod';
+const CACHE_NAME = 'moon-v74-prod';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -86,7 +86,7 @@ self.addEventListener('message', (event) => {
   if (!event.data) return;
 
   if (event.data.type === 'TRIGGER_PUSH_NOTIFICATION') {
-    const title = event.data.title || 'Moon Fitness OS ðŸš€';
+    const title = event.data.title || 'Moon Fitness OS 🚀';
     const opts = event.data.options || {};
     self.registration.showNotification(title, {
       body: opts.body || '',
@@ -103,7 +103,7 @@ self.addEventListener('message', (event) => {
 
   if (event.data.type === 'SCHEDULE_REST_TIMER') {
     const delayMs = event.data.delayMs || 90000;
-    const title = event.data.title || 'Moon Fitness - Rest Target Reached! ðŸ””';
+    const title = event.data.title || 'Moon Fitness - Rest Target Reached! 🔔';
     const body = event.data.body || 'Rest period complete! Step up for your next set.';
     setTimeout(() => {
       self.registration.showNotification(title, {

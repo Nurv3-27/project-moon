@@ -77,6 +77,15 @@
   AI_COACHES.maryam = AI_COACHES.M;
 
   // State Management
+  // Configurable Live Backend Host:
+  window.getMoonApiUrl = function (path) {
+    let base = window.MOON_BACKEND_URL || localStorage.getItem('moon_backend_host') || '';
+    if (!base && typeof window !== 'undefined' && window.location.protocol === 'file:') {
+      base = 'https://project-moon.vercel.app';
+    }
+    return (base ? base.replace(/\/+$/, '') : '') + path;
+  };
+
   function loadUsersDB() {
     try {
       const raw = localStorage.getItem(STORAGE_USERS);
@@ -96,7 +105,7 @@
     try {
       localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
       // Optional async sync to local serve.py server
-      fetch('/api/users', {
+      fetch(window.getMoonApiUrl('/api/users'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(users)
@@ -139,7 +148,7 @@
 
       // Check for live Supabase / Auth config from backend
       try {
-        const cfgRes = await fetch('/api/auth/config');
+        const cfgRes = await fetch(window.getMoonApiUrl('/api/auth/config'));
         if (cfgRes.ok) {
           const cfg = await cfgRes.json();
           if (cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase) {
@@ -152,7 +161,7 @@
       const token = localStorage.getItem(STORAGE_TOKEN);
       if (token) {
         try {
-          const sessionRes = await fetch('/api/auth/session', {
+          const sessionRes = await fetch(window.getMoonApiUrl('/api/auth/session'), {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (sessionRes.ok) {
@@ -178,7 +187,7 @@
 
       // Sync registered athletes from live database
       try {
-        const usersRes = await fetch('/api/users');
+        const usersRes = await fetch(window.getMoonApiUrl('/api/users'));
         if (usersRes.ok) {
           const remoteUsers = await usersRes.json();
           if (Array.isArray(remoteUsers)) {
@@ -480,7 +489,7 @@
 
       // Async sync with server database & obtain signed JWT token
       try {
-        const res = await fetch('/api/auth/admin-override', {
+        const res = await fetch(window.getMoonApiUrl('/api/auth/admin-override'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: code, username: user.username })
@@ -525,7 +534,7 @@
 
       // Check for live backend / Supabase authentication
       try {
-        const res = await fetch('/api/auth/signup', {
+        const res = await fetch(window.getMoonApiUrl('/api/auth/signup'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -627,7 +636,7 @@
 
       // Dispatch to Live Authentication Backend
       try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch(window.getMoonApiUrl('/api/auth/login'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ identifier: clean, password: password })
@@ -687,7 +696,7 @@
         localStorage.removeItem(STORAGE_SESSION);
         localStorage.removeItem(STORAGE_TOKEN);
         try {
-          fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+          fetch(window.getMoonApiUrl('/api/auth/logout'), { method: 'POST' }).catch(() => {});
         } catch (e) {}
         this.currentUser = null;
         this.updateHeaderUI();

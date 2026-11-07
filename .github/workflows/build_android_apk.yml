@@ -4,6 +4,14 @@ on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
+    inputs:
+      moon_public_url:
+        description: 'Live production URL for Moon Fitness OS'
+        required: false
+        default: 'https://project-moon.vercel.app'
+
+permissions:
+  contents: write
 
 jobs:
   build-apk:
@@ -13,6 +21,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -20,27 +30,54 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Configure Android SDK Environment
+        run: |
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.2'
 
-      - name: Package Assets & Build Standalone Release APK
+      - name: Package Assets & Compile Standalone Release APK
         env:
-          MOON_PUBLIC_URL: ${{ vars.MOON_PUBLIC_URL }}
+          MOON_PUBLIC_URL: ${{ inputs.moon_public_url || vars.MOON_PUBLIC_URL || 'https://project-moon.vercel.app' }}
         run: |
+          ROOT_DIR=$(pwd)
           if [ -d "fitness_tracker_app/android" ]; then
-            cd fitness_tracker_app/android
-            mkdir -p app/src/main/assets
-            cp -r ../*.html ../*.js ../*.css ../*.png ../*.mp3 app/src/main/assets/ 2>/dev/null || true
-          elif [ -d "android" ]; then
-            cd android
-            mkdir -p app/src/main/assets
-            cp -r ../*.html ../*.js ../*.css ../*.png ../*.mp3 app/src/main/assets/ 2>/dev/null || true
+            APP_DIR="$ROOT_DIR/fitness_tracker_app"
+            ANDROID_DIR="$ROOT_DIR/fitness_tracker_app/android"
+          else
+            APP_DIR="$ROOT_DIR"
+            ANDROID_DIR="$ROOT_DIR/android"
           fi
-          chmod +x gradlew 2>/dev/null || gradle wrapper
+
+          echo "App directory: $APP_DIR"
+          echo "Android directory: $ANDROID_DIR"
+
+          mkdir -p "$ANDROID_DIR/app/src/main/assets"
+          cp -r "$APP_DIR"/*.html "$APP_DIR"/*.js "$APP_DIR"/*.css "$APP_DIR"/*.png "$APP_DIR"/*.mp3 "$ANDROID_DIR/app/src/main/assets/" 2>/dev/null || true
+
+          cd "$ANDROID_DIR"
+          gradle wrapper --gradle-version 8.2
+          chmod +x gradlew
+
           ./gradlew assembleRelease --stacktrace || ./gradlew assembleDebug --stacktrace
+
+          # Find the generated APK
+          COMPILED_APK=$(find "$ANDROID_DIR/app/build/outputs/apk" -name "*.apk" | head -n 1)
+          if [ -n "$COMPILED_APK" ] && [ -f "$COMPILED_APK" ]; then
+            echo "Successfully generated APK: $COMPILED_APK"
+            mkdir -p "$APP_DIR/downloads"
+            cp "$COMPILED_APK" "$APP_DIR/downloads/moon-fitness.apk"
+            cp "$COMPILED_APK" "$APP_DIR/moon-fitness-release.apk"
+            cp "$COMPILED_APK" "$APP_DIR/moon-fitness-v1.0-release.apk"
+          else
+            echo "ERROR: APK compilation did not produce an APK file!"
+            exit 1
+          fi
 
       - name: Upload Standalone Release APK Artifact
         uses: actions/upload-artifact@v4
@@ -48,6 +85,14 @@ jobs:
           name: Moon-Fitness-Android-Production-APK
           path: |
             **/android/app/build/outputs/apk/**/*.apk
-            **/*.apk
+            **/downloads/moon-fitness.apk
+            **/moon-fitness-release.apk
           retention-days: 30
 
+      - name: Commit & Push Compiled APK
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add downloads/moon-fitness.apk moon-fitness-release.apk moon-fitness-v1.0-release.apk 2>/dev/null || git add **/downloads/moon-fitness.apk **/moon-fitness-release.apk **/moon-fitness-v1.0-release.apk
+          git commit -m "build(android): auto-update compiled release APK [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:${{ github.ref_name }} || echo "Push skipped"

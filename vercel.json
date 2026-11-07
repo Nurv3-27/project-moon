@@ -1,6 +1,12 @@
 {
   "rewrites": [
-    { "source": "/api/download/android", "destination": "/downloads/moon-fitness.apk" }
+    { "source": "/api/download/android", "destination": "/downloads/moon-fitness.apk" },
+    { "source": "/api/auth/admin-override", "destination": "/api/auth.py" },
+    { "source": "/api/auth/:path*", "destination": "/api/auth.py" },
+    { "source": "/api/coach-chat", "destination": "/api/coach_chat.py" },
+    { "source": "/api/distribution", "destination": "/api/distribution.py" },
+    { "source": "/api/leaderboard", "destination": "/api/leaderboard.py" },
+    { "source": "/api/users", "destination": "/api/users.py" }
   ],
   "headers": [
     {
@@ -17,6 +23,14 @@
       "headers": [
         { "key": "Content-Type", "value": "application/vnd.android.package-archive" },
         { "key": "Content-Disposition", "value": "attachment" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS, PUT, DELETE" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
       ]
     }
   ]

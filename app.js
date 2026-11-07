@@ -7114,7 +7114,8 @@ window.askCoachPrompt = async function(promptText) {
       }
     };
 
-    const resp = await fetch('/api/coach-chat', {
+    const apiUrl = typeof window.getMoonApiUrl === 'function' ? window.getMoonApiUrl('/api/coach-chat') : '/api/coach-chat';
+    const resp = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -7187,7 +7188,8 @@ window.handleCoachChatSubmit = function(e) {
     if (!aBox || !iBox) return;
     let info = null;
     try {
-      const res = await fetch('/api/distribution');
+      const distUrl = typeof window.getMoonApiUrl === 'function' ? window.getMoonApiUrl('/api/distribution') : '/api/distribution';
+      const res = await fetch(distUrl);
       if (res.ok) info = await res.json();
     } catch (e) {}
     if (!info) {

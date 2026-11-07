@@ -22,6 +22,7 @@ import re
 import urllib.parse
 import urllib.request
 import tempfile
+import ssl
 import hmac
 import hashlib
 import base64
@@ -662,6 +663,52 @@ class MoonHandler(http.server.SimpleHTTPRequestHandler):
                 except Exception:
                     pass
             return self._send('{"message":""}', ctype='application/json; charset=utf-8')
+
+        if clean == '/api/download/android':
+            apk_path = None
+            for name in ('moon-fitness-release.apk', 'moon-fitness-v1.0-release.apk'):
+                cand = os.path.join(APP_DIR, name)
+                if os.path.isfile(cand):
+                    apk_path = cand
+                    break
+            if not apk_path:
+                return self._send(json.dumps({'ok': False, 'error': 'APK build not available'}),
+                                  code=404, ctype='application/json; charset=utf-8')
+            size = os.path.getsize(apk_path)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/vnd.android.package-archive')
+            self.send_header('Content-Disposition', 'attachment; filename="moon-fitness.apk"')
+            self.send_header('Content-Length', str(size))
+            self.send_header('Cache-Control', 'no-store')
+            self.send_header('X-Content-Type-Options', 'nosniff')
+            self.end_headers()
+            with open(apk_path, 'rb') as f:
+                while True:
+                    chunk = f.read(65536)
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+            return
+
+        if clean == '/api/distribution':
+            # Public web URL: PUBLIC_URL env var wins; otherwise derive from the request,
+            # swapping localhost for the LAN IP so phones can actually reach it.
+            public = os.environ.get('PUBLIC_URL', '').strip().rstrip('/')
+            if not public:
+                host = (self.headers.get('X-Forwarded-Host') or self.headers.get('Host') or '').strip()
+                proto = self.headers.get('X-Forwarded-Proto') or ('https' if isinstance(self.connection, ssl.SSLSocket) else 'http')
+                hostname = host.split(':')[0].lower()
+                if not host or hostname in ('localhost', '127.0.0.1', '::1'):
+                    public = f'http://{get_lan_ip()}:{PORT}'
+                else:
+                    public = f'{proto}://{host}'
+            apk_ready = any(os.path.isfile(os.path.join(APP_DIR, n)) for n in ('moon-fitness-release.apk', 'moon-fitness-v1.0-release.apk'))
+            return self._send(json.dumps({
+                'ok': True,
+                'androidUrl': f'{public}/api/download/android',
+                'iosUrl': f'{public}/',
+                'apkAvailable': apk_ready
+            }), ctype='application/json; charset=utf-8')
 
         if clean == '/api/lan-info':
             ip = get_lan_ip()

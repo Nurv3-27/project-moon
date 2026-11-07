@@ -11745,3 +11745,32 @@ body.oled-true-black .streak-roadmap-card {
 
 
 
+
+/* ===== Onboarding: auth lock, admin QR cards, iOS install modal ===== */
+body.auth-locked #modal-auth .modal-close-btn { display: none !important; }
+body.auth-locked .app-header,
+body.auth-locked .bottom-nav,
+body.auth-locked .nav-bar { pointer-events: none; }
+.admin-distribution-box { margin: 0 0 14px; padding: 14px; border-radius: 16px;
+  background: rgba(255, 214, 10, 0.05); border: 1px solid rgba(255, 214, 10, 0.25); }
+.admin-distribution-title { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; color: #FFD60A; margin-bottom: 10px; }
+.admin-qr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.admin-qr-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px;
+  border-radius: 14px; background: rgba(14, 16, 24, 0.7); border: 1px solid rgba(224, 80, 106, 0.3); }
+.admin-qr-label { font-weight: 800; font-size: 13px; }
+.admin-qr-label.android { color: #3DDC84; }
+.admin-qr-label.ios { color: #E8E8ED; }
+.admin-qr-img { background: #fff; padding: 6px; border-radius: 10px; min-height: 162px; min-width: 162px; display: flex; align-items: center; justify-content: center; }
+.admin-qr-img img, .admin-qr-img canvas { max-width: 150px; height: auto; }
+.admin-qr-card .lan-url-input { width: 100%; font-size: 10px; }
+.admin-qr-hint { font-size: 10px; color: #9aa0b4; text-align: center; line-height: 1.35; }
+@media (max-width: 420px) { .admin-qr-grid { grid-template-columns: 1fr; } }
+#modal-ios-install { z-index: 400; align-items: flex-end; }
+.ios-install-modal-card { text-align: center; padding: 22px 20px 26px; margin-bottom: max(18px, env(safe-area-inset-bottom)); }
+.ios-install-glyph { color: #E0506A; margin-bottom: 6px; }
+.ios-install-title { margin: 4px 0; font-size: 19px; }
+.ios-install-sub { color: #9aa0b4; margin: 0 0 12px; font-size: 13px; }
+.ios-install-steps { text-align: left; margin: 0 0 16px; padding-left: 20px; font-size: 14px; line-height: 1.7; }
+.ios-share-inline { display: inline-block; padding: 0 6px; border: 1px solid rgba(224,80,106,.5); border-radius: 6px; }
+.ios-install-arrow { margin-top: 10px; font-size: 22px; color: #E0506A; animation: iosBounce 1.2s infinite; }
+@keyframes iosBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }

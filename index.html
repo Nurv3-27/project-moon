@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=72">
+  <link rel="stylesheet" href="style.css?v=73">
 </head>
 <body>
   <!-- ANIMATED THREE-STAGE INITIAL APP SPLASH SCREEN (IMMERSIVE PITCH-BLACK + MOON_LOGO.PNG) -->
@@ -52,11 +52,11 @@
       </div>
     </div>
 
-    <!-- PHASE 2: While the logo is on screen, fade in the bottom-right text 'In the loving memory of 27 / من' -->
+    <!-- PHASE 2: While the logo is on screen, fade in the bottom-right text 'In the loving memory of 27 / Ù…Ù†' -->
     <div id="splash-tribute-wrap" class="splash-corner-tribute">
       <span class="splash-tribute-en">In the loving memory of 27</span>
       <span class="splash-tribute-sep">/</span>
-      <span class="splash-tribute-arabic">من</span>
+      <span class="splash-tribute-arabic">Ù…Ù†</span>
     </div>
   </div>
 
@@ -75,13 +75,13 @@
       <div class="header-right">
         <!-- Admin Quick Access (Visible only if Admin) -->
         <button type="button" class="header-admin-pill admin-only-feature" onclick="window.AuthSystem.openAdminDashboard()" title="Open Admin Control Center" style="display:none;">
-          <span>👑</span>
+          <span>ðŸ‘‘</span>
           <span class="btn-label">Admin</span>
         </button>
 
         <!-- User Profile Pill -->
         <button type="button" id="header-user-btn" class="header-user-pill" onclick="openAuthModal()" title="Athlete Account & Switcher">
-          <span class="user-avatar-badge" id="header-user-avatar">♂</span>
+          <span class="user-avatar-badge" id="header-user-avatar">â™‚</span>
           <span class="user-name-text" id="header-user-name">Athlete</span>
           <span class="user-role-badge standard" id="header-user-role">STANDARD</span>
         </button>
@@ -108,7 +108,7 @@
             <span class="live-pulse-dot"></span>
             <div>
               <h2 class="d-ig-title">Instagram Direct</h2>
-              <span class="d-ig-sub">🛡️ Strictly Contained &bull; Feeds &amp; Pop-outs Blocked</span>
+              <span class="d-ig-sub">ðŸ›¡ï¸ Strictly Contained &bull; Feeds &amp; Pop-outs Blocked</span>
             </div>
           </div>
           <div class="d-ig-header-right">
@@ -116,10 +116,10 @@
               <span id="d-ig-timer-digits">00:00</span>
             </div>
             <button type="button" class="d-ig-btn-bank" onclick="pauseAndBankScrollWebView()" title="Save and bank time">
-              💾 Bank
+              ðŸ’¾ Bank
             </button>
             <button type="button" class="d-ig-mini-action" onclick="refreshInAppInstagramWebView()" title="Refresh">
-              🔄
+              ðŸ”„
             </button>
           </div>
         </div>
@@ -141,11 +141,11 @@
               <h2 class="time-up-heading">Time Up - Get Back to Work</h2>
               <p class="time-up-sub">Your earned scroll bank balance has reached zero. Instagram has been <strong>immediately unmounted</strong> so scrolling is impossible.</p>
               <div class="ig-lockout-reward-info">
-                <span>⚡ Earn more scroll time with push-ups, pull-ups, or gym sets in your workout tracker.</span>
+                <span>âš¡ Earn more scroll time with push-ups, pull-ups, or gym sets in your workout tracker.</span>
               </div>
               <div class="ig-lockout-actions">
                 <button type="button" class="primary-glow-btn full-width" onclick="switchTab('workout');">
-                  🏋️ Return to Gym Hub
+                  ðŸ‹ï¸ Return to Gym Hub
                 </button>
                 <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="switchTab('focus');">
                   Go to Focus Controls
@@ -195,14 +195,14 @@
           <div class="futuristic-goals-section" id="workout-goals-hub">
             <div class="goals-section-header">
               <div class="goals-header-left">
-                <span class="goals-aura-icon">🎯</span>
+                <span class="goals-aura-icon">ðŸŽ¯</span>
                 <div>
                   <h3 class="goals-section-title">Futuristic Goals &amp; Milestones</h3>
                   <span class="goals-section-sub">Dynamic Target Tracking &bull; Adaptive Aura</span>
                 </div>
               </div>
               <button type="button" class="goals-config-btn" onclick="openGoalsConfigModal()" title="Configure your fitness goals">
-                <span>⚙️</span>
+                <span>âš™ï¸</span>
                 <span>Edit Targets</span>
               </button>
             </div>
@@ -315,14 +315,14 @@
           <div class="streak-roadmap-card" id="streak-progression-map">
             <div class="cosmic-map-header">
               <div class="cosmic-map-header-left">
-                <span class="cosmic-title-icon">🚀</span>
+                <span class="cosmic-title-icon">ðŸš€</span>
                 <div>
                   <h3>Cosmic Progression Map</h3>
                   <span class="cosmic-map-sub">Earth &rarr; Asteroids &rarr; Maroon Moon Citadel</span>
                 </div>
               </div>
               <div class="cosmic-streak-counter-pill">
-                <span class="streak-flame">🔥</span>
+                <span class="streak-flame">ðŸ”¥</span>
                 <span><span id="cosmic-streak-num">0</span> DAYS</span>
               </div>
             </div>
@@ -365,7 +365,7 @@
               </svg>
 
               <div class="cosmic-nodes-track">
-                <!-- Node 0: EARTH (Start Station • Day 0) -->
+                <!-- Node 0: EARTH (Start Station â€¢ Day 0) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node active-station" id="celestial-node-0" onclick="inspectAsteroidNode(0)">
                     <div class="earth-planet-body">
@@ -495,12 +495,12 @@
                   </div>
                 </div>
 
-                <!-- Node 10: MAROON MOON (Destination • Lunar Citadel) -->
+                <!-- Node 10: MAROON MOON (Destination â€¢ Lunar Citadel) -->
                 <div class="cosmic-node-row pos-center">
                   <div class="celestial-node" id="celestial-node-10" onclick="inspectAsteroidNode(10)">
                     <div class="maroon-moon-body">
                       <img src="cosmic_moon_asset.png" alt="Maroon Moon" class="celestial-texture-img" onerror="this.style.display='none';">
-                      <span class="moon-flag-badge">🚩 MOON CITADEL</span>
+                      <span class="moon-flag-badge">ðŸš© MOON CITADEL</span>
                     </div>
                     <div class="celestial-node-meta">
                       <span class="node-title moon-node-title">MAROON MOON</span>
@@ -540,7 +540,7 @@
               <span class="active-live-badge-text">ACTIVE SESSION</span>
             </div>
             <button type="button" class="workout-peek-routines-btn" id="btn-peek-routines" onclick="toggleActiveWorkoutRoutinesPeek()">
-              📁 Saved Routines
+              ðŸ“ Saved Routines
             </button>
           </div>
 
@@ -727,13 +727,13 @@
         <!-- Segmented Sub-Tab Switcher: Muscle Ranks vs Personal Records vs Division Leaderboard -->
         <div class="modal-tab-switcher ranks-prs-segment" id="ranks-prs-tab-switcher" role="tablist">
           <button type="button" class="modal-tab-btn active" id="btn-subtab-ranks" onclick="switchRanksSubTab('ranks')">
-            ⚔️ Muscle Ranks
+            âš”ï¸ Muscle Ranks
           </button>
           <button type="button" class="modal-tab-btn" id="btn-subtab-prs" onclick="switchRanksSubTab('prs')">
-            🏆 Personal Records
+            ðŸ† Personal Records
           </button>
           <button type="button" class="modal-tab-btn" id="btn-subtab-leaderboard" onclick="switchRanksSubTab('leaderboard')">
-            🥇 Leaderboard
+            ðŸ¥‡ Leaderboard
           </button>
         </div>
 
@@ -1242,7 +1242,7 @@
                   <circle class="hold-ring-fill" id="opal-hold-ring-fill" cx="60" cy="60" r="50"></circle>
                 </svg>
                 <div class="opal-hold-core">
-                  <span class="opal-hold-glyph">🛑</span>
+                  <span class="opal-hold-glyph">ðŸ›‘</span>
                   <strong class="opal-hold-label" id="opal-hold-label" data-i18n="hold_to_cancel">Hold to Pause/Cancel</strong>
                   <span class="opal-hold-countdown" id="opal-hold-countdown">Hold 3s</span>
                 </div>
@@ -1256,11 +1256,11 @@
             <button type="button" class="opal-pill-btn opal-hero-pill" id="opal-btn-instant-block" onclick="toggleInstantBlock()">
               <div class="opal-pill-center">
                 <div class="opal-pill-headline">
-                  <span class="opal-pill-glyph">⚡</span>
+                  <span class="opal-pill-glyph">âš¡</span>
                   <span class="opal-pill-title" id="opal-instant-title">Instant Block</span>
                   <span class="opal-badge-pill" id="opal-instant-badge">START</span>
                 </div>
-                <span class="opal-pill-sub" id="opal-instant-sub">15M LOCKDOWN • TAP TO BEGIN</span>
+                <span class="opal-pill-sub" id="opal-instant-sub">15M LOCKDOWN â€¢ TAP TO BEGIN</span>
               </div>
             </button>
 
@@ -1280,11 +1280,11 @@
             <div class="opal-pill-btn opal-hero-pill" id="opal-btn-scheduled-block" onclick="toggleOpalScheduleDrawer()">
               <div class="opal-pill-center">
                 <div class="opal-pill-headline">
-                  <span class="opal-pill-glyph">⏰</span>
+                  <span class="opal-pill-glyph">â°</span>
                   <span class="opal-pill-title">Scheduled Block</span>
                   <span class="opal-badge-pill active" id="opal-sched-badge">ACTIVE</span>
                 </div>
-                <span class="opal-pill-sub" id="opal-sched-sub">MON-FRI • 09:00 - 17:00</span>
+                <span class="opal-pill-sub" id="opal-sched-sub">MON-FRI â€¢ 09:00 - 17:00</span>
               </div>
               <div class="opal-pill-switch-anchor" onclick="event.stopPropagation()">
                 <label class="ios-switch" title="Toggle Scheduled Block">
@@ -1336,7 +1336,7 @@
         <div class="distraction-targets-card">
           <div class="dt-header">
             <div class="dt-header-left">
-              <span class="dt-icon">🛡️</span>
+              <span class="dt-icon">ðŸ›¡ï¸</span>
               <div>
                 <h3>Designated Distracting Apps</h3>
                 <span class="dt-subtitle">Enforced during Instant &amp; Scheduled blocks</span>
@@ -1349,7 +1349,7 @@
             <!-- App 1: YouTube Shorts -->
             <div class="dt-app-item">
               <div class="dt-app-info">
-                <span class="dt-app-emoji">🎬</span>
+                <span class="dt-app-emoji">ðŸŽ¬</span>
                 <div>
                   <strong>YouTube Shorts</strong>
                   <small>Blocks /shorts, mobile shorts player &amp; algorithmic video shelves</small>
@@ -1364,7 +1364,7 @@
             <!-- App 2: Games & Gaming Apps -->
             <div class="dt-app-item">
               <div class="dt-app-info">
-                <span class="dt-app-emoji">🎮</span>
+                <span class="dt-app-emoji">ðŸŽ®</span>
                 <div>
                   <strong>Mobile &amp; PC Games</strong>
                   <small>Restricts launching mobile games, web games &amp; gaming feeds</small>
@@ -1379,7 +1379,7 @@
             <!-- App 3: Instagram Reels & Explore -->
             <div class="dt-app-item">
               <div class="dt-app-info">
-                <span class="dt-app-emoji">📱</span>
+                <span class="dt-app-emoji">ðŸ“±</span>
                 <div>
                   <strong>Instagram Reels &amp; Explore</strong>
                   <small>Locks infinite scroll; preserves DM Chat Inbox &amp; friend reels</small>
@@ -1394,7 +1394,7 @@
             <!-- App 4: TikTok & Fast Feeds -->
             <div class="dt-app-item">
               <div class="dt-app-info">
-                <span class="dt-app-emoji">🎵</span>
+                <span class="dt-app-emoji">ðŸŽµ</span>
                 <div>
                   <strong>TikTok &amp; Fast Feeds</strong>
                   <small>Locks rapid algorithmic short-form video streaming</small>
@@ -1436,7 +1436,7 @@
             <button type="button" class="cam-quick-mode-btn" onclick="openCameraCoach('plank')">&#9201;&#65039; Plank</button>
           </div>
           <label class="scroll-toggle-row"><input type="checkbox" id="setting-require-camera" checked> Only camera-verified reps earn scroll time</label>
-          <button type="button" class="faq-link-pill-btn" onclick="navigateToSettingsFaq('camera')">📖 How Camera AI Pose Tracking &amp; Bank Work &rarr;</button>
+          <button type="button" class="faq-link-pill-btn" onclick="navigateToSettingsFaq('camera')">ðŸ“– How Camera AI Pose Tracking &amp; Bank Work &rarr;</button>
         </div>
 
         <!-- Non-Scrolling Messenger Shield: Chat Inbox & Friend-Sent Reels Allowed -->
@@ -1535,7 +1535,7 @@
           </div>
 
           <button type="button" class="faq-link-pill-btn" style="margin-top:14px;" onclick="navigateToSettingsFaq('blocker')">
-            📖 View Blocker Setup Guide (PC, iPhone &amp; Safari) in Settings &rarr;
+            ðŸ“– View Blocker Setup Guide (PC, iPhone &amp; Safari) in Settings &rarr;
           </button>
         </div>
       </section>
@@ -1572,7 +1572,7 @@
                   </linearGradient>
                 </defs>
               </svg>
-              <span class="athlete-big-avatar" id="settings-user-avatar">♂</span>
+              <span class="athlete-big-avatar" id="settings-user-avatar">â™‚</span>
             </div>
             <div class="athlete-profile-meta">
               <div class="athlete-title-row">
@@ -1581,16 +1581,16 @@
               </div>
               <span class="athlete-handle" id="settings-user-handle">@athlete</span>
               <div class="athlete-tags-row">
-                <span class="athlete-gender-pill" id="settings-user-gender">♂ Male Athlete</span>
-                <span class="athlete-coach-pill" id="settings-user-coach">⚡ Assigned AI: Coach Nurv</span>
+                <span class="athlete-gender-pill" id="settings-user-gender">â™‚ Male Athlete</span>
+                <span class="athlete-coach-pill" id="settings-user-coach">âš¡ Assigned AI: Coach Nurv</span>
               </div>
               <p class="athlete-bio" id="settings-user-bio">Defying gravity, conquering every plateau. Taking it to the moon.</p>
             </div>
           </div>
           <div class="athlete-profile-actions">
-            <button type="button" class="primary-glow-btn small-btn" onclick="openEditProfileModal()">✏️ Edit Profile</button>
-            <button type="button" class="secondary-btn small-btn" onclick="openAICoachModal()">💬 Talk to Coach</button>
-            <button type="button" class="secondary-btn small-btn" onclick="window.AuthSystem.toggleCoach()" title="Toggle between Coach Nurv and Coach Maryam">🔄 Switch AI Coach</button>
+            <button type="button" class="primary-glow-btn small-btn" onclick="openEditProfileModal()">âœï¸ Edit Profile</button>
+            <button type="button" class="secondary-btn small-btn" onclick="openAICoachModal()">ðŸ’¬ Talk to Coach</button>
+            <button type="button" class="secondary-btn small-btn" onclick="window.AuthSystem.toggleCoach()" title="Toggle between Coach Nurv and Coach Maryam">ðŸ”„ Switch AI Coach</button>
             <button type="button" class="secondary-btn small-btn" onclick="openAuthModal()">Switch / Sign In</button>
             <button type="button" class="danger-ghost-btn small-btn" onclick="window.AuthSystem.logout()">Log Out</button>
           </div>
@@ -1617,7 +1617,7 @@
                 </linearGradient>
               </defs>
             </svg>
-            <div class="admin-cta-badge">👑 RESTRICTED ADMIN ACCESS</div>
+            <div class="admin-cta-badge">ðŸ‘‘ RESTRICTED ADMIN ACCESS</div>
           </div>
           <div class="admin-cta-content">
             <h3 class="admin-cta-title">Obsidian Citadel Control Center</h3>
@@ -1674,7 +1674,7 @@
           <div class="workout-split-card" id="card-workout-split">
             <div class="split-card-header">
               <div class="split-header-left">
-                <span class="split-badge-icon">🏋️</span>
+                <span class="split-badge-icon">ðŸ‹ï¸</span>
                 <div>
                   <h3 class="split-card-title" data-i18n="workout_split_title">Workout Split &amp; Training Cadence</h3>
                   <span class="split-card-sub" id="split-card-summary">5 Days On / 2 Days Off &bull; Push / Pull / Legs</span>
@@ -1685,7 +1685,7 @@
 
             <!-- Dynamic Rest vs Training Day Status Banner -->
             <div class="split-status-banner" id="split-status-banner">
-              <div class="split-banner-icon" id="split-banner-icon">🔥</div>
+              <div class="split-banner-icon" id="split-banner-icon">ðŸ”¥</div>
               <div class="split-banner-info">
                 <strong id="split-banner-title">Today is a Scheduled Training Day</strong>
                 <p id="split-banner-desc">Push / Pull / Legs rotation active. Daily gym reminders are armed for 17:30.</p>
@@ -1702,12 +1702,12 @@
               <!-- Quick Dropdown with Custom option -->
               <div class="split-dropdown-container" style="margin-bottom:12px;">
                 <select id="split-type-dropdown" class="ios-select split-select-menu" onchange="selectWorkoutSplitPreset(this.value)">
-                  <option value="PPL">Push / Pull / Legs (PPL) • 5 Days On / 2 Off</option>
-                  <option value="UpperLower">Upper / Lower • 4 Days On / 3 Off</option>
-                  <option value="FullBody">Full Body (3x) • 3 Days On / 4 Off</option>
-                  <option value="Arnold">Arnold Split (6x) • 6 Days On / 1 Off</option>
-                  <option value="BroSplit">Bro Split (5x) • 5 Days On / 2 Off</option>
-                  <option value="Custom">Custom • 7-Day Personalized Schedule Builder</option>
+                  <option value="PPL">Push / Pull / Legs (PPL) â€¢ 5 Days On / 2 Off</option>
+                  <option value="UpperLower">Upper / Lower â€¢ 4 Days On / 3 Off</option>
+                  <option value="FullBody">Full Body (3x) â€¢ 3 Days On / 4 Off</option>
+                  <option value="Arnold">Arnold Split (6x) â€¢ 6 Days On / 1 Off</option>
+                  <option value="BroSplit">Bro Split (5x) â€¢ 5 Days On / 2 Off</option>
+                  <option value="Custom">Custom â€¢ 7-Day Personalized Schedule Builder</option>
                 </select>
               </div>
 
@@ -1744,7 +1744,7 @@
             <div id="custom-split-builder-panel" class="custom-split-builder-panel hidden">
               <div class="custom-builder-header">
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:1.1rem;">🗓️</span>
+                  <span style="font-size:1.1rem;">ðŸ—“ï¸</span>
                   <div>
                     <h4 class="custom-builder-title">7-Day Custom Split Builder</h4>
                     <span class="custom-builder-sub">Type your daily workout focus or toggle as Rest. Reminders fire strictly to this schedule.</span>
@@ -1799,7 +1799,7 @@
                   <input type="time" id="split-reminder-time-input" class="split-time-input" value="17:30" onchange="updateWorkoutSplitReminderTime(this.value)">
                 </div>
                 <button type="button" class="secondary-btn small-btn split-test-btn" onclick="testDailyGymReminder()" title="Test how push reminder reacts to today's schedule">
-                  🔔 Test Gym Reminder
+                  ðŸ”” Test Gym Reminder
                 </button>
               </div>
             </div>
@@ -1836,12 +1836,12 @@
           <!-- Language Toggle: English (LTR) vs Arabic (Strict RTL) -->
           <div class="setting-item" id="setting-item-language">
             <div class="setting-label-col">
-              <span class="setting-name" data-i18n="lang_setting_name">Language / اللغة</span>
-              <span class="setting-desc" data-i18n="lang_setting_desc">Select English (LTR) or العربية (Strict RTL)</span>
+              <span class="setting-name" data-i18n="lang_setting_name">Language / Ø§Ù„Ù„ØºØ©</span>
+              <span class="setting-desc" data-i18n="lang_setting_desc">Select English (LTR) or Ø§Ù„Ø¹Ø±Ø¨ÙŠØ© (Strict RTL)</span>
             </div>
             <div class="unit-toggle lang-toggle" id="lang-toggle-group">
               <button type="button" class="unit-btn active" id="btn-lang-en" onclick="setAppLanguage('en')">English</button>
-              <button type="button" class="unit-btn" id="btn-lang-ar" onclick="setAppLanguage('ar')">العربية</button>
+              <button type="button" class="unit-btn" id="btn-lang-ar" onclick="setAppLanguage('ar')">Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©</button>
             </div>
           </div>
 
@@ -1919,7 +1919,7 @@
               <span class="setting-desc" data-i18n="export_csv_desc">Download complete workout logs and personal records (PRs) as CSV</span>
             </div>
             <button type="button" class="secondary-btn small-btn" id="btn-export-workout-csv" onclick="exportWorkoutDataCSV()" title="Export all workout logs and PRs to CSV">
-              📥 Export CSV
+              ðŸ“¥ Export CSV
             </button>
           </div>
 
@@ -1938,11 +1938,11 @@
           <!-- Native Android Production APK Download -->
           <div class="setting-item" id="setting-item-android-apk">
             <div class="setting-label-col">
-              <span class="setting-name">🤖 Android Native App (.apk)</span>
+              <span class="setting-name">ðŸ¤– Android Native App (.apk)</span>
               <span class="setting-desc">Install Moon Fitness OS natively on your Android device with zero web chrome and full background services.</span>
             </div>
             <a href="moon-fitness-release.apk" download="moon-fitness-release.apk" class="primary-glow-btn small-btn" style="text-decoration:none; padding:8px 14px; font-size:0.78rem; display:inline-flex; align-items:center; gap:6px;">
-              <span>⬇️ Download APK</span>
+              <span>â¬‡ï¸ Download APK</span>
             </a>
           </div>
         </div>
@@ -1952,7 +1952,7 @@
           <div class="settings-faq-card">
             <div class="faq-top-row">
               <div class="dt-header-left">
-                <span class="dt-icon">📖</span>
+                <span class="dt-icon">ðŸ“–</span>
                 <div>
                   <h3 style="margin:0; font-size:1.1rem; color:#FFF; font-weight:800;">Knowledge Base &amp; FAQs</h3>
                   <span class="dt-subtitle">AI Guidance, Prompt Library, Camera Vision &amp; Blocker Setup</span>
@@ -1963,17 +1963,17 @@
 
             <!-- Instant Search Field -->
             <div class="faq-search-box">
-              <span class="faq-search-icon">🔍</span>
+              <span class="faq-search-icon">ðŸ”</span>
               <input type="text" id="faq-search-input" placeholder="Search FAQs, AI Prompts &amp; Setup instructions..." oninput="filterFaqSearch(this.value)">
             </div>
 
             <!-- Category Pills -->
             <div class="faq-category-nav" id="faq-category-nav">
               <button type="button" class="faq-cat-btn active" data-cat="all" onclick="selectFaqCategory('all')">All FAQs</button>
-              <button type="button" class="faq-cat-btn" data-cat="ai-coach" onclick="selectFaqCategory('ai-coach')">🤖 AI Coaches &amp; Prompts</button>
-              <button type="button" class="faq-cat-btn" data-cat="blocker" onclick="selectFaqCategory('blocker')">🛑 App Blocker Setup</button>
-              <button type="button" class="faq-cat-btn" data-cat="camera" onclick="selectFaqCategory('camera')">📷 Camera Vision</button>
-              <button type="button" class="faq-cat-btn" data-cat="leaderboard" onclick="selectFaqCategory('leaderboard')">🏆 PRs &amp; Citadel</button>
+              <button type="button" class="faq-cat-btn" data-cat="ai-coach" onclick="selectFaqCategory('ai-coach')">ðŸ¤– AI Coaches &amp; Prompts</button>
+              <button type="button" class="faq-cat-btn" data-cat="blocker" onclick="selectFaqCategory('blocker')">ðŸ›‘ App Blocker Setup</button>
+              <button type="button" class="faq-cat-btn" data-cat="camera" onclick="selectFaqCategory('camera')">ðŸ“· Camera Vision</button>
+              <button type="button" class="faq-cat-btn" data-cat="leaderboard" onclick="selectFaqCategory('leaderboard')">ðŸ† PRs &amp; Citadel</button>
             </div>
 
             <!-- FAQ Accordion Items List -->
@@ -1981,7 +1981,7 @@
               <!-- Item 1: Who are the AI Coaches -->
               <div class="faq-item" id="faq-item-1" data-cat="ai-coach">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-1')">
-                  <span>🤖 Who are Coach Nurv and Coach Maryam, and what are their coaching styles?</span>
+                  <span>ðŸ¤– Who are Coach Nurv and Coach Maryam, and what are their coaching styles?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -1997,7 +1997,7 @@
               <!-- Item 2: 6 Hardcoded Domains & Prompts -->
               <div class="faq-item open" id="faq-item-2" data-cat="ai-coach">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-2')">
-                  <span>📐 What are the 6 hardcoded fitness &amp; nutrition domains the AI can answer?</span>
+                  <span>ðŸ“ What are the 6 hardcoded fitness &amp; nutrition domains the AI can answer?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -2040,7 +2040,7 @@
               <!-- Item 3: Guardrails & Declines -->
               <div class="faq-item" id="faq-item-3" data-cat="ai-coach">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-3')">
-                  <span>🛡️ Why does the AI coach decline non-fitness questions?</span>
+                  <span>ðŸ›¡ï¸ Why does the AI coach decline non-fitness questions?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -2051,7 +2051,7 @@
               <!-- Item 4: Instant Block & Scheduled Block -->
               <div class="faq-item" id="faq-item-4" data-cat="blocker">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-4')">
-                  <span>⚡ How do Instant Block and Scheduled Block manage app restrictions?</span>
+                  <span>âš¡ How do Instant Block and Scheduled Block manage app restrictions?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -2067,12 +2067,12 @@
               <!-- Item 5: PC Browser Blocker Setup -->
               <div class="faq-item" id="faq-item-5" data-cat="blocker">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-5')">
-                  <span>💻 How do I set up the PC Browser Blocker (Chrome, Edge, Brave)?</span>
+                  <span>ðŸ’» How do I set up the PC Browser Blocker (Chrome, Edge, Brave)?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
                   <ol>
-                    <li>On the Focus tab, tap <strong>"🧩 Enable Browser Blocker"</strong> to copy the local extension path.</li>
+                    <li>On the Focus tab, tap <strong>"ðŸ§© Enable Browser Blocker"</strong> to copy the local extension path.</li>
                     <li>In your browser (Chrome, Edge, or Brave), navigate to <code>chrome://extensions</code> or <code>edge://extensions</code>.</li>
                     <li>Turn on the <strong>Developer mode</strong> switch in the top-right corner.</li>
                     <li>Click <strong>"Load unpacked"</strong> and select the <code>moon_antiscroll_extension</code> folder located inside the app directory.</li>
@@ -2084,7 +2084,7 @@
               <!-- Item 6: iPhone iOS Shortcuts Automation -->
               <div class="faq-item" id="faq-item-6" data-cat="blocker">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-6')">
-                  <span>📱 How do I set up iPhone iOS Shortcuts to block YouTube and redirect Instagram?</span>
+                  <span>ðŸ“± How do I set up iPhone iOS Shortcuts to block YouTube and redirect Instagram?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -2111,7 +2111,7 @@
               <!-- Item 7: Safari Userscript -->
               <div class="faq-item" id="faq-item-7" data-cat="blocker">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-7')">
-                  <span>🌐 How do I install the Safari / Tampermonkey userscript?</span>
+                  <span>ðŸŒ How do I install the Safari / Tampermonkey userscript?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -2124,7 +2124,7 @@
               <!-- Item 8: Camera Vision Rep Tracking -->
               <div class="faq-item" id="faq-item-8" data-cat="camera">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-8')">
-                  <span>📷 How does the AI Camera Coach verify Push-Ups, Pull-Ups, and Planks?</span>
+                  <span>ðŸ“· How does the AI Camera Coach verify Push-Ups, Pull-Ups, and Planks?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -2141,7 +2141,7 @@
               <!-- Item 9: Doomscroll Bank Calculation -->
               <div class="faq-item" id="faq-item-9" data-cat="camera">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-9')">
-                  <span>💰 How does the Doomscroll Bank reward system work?</span>
+                  <span>ðŸ’° How does the Doomscroll Bank reward system work?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -2157,18 +2157,18 @@
               <!-- Item 10: PR Leaderboards & Gender Brackets -->
               <div class="faq-item" id="faq-item-10" data-cat="leaderboard">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-10')">
-                  <span>🏆 Why is gender selection mandatory during sign-up?</span>
+                  <span>ðŸ† Why is gender selection mandatory during sign-up?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
-                  <p>During registration, selecting your gender bracket (Male ♂ or Female ♀) ensures the PR &amp; Ranks leaderboard automatically displays only your division without needing manual filtering. Male athletes compete on the Male Division leaderboard, and Female athletes compete on the Female Division leaderboard, with custom anatomy heatmaps corresponding to their physique.</p>
+                  <p>During registration, selecting your gender bracket (Male â™‚ or Female â™€) ensures the PR &amp; Ranks leaderboard automatically displays only your division without needing manual filtering. Male athletes compete on the Male Division leaderboard, and Female athletes compete on the Female Division leaderboard, with custom anatomy heatmaps corresponding to their physique.</p>
                 </div>
               </div>
 
               <!-- Item 11: Obsidian Citadel Admin Dashboard -->
               <div class="faq-item" id="faq-item-11" data-cat="leaderboard">
                 <div class="faq-question" onclick="toggleFaqItem('faq-item-11')">
-                  <span>👑 What is the Obsidian Citadel Admin Dashboard?</span>
+                  <span>ðŸ‘‘ What is the Obsidian Citadel Admin Dashboard?</span>
                   <span class="faq-arrow">&#9660;</span>
                 </div>
                 <div class="faq-answer">
@@ -2210,10 +2210,10 @@
           <span class="timer-tag" id="rest-timer-tag">RESTING</span>
           <span class="timer-mode-tag" id="rest-timer-mode-tag">COUNTDOWN</span>
         </div>
-        <span class="timer-sub" id="rest-timer-sub">Next set coming up &bull; ⏱️ Count Up available</span>
+        <span class="timer-sub" id="rest-timer-sub">Next set coming up &bull; â±ï¸ Count Up available</span>
       </div>
       <div class="timer-controls">
-        <button type="button" id="timer-btn-mode-toggle" class="timer-pill-btn sw-pill-mode-btn" onclick="toggleRestStopwatchMode()" title="Toggle between countdown and count-up stopwatch">⏱️ Count Up</button>
+        <button type="button" id="timer-btn-mode-toggle" class="timer-pill-btn sw-pill-mode-btn" onclick="toggleRestStopwatchMode()" title="Toggle between countdown and count-up stopwatch">â±ï¸ Count Up</button>
         <button type="button" id="timer-btn-minus" class="timer-pill-btn">-15s</button>
         <button type="button" id="timer-btn-plus" class="timer-pill-btn">+30s</button>
         <button type="button" id="timer-btn-skip" class="timer-pill-btn skip-btn">Skip</button>
@@ -2305,7 +2305,7 @@
         <!-- Live Accent Theme Selector for Routine Search -->
         <div class="routine-search-theme-bar">
           <div class="rs-theme-header">
-            <span class="rs-theme-title">🎨 UI Accent Theme</span>
+            <span class="rs-theme-title">ðŸŽ¨ UI Accent Theme</span>
             <span class="rs-theme-hint">Switch app color palette</span>
           </div>
           <div class="rs-theme-swatches-scroll" id="routine-search-theme-swatches">
@@ -2749,10 +2749,10 @@
       <!-- Sub-Tab Switcher: Sign In vs Sign Up -->
       <div class="modal-tab-switcher auth-mode-switcher" role="tablist">
         <button type="button" class="modal-tab-btn active" id="btn-auth-tab-signin" onclick="switchAuthTab('signin')">
-          🔐 Sign In
+          ðŸ” Sign In
         </button>
         <button type="button" class="modal-tab-btn" id="btn-auth-tab-signup" onclick="switchAuthTab('signup')">
-          ⚡ Sign Up (New Athlete)
+          âš¡ Sign Up (New Athlete)
         </button>
       </div>
 
@@ -2764,12 +2764,12 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="signin-password" class="ios-input" placeholder="••••••••" required autocomplete="current-password">
+          <input type="password" id="signin-password" class="ios-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required autocomplete="current-password">
         </div>
         <div class="form-group signin-access-code-group" style="margin-top: 6px;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <label for="signin-access-code" style="font-size:0.75rem; color:#FFA8BA; cursor:pointer;" onclick="const el=document.getElementById('signin-access-code-wrap');el.classList.toggle('hidden');if(!el.classList.contains('hidden'))document.getElementById('signin-access-code').focus();">
-              🔑 Master Access Code <span style="font-size:0.68rem; color:#888;">(Click for Admin override)</span>
+              ðŸ”‘ Master Access Code <span style="font-size:0.68rem; color:#888;">(Click for Admin override)</span>
             </label>
           </div>
           <div id="signin-access-code-wrap" class="hidden" style="margin-top:4px;">
@@ -2793,7 +2793,7 @@
         </div>
         <div class="form-group">
           <label>Password (min 4 chars)</label>
-          <input type="password" id="signup-password" class="ios-input" placeholder="••••••••" required autocomplete="new-password">
+          <input type="password" id="signup-password" class="ios-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required autocomplete="new-password">
         </div>
 
         <!-- STEP 1: GENDER SELECTION (PR LEADERBOARD BRACKET & 3D ANATOMY) -->
@@ -2805,7 +2805,7 @@
           <p class="gender-help-text">Filters your Official Division Leaderboard bracket and calibrates your 3D muscle anatomy.</p>
           <div class="gender-select-cards-grid">
             <div class="gender-card active" id="card-gender-male" onclick="selectSignupGender('male')">
-              <span class="gc-icon male">♂</span>
+              <span class="gc-icon male">â™‚</span>
               <div class="gc-info">
                 <strong>Male Division Bracket</strong>
                 <span>Official Male PR Leaderboard &bull; HD Male Muscle Anatomy</span>
@@ -2813,7 +2813,7 @@
               <span class="gc-radio-dot"></span>
             </div>
             <div class="gender-card" id="card-gender-female" onclick="selectSignupGender('female')">
-              <span class="gc-icon female">♀</span>
+              <span class="gc-icon female">â™€</span>
               <div class="gc-info">
                 <strong>Female Division Bracket</strong>
                 <span>Official Female PR Leaderboard &bull; HD Lady Muscle Anatomy</span>
@@ -2943,7 +2943,7 @@
         <!-- OBSIDIAN CITADEL CONTROL CENTER (UNLOCKED FOR ADMINS) -->
         <button type="button" class="dest-large-choice-btn dest-choice-citadel admin-only-feature" id="btn-dest-choice-citadel" onclick="closeModal('modal-session-destination'); window.AuthSystem.openAdminDashboard();" style="display:none;">
           <div class="dest-icon-circle citadel-icon-circle">
-            <span style="font-size:1.6rem;">👑</span>
+            <span style="font-size:1.6rem;">ðŸ‘‘</span>
           </div>
           <div class="dest-btn-info">
             <span class="dest-kicker-tag" style="color:#FFD60A;">RESTRICTED CITADEL</span>
@@ -2969,7 +2969,7 @@
         </div>
         <div class="coach-header-right">
           <button type="button" class="coach-voice-btn" id="btn-toggle-coach-voice" onclick="toggleCoachVoice()" title="Toggle Voice Audio">
-            <span id="coach-voice-icon">🔊</span>
+            <span id="coach-voice-icon">ðŸ”Š</span>
             <span id="coach-voice-label">Voice: ON</span>
           </button>
           <button class="modal-close-btn" onclick="closeModal('modal-ai-coach')">&times;</button>
@@ -2982,12 +2982,12 @@
 
       <!-- Specialized Interactive Inquiries (6 Hardcoded Domains) -->
       <div class="coach-quick-prompts-row">
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How do I optimize my bench press and squat form cues?')">📐 Form Cues</button>
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How do I fix knee caving and lower back rounding?')">🛠️ Fix Form</button>
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('I have unknown shoulder and knee pain during lifting, how should I triage and modify?')">⚠️ Pain Triage</button>
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How much protein and calories should I eat for my goals?')">🥗 Diet &amp; Macros</button>
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How should I structure a 4-day Upper Lower or Push Pull Legs split?')">📅 Workout Splits</button>
-        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Explain progressive overload double progression and RPE scale')">⚡ Gym Guidance</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How do I optimize my bench press and squat form cues?')">ðŸ“ Form Cues</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How do I fix knee caving and lower back rounding?')">ðŸ› ï¸ Fix Form</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('I have unknown shoulder and knee pain during lifting, how should I triage and modify?')">âš ï¸ Pain Triage</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How much protein and calories should I eat for my goals?')">ðŸ¥— Diet &amp; Macros</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('How should I structure a 4-day Upper Lower or Push Pull Legs split?')">ðŸ“… Workout Splits</button>
+        <button type="button" class="coach-quick-btn" onclick="askCoachPrompt('Explain progressive overload double progression and RPE scale')">âš¡ Gym Guidance</button>
       </div>
 
       <!-- Live Chat Transcript Stream -->
@@ -3015,7 +3015,7 @@
       <div class="cyber-corner-bracket bottom-right"></div>
       <div class="modal-header">
         <div class="modal-header-left" style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:1.4rem;">👤</span>
+          <span style="font-size:1.4rem;">ðŸ‘¤</span>
           <div>
             <h3>Edit Athlete Profile</h3>
             <span class="admin-badge-sub">Custom avatar picture, display identity &amp; personal bio</span>
@@ -3028,16 +3028,16 @@
         <!-- PFP Preview & Uploader -->
         <div class="edit-pfp-uploader-container">
           <div class="edit-pfp-avatar-preview" id="edit-pfp-preview-wrap">
-            <span id="edit-pfp-preview-symbol">♂</span>
+            <span id="edit-pfp-preview-symbol">â™‚</span>
             <img id="edit-pfp-preview-img" class="edit-pfp-img hidden" alt="PFP Preview">
           </div>
           <div class="edit-pfp-btn-group">
             <button type="button" class="primary-glow-btn small-btn" onclick="document.getElementById('edit-profile-pfp-input').click()">
-              📷 Upload Custom PFP
+              ðŸ“· Upload Custom PFP
             </button>
             <input type="file" id="edit-profile-pfp-input" accept="image/*" style="display:none;" onchange="handlePfpFileSelected(event)">
             <button type="button" class="secondary-btn small-btn" onclick="resetPfpToDefault()">
-              🔄 Reset Avatar
+              ðŸ”„ Reset Avatar
             </button>
           </div>
         </div>
@@ -3046,15 +3046,15 @@
         <div class="edit-pfp-presets-row">
           <span class="preset-label">OR QUICK ICON:</span>
           <div class="pfp-presets-list">
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('♂')">♂</button>
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('♀')">♀</button>
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('👑')">👑</button>
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('⚡')">⚡</button>
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🐺')">🐺</button>
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🦁')">🦁</button>
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🦾')">🦾</button>
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🚀')">🚀</button>
-            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('🌑')">🌑</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('â™‚')">â™‚</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('â™€')">â™€</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('ðŸ‘‘')">ðŸ‘‘</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('âš¡')">âš¡</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('ðŸº')">ðŸº</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('ðŸ¦')">ðŸ¦</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('ðŸ¦¾')">ðŸ¦¾</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('ðŸš€')">ðŸš€</button>
+            <button type="button" class="pfp-preset-pill" onclick="selectPresetPfp('ðŸŒ‘')">ðŸŒ‘</button>
           </div>
         </div>
 
@@ -3073,7 +3073,7 @@
 
         <div class="modal-actions-row">
           <button type="submit" class="primary-glow-btn full-width">
-            <span>💾 Save Profile</span>
+            <span>ðŸ’¾ Save Profile</span>
           </button>
           <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="closeModal('modal-edit-profile')">
             Cancel
@@ -3090,7 +3090,7 @@
       <div class="cyber-corner-bracket bottom-right"></div>
       <div class="modal-header">
         <div class="modal-header-left" style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:1.4rem;">✏️</span>
+          <span style="font-size:1.4rem;">âœï¸</span>
           <div>
             <h3 id="edit-history-modal-heading">Edit Workout History</h3>
             <span class="admin-badge-sub">Log missed sets, exercises, and weights set-by-set</span>
@@ -3148,7 +3148,7 @@
 
         <div class="modal-actions-row" style="margin-top:16px;">
           <button type="submit" class="primary-glow-btn full-width">
-            <span>💾 Save Workout History</span>
+            <span>ðŸ’¾ Save Workout History</span>
           </button>
           <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="closeModal('modal-edit-history')">
             Cancel
@@ -3165,7 +3165,7 @@
     <div class="modal-card futuristic-modal goals-config-card">
       <div class="modal-header">
         <div class="modal-header-left" style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:1.4rem;">🎯</span>
+          <span style="font-size:1.4rem;">ðŸŽ¯</span>
           <div>
             <h3>Configure Fitness Goals</h3>
             <span class="admin-badge-sub">Adaptive targets &amp; glowing visual thresholds</span>
@@ -3217,7 +3217,7 @@
 
         <div class="modal-actions-row">
           <button type="submit" class="primary-glow-btn full-width">
-            <span>💾 Save Target Milestones</span>
+            <span>ðŸ’¾ Save Target Milestones</span>
           </button>
           <button type="button" class="secondary-btn full-width" style="margin-top:8px;" onclick="closeGoalsConfigModal()">
             Cancel
@@ -3271,7 +3271,7 @@
           </div>
           <div class="telemetry-cell">
             <span class="telemetry-label">SURFACE TEMP</span>
-            <strong id="asteroid-modal-temp" class="telemetry-val">-185°C</strong>
+            <strong id="asteroid-modal-temp" class="telemetry-val">-185Â°C</strong>
           </div>
         </div>
       </div>
@@ -3289,7 +3289,7 @@
     <div class="modal-card admin-modal-card">
       <div class="modal-header admin-modal-header">
         <div class="admin-head-left">
-          <span class="admin-crown-icon">👑</span>
+          <span class="admin-crown-icon">ðŸ‘‘</span>
           <div>
             <h3>Obsidian Citadel Admin Dashboard</h3>
             <span class="admin-badge-sub">Full Platform Oversight &bull; Gender Filters Bypassed</span>
@@ -3298,17 +3298,57 @@
         <button class="modal-close-btn" onclick="closeModal('modal-admin-dashboard')">&times;</button>
       </div>
 
+      <!-- Admin Portal: Distribution QR Codes (static; survives dashboard re-render) -->
+      <div id="admin-distribution-box" class="admin-distribution-box">
+        <div class="admin-distribution-title">ðŸ“² APP DISTRIBUTION &bull; ONBOARDING QR CODES</div>
+        <div class="admin-qr-grid">
+          <div class="admin-qr-card">
+            <div class="admin-qr-label android">ðŸ¤– Android</div>
+            <div id="admin-qr-android" class="admin-qr-img"></div>
+            <input type="text" id="admin-qr-android-url" class="lan-url-input" readonly>
+            <div class="admin-qr-hint">Scan &rarr; APK downloads instantly &rarr; tap Open / Install</div>
+          </div>
+          <div class="admin-qr-card">
+            <div class="admin-qr-label ios">ðŸŽ iPhone</div>
+            <div id="admin-qr-ios" class="admin-qr-img"></div>
+            <input type="text" id="admin-qr-ios-url" class="lan-url-input" readonly>
+            <div class="admin-qr-hint">Scan &rarr; opens live web app &rarr; Share &rarr; Add to Home Screen</div>
+          </div>
+        </div>
+      </div>
+
       <div id="admin-dashboard-content" class="admin-dashboard-content">
         <!-- Dynamically rendered by window.AuthSystem.renderAdminView() -->
       </div>
     </div>
   </div>
 
-  <script src="i18n.js?v=72"></script>
-  <script src="auth.js?v=72"></script>
-  <script src="app.js?v=72"></script>
-  <script src="camera.js?v=72"></script>
-  <script src="ranks.js?v=72"></script>
+  <!-- ==================== iOS ADD-TO-HOME-SCREEN MODAL ==================== -->
+  <div id="modal-ios-install" class="modal-overlay hidden">
+    <div class="modal-card ios-install-modal-card">
+      <div class="ios-install-glyph">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>
+        </svg>
+      </div>
+      <h3 class="ios-install-title">Install Moon on your iPhone</h3>
+      <p class="ios-install-sub">Get the full-screen native experience.</p>
+      <ol class="ios-install-steps">
+        <li>Tap the <strong>Share</strong> button <span class="ios-share-inline">âŽ‹</span> in Safari's toolbar.</li>
+        <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+        <li>Tap <strong>Add</strong>, then launch Moon from your Home Screen.</li>
+      </ol>
+      <button type="button" class="primary-glow-btn full-width" onclick="window.dismissIosInstall()"><span>Got it</span></button>
+      <div class="ios-install-arrow">â–¼</div>
+    </div>
+  </div>
+
+
+  <script src="i18n.js?v=73"></script>
+  <script src="auth.js?v=73"></script>
+  <script src="app.js?v=73"></script>
+  <script src="camera.js?v=73"></script>
+  <script src="ranks.js?v=73"></script>
 </body>
 </html>
 

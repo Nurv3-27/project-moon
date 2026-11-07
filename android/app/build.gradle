@@ -13,6 +13,14 @@ android {
         versionCode 1
         versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // Live production web URL the installed app launches into (auth backend lives there).
+        // Set via -PMOON_PUBLIC_URL=https://your-host or the MOON_PUBLIC_URL env var.
+        def moonUrl = (project.findProperty('MOON_PUBLIC_URL') ?: System.getenv('MOON_PUBLIC_URL') ?: '').toString()
+        buildConfigField "String", "MOON_PUBLIC_URL", "\"${moonUrl}\""
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     buildTypes {
@@ -39,3 +47,4 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.webkit:webkit:1.10.0'
 }
+

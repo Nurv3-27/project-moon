@@ -27,6 +27,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Package Assets & Build Standalone Release APK
+        env:
+          MOON_PUBLIC_URL: ${{ vars.MOON_PUBLIC_URL }}
         run: |
           if [ -d "fitness_tracker_app/android" ]; then
             cd fitness_tracker_app/android
@@ -48,3 +50,4 @@ jobs:
             **/android/app/build/outputs/apk/**/*.apk
             **/*.apk
           retention-days: 30
+

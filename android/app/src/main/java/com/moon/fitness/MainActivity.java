@@ -61,8 +61,9 @@ public class MainActivity extends Activity {
 
         mWebView.setWebChromeClient(new WebChromeClient());
 
-        // Load Moon Fitness OS directly
-        mWebView.loadUrl(APP_URL);
+        // Launch into the live web app (auth gateway). Falls back to bundled assets if no URL configured.
+        final String live = BuildConfig.MOON_PUBLIC_URL;
+        mWebView.loadUrl(live != null && live.length() > 0 ? live : APP_URL);
     }
 
     public class MoonNativeBridge {
@@ -97,3 +98,4 @@ public class MainActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 }
+

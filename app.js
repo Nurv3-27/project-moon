@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Moon - iOS Workout & Fitness Tracker Engine
  * Production Standalone Release
  */

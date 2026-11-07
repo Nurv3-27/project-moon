@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Moon Fitness OS - Standalone Android APK Generator
 Packages Android manifest, DEX runtime, assets, and signed META-INF into an installable .apk

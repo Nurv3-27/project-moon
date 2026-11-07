@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Moon Local Server & iPhone Host
 Serves the PWA locally so your iPhone on the same Wi-Fi can open and install it!

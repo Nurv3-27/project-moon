@@ -1,7 +1,23 @@
 /**
  * Moon - iOS Workout & Fitness Tracker Engine
- * Full offline PWA support, Web Audio synthesized sounds, Haptic feedback
+ * Production Standalone Release
  */
+
+// ==========================================================================
+// PRODUCTION RELEASE - DISABLE DEBUG LOGS & INSPECTION TOOLS
+// ==========================================================================
+window.__MOON_PRODUCTION__ = true;
+if (window.__MOON_PRODUCTION__) {
+  const _noop = function() {};
+  console.debug = _noop;
+  console.log = _noop;
+  console.info = _noop;
+  try {
+    if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+      window.__REACT_DEVTOOLS_GLOBAL_HOOK__.isDisabled = true;
+    }
+  } catch (e) {}
+}
 
 // --- Comprehensive Gym Exercise Database ---
 const DEFAULT_EXERCISES = [
@@ -352,41 +368,6 @@ const DEFAULT_ROUTINES = [
 // Initial state helpers
 const STORAGE_KEY = 'ironpulse_app_state_v1';
 
-const DEMO_HISTORY = [
-  {
-    id: 'hist_demo_1',
-    title: 'Upper Body Power (Push & Pull)',
-    date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    durationSeconds: 3120,
-    volume: 6840,
-    unit: 'kg',
-    setsCount: 22,
-    exercises: [
-      { name: 'Barbell Bench Press', sets: 4, bestWeight: 85, bestReps: 8 },
-      { name: 'Incline Dumbbell Press', sets: 4, bestWeight: 28, bestReps: 10 },
-      { name: 'Barbell Bent-Over Row', sets: 4, bestWeight: 80, bestReps: 10 },
-      { name: 'Dumbbell Lateral Raise', sets: 4, bestWeight: 14, bestReps: 12 },
-      { name: 'Barbell Bicep Curl', sets: 3, bestWeight: 35, bestReps: 10 },
-      { name: 'Tricep Rope Pushdown', sets: 4, bestWeight: 32, bestReps: 12 }
-    ]
-  },
-  {
-    id: 'hist_demo_2',
-    title: 'Leg Day & Posterior Hypertrophy',
-    date: new Date(Date.now() - 86400000 * 4).toISOString(),
-    durationSeconds: 3480,
-    volume: 8450,
-    unit: 'kg',
-    setsCount: 18,
-    exercises: [
-      { name: 'Barbell Back Squat', sets: 5, bestWeight: 120, bestReps: 6 },
-      { name: 'Romanian Deadlift', sets: 4, bestWeight: 100, bestReps: 8 },
-      { name: 'Leg Press', sets: 5, bestWeight: 220, bestReps: 10 },
-      { name: 'Standing Calf Raise', sets: 4, bestWeight: 90, bestReps: 15 }
-    ]
-  }
-];
-
 function rebuildPRsFromHistory(historyList) {
   const prs = {};
   (historyList || []).forEach((h) => {
@@ -403,7 +384,7 @@ function rebuildPRsFromHistory(historyList) {
   return prs;
 }
 
-function syncDemoState(state) {
+function syncProductionState(state) {
   state.settings = state.settings || {};
   state.exercises = state.exercises || [...DEFAULT_EXERCISES];
   const existingNames = new Set(state.exercises.map(e => (e.name || '').toLowerCase()));
@@ -414,15 +395,11 @@ function syncDemoState(state) {
   });
 
   state.deletedRoutineIds = state.deletedRoutineIds || [];
-  
-  // Filter out default/featured routines from Saved Routines per user request.
-  // Featured routines now live in the + New Routine -> Featured Templates builder tab.
   const defaultIdSet = new Set(DEFAULT_ROUTINES.map(d => d.id));
   state.routines = (state.routines || []).filter(r => !r.isFeatured && !defaultIdSet.has(r.id));
 
-  const demoOn = (window.isDemoSandboxActive === true);
-  const realHistory = (state.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
-  state.history = demoOn ? [...realHistory, ...DEMO_HISTORY] : realHistory;
+  // Purge any legacy sample/demo history records
+  state.history = (state.history || []).filter(h => h && h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
   state.prs = rebuildPRsFromHistory(state.history);
   return state;
 }
@@ -432,7 +409,7 @@ function getInitialState() {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      return syncDemoState(parsed);
+      return syncProductionState(parsed);
     } catch (e) {
       console.error('Failed to parse saved state', e);
     }
@@ -2041,9 +2018,6 @@ const ASTEROID_STATIONS = [
 ];
 
 function getConsecutiveWorkoutStreak() {
-  if (typeof AppState.streak === 'number' && AppState.streak >= 0) {
-    return AppState.streak;
-  }
   const history = AppState.history || [];
   if (!history.length) return 0;
 
@@ -2143,13 +2117,7 @@ function renderStreakProgressionMap() {
 }
 window.renderStreakProgressionMap = renderStreakProgressionMap;
 
-function setDemoStreak(num) {
-  AppState.streak = Number(num);
-  saveState();
-  updateOverviewStats();
-  showToast(`🚀 Workout streak set to ${num} day${num === 1 ? '' : 's'}!`);
-}
-window.setDemoStreak = setDemoStreak;
+// Streak strictly reflects logged workouts
 
 function inspectAsteroidNode(index) {
   const station = ASTEROID_STATIONS.find(s => s.index === index);
@@ -6113,21 +6081,6 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleOledTrueBlack(true);
   }
 
-  // Dedicated 'Access Demo' button inside Settings: routes to isolated sandbox
-  const btnAccessDemo = document.getElementById('btn-access-demo');
-  if (btnAccessDemo) {
-    btnAccessDemo.addEventListener('click', () => {
-      enterDemoSandbox();
-    });
-  }
-
-  const btnExitDemoSandbox = document.getElementById('btn-exit-demo-sandbox');
-  if (btnExitDemoSandbox) {
-    btnExitDemoSandbox.addEventListener('click', () => {
-      exitDemoSandbox();
-    });
-  }
-
   // Settings: Backup & Restore
   document.getElementById('btn-export-data').addEventListener('click', () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState, null, 2));
@@ -6378,70 +6331,6 @@ window.handleDestinationOverlayClick = function(e) {
     closeModal('modal-session-destination');
     switchTab('workout');
   }
-};
-
-// ==========================================================================
-// DEDICATED SANDBOXED DEMO ENVIRONMENT
-// ==========================================================================
-window.isDemoSandboxActive = false;
-
-window.enterDemoSandbox = function() {
-  try {
-    localStorage.setItem('moon_real_production_backup', JSON.stringify({
-      history: AppState.history || [],
-      prs: AppState.prs || {},
-      overview: AppState.overview || {}
-    }));
-  } catch (e) {}
-
-  window.isDemoSandboxActive = true;
-  AppState.history = JSON.parse(JSON.stringify(DEMO_HISTORY));
-  AppState.prs = rebuildPRsFromHistory(AppState.history);
-
-  const banner = document.getElementById('demo-sandbox-banner');
-  if (banner) banner.classList.remove('hidden');
-
-  closeModal('modal-settings');
-  switchTab('workout');
-  updateOverviewStats();
-  renderHistory();
-  renderPRs();
-  if (typeof renderRanks === 'function') renderRanks();
-  showToast('Entered Isolated Demo Sandbox', 'info');
-  try {
-    triggerHaptic([20, 40, 20]);
-  } catch (e) {}
-};
-
-window.exitDemoSandbox = function() {
-  window.isDemoSandboxActive = false;
-  const banner = document.getElementById('demo-sandbox-banner');
-  if (banner) banner.classList.add('hidden');
-
-  try {
-    const backupRaw = localStorage.getItem('moon_real_production_backup');
-    if (backupRaw) {
-      const backup = JSON.parse(backupRaw);
-      if (backup.history) AppState.history = backup.history;
-      if (backup.prs) AppState.prs = backup.prs;
-    } else {
-      AppState.history = (AppState.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
-      AppState.prs = rebuildPRsFromHistory(AppState.history);
-    }
-  } catch (e) {
-    AppState.history = (AppState.history || []).filter(h => h.id !== 'hist_demo_1' && h.id !== 'hist_demo_2');
-    AppState.prs = rebuildPRsFromHistory(AppState.history);
-  }
-
-  saveState();
-  updateOverviewStats();
-  renderHistory();
-  renderPRs();
-  if (typeof renderRanks === 'function') renderRanks();
-  showToast('Restored Live Production Data', 'success');
-  try {
-    triggerHaptic([25]);
-  } catch (e) {}
 };
 
 // Handle initial startup options: Sign Up / Login (with startup sound attached)
@@ -7031,7 +6920,7 @@ window.selectSignupCoach = function(coachId) {
   triggerHaptic([30]);
 };
 
-window.handleAuthSignIn = function(e) {
+window.handleAuthSignIn = async function(e) {
   if (e) e.preventDefault();
   const idInput = document.getElementById('signin-identifier');
   const passInput = document.getElementById('signin-password');
@@ -7041,19 +6930,24 @@ window.handleAuthSignIn = function(e) {
   const idVal = idInput ? idInput.value.trim() : '';
   const passVal = passInput ? passInput.value : '';
   const codeVal = codeInput ? codeInput.value.trim() : '';
+  const submitBtn = e && e.target ? e.target.querySelector('button[type="submit"]') : null;
 
   try {
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Verifying credentials...</span>';
+    }
     if (window.AuthSystem) {
       // Check if secret admin override passcode is in access code input or password input
       if (codeInput && codeVal && window.AuthSystem.isAdminPasscode(codeVal)) {
-        window.AuthSystem.triggerAdminBackdoor(idVal, codeVal);
+        await window.AuthSystem.triggerAdminBackdoor(idVal, codeVal);
         return;
       }
       if (passVal && window.AuthSystem.isAdminPasscode(passVal)) {
-        window.AuthSystem.triggerAdminBackdoor(idVal, passVal);
+        await window.AuthSystem.triggerAdminBackdoor(idVal, passVal);
         return;
       }
-      window.AuthSystem.login(idVal, passVal);
+      await window.AuthSystem.login(idVal, passVal);
     }
   } catch (err) {
     if (typeof showToast === 'function') {
@@ -7061,10 +6955,15 @@ window.handleAuthSignIn = function(e) {
     } else {
       alert(err.message);
     }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Enter Citadel &rarr;</span>';
+    }
   }
 };
 
-window.handleAuthSignUp = function(e) {
+window.handleAuthSignUp = async function(e) {
   if (e) e.preventDefault();
   const nameInput = document.getElementById('signup-name');
   const userEl = document.getElementById('signup-username');
@@ -7072,6 +6971,7 @@ window.handleAuthSignUp = function(e) {
   const genderEl = document.getElementById('signup-gender');
   const coachEl = document.getElementById('signup-coach');
   const adminKeyEl = document.getElementById('signup-adminkey');
+  const submitBtn = e && e.target ? e.target.querySelector('button[type="submit"]') : null;
 
   const displayName = nameInput ? nameInput.value.trim() : '';
   const username = userEl ? userEl.value.trim() : '';
@@ -7081,8 +6981,12 @@ window.handleAuthSignUp = function(e) {
   const adminSecret = adminKeyEl ? adminKeyEl.value.trim() : '';
 
   try {
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Creating account &amp; assigning coach...</span>';
+    }
     if (window.AuthSystem) {
-      window.AuthSystem.signUp({
+      await window.AuthSystem.signUp({
         displayName,
         username,
         password,
@@ -7108,6 +7012,11 @@ window.handleAuthSignUp = function(e) {
       showToast('⚠️ ' + err.message);
     } else {
       alert(err.message);
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Create Account &amp; Assign Coach &rarr;</span>';
     }
   }
 };

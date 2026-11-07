@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Moon Fitness OS",
+    "slug": "moon-fitness-os",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./app_icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#000000",
+    "splash": {
+      "image": "./moon_logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.moon.fitness",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.moon.fitness",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./app_icon.png",
+        "backgroundColor": "#0B0709"
+      },
+      "permissions": [
+        "VIBRATE",
+        "POST_NOTIFICATIONS",
+        "WAKE_LOCK",
+        "RECEIVE_BOOT_COMPLETED",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./app_icon_192.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "moon-fitness-os-production-2026"
+      }
+    }
+  }
+}

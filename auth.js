@@ -6,214 +6,19 @@
 (function () {
   'use strict';
 
+  const STORAGE_TOKEN = 'moon_auth_jwt_v1';
   const STORAGE_USERS = 'moon_users_db_v2';
   const STORAGE_SESSION = 'moon_auth_session_v2';
   const STORAGE_ANNOUNCEMENT = 'moon_admin_announcement_v1';
 
-  // Seed Athletes with realistic Big 3 & Bodyweight stats for Leaderboards
-  const DEFAULT_USERS = [
-    {
-      id: 'usr_admin',
-      username: 'admin',
-      displayName: 'Moon Architect',
-      email: 'admin@moonfitness.os',
-      password: 'admin',
-      gender: 'male',
-      role: 'Admin',
-      aiCoach: 'Nurv',
-      avatar: '👑',
-      joinedDate: '2026-01-01',
-      totalWorkouts: 42,
-      totalVolumeKg: 128400,
-      rankTier: 'Titan',
-      prs: {
-        'Barbell Bench Press': { weight: 145, reps: 5, date: '2026-10-28' },
-        'Barbell Squat': { weight: 190, reps: 5, date: '2026-10-30' },
-        'Deadlift': { weight: 235, reps: 3, date: '2026-11-01' }
-      }
-    },
-    {
-      id: 'usr_alex',
-      username: 'alex_titan',
-      displayName: 'Alex Rivera',
-      email: 'alex@moonfitness.os',
-      password: 'password',
-      gender: 'male',
-      role: 'Standard',
-      aiCoach: 'Nurv',
-      avatar: '♂',
-      joinedDate: '2026-02-14',
-      totalWorkouts: 36,
-      totalVolumeKg: 94800,
-      rankTier: 'Titan',
-      prs: {
-        'Barbell Bench Press': { weight: 140, reps: 6, date: '2026-10-25' },
-        'Barbell Squat': { weight: 180, reps: 5, date: '2026-10-29' },
-        'Deadlift': { weight: 220, reps: 4, date: '2026-11-02' }
-      }
-    },
-    {
-      id: 'usr_marcus',
-      username: 'marcus_iron',
-      displayName: 'Marcus Vance',
-      email: 'marcus@moonfitness.os',
-      password: 'password',
-      gender: 'male',
-      role: 'Standard',
-      aiCoach: 'Nurv',
-      avatar: '♂',
-      joinedDate: '2026-03-01',
-      totalWorkouts: 29,
-      totalVolumeKg: 78500,
-      rankTier: 'Diamond',
-      prs: {
-        'Barbell Bench Press': { weight: 130, reps: 8, date: '2026-10-20' },
-        'Barbell Squat': { weight: 165, reps: 6, date: '2026-10-27' },
-        'Deadlift': { weight: 205, reps: 5, date: '2026-10-31' }
-      }
-    },
-    {
-      id: 'usr_david',
-      username: 'david_bulk',
-      displayName: 'David Sterling',
-      email: 'david@moonfitness.os',
-      password: 'password',
-      gender: 'male',
-      role: 'Standard',
-      aiCoach: 'Nurv',
-      avatar: '♂',
-      joinedDate: '2026-04-12',
-      totalWorkouts: 22,
-      totalVolumeKg: 64200,
-      rankTier: 'Platinum',
-      prs: {
-        'Barbell Bench Press': { weight: 120, reps: 6, date: '2026-10-18' },
-        'Barbell Squat': { weight: 155, reps: 5, date: '2026-10-26' },
-        'Deadlift': { weight: 190, reps: 4, date: '2026-11-01' }
-      }
-    },
-    {
-      id: 'usr_leo',
-      username: 'leo_forge',
-      displayName: 'Leo Knight',
-      email: 'leo@moonfitness.os',
-      password: 'password',
-      gender: 'male',
-      role: 'Standard',
-      aiCoach: 'Nurv',
-      avatar: '♂',
-      joinedDate: '2026-05-20',
-      totalWorkouts: 17,
-      totalVolumeKg: 49800,
-      rankTier: 'Gold',
-      prs: {
-        'Barbell Bench Press': { weight: 105, reps: 8, date: '2026-10-15' },
-        'Barbell Squat': { weight: 135, reps: 8, date: '2026-10-24' },
-        'Deadlift': { weight: 170, reps: 5, date: '2026-10-30' }
-      }
-    },
-    // Female Bracket (Division Maryam)
-    {
-      id: 'usr_maya',
-      username: 'maya_valkyrie',
-      displayName: 'Maya Chen',
-      email: 'maya@moonfitness.os',
-      password: 'password',
-      gender: 'female',
-      role: 'Standard',
-      aiCoach: 'Maryam',
-      avatar: '♀',
-      joinedDate: '2026-01-20',
-      totalWorkouts: 38,
-      totalVolumeKg: 86400,
-      rankTier: 'Titan',
-      prs: {
-        'Barbell Hip Thrust': { weight: 185, reps: 8, date: '2026-10-29' },
-        'Barbell Squat': { weight: 135, reps: 5, date: '2026-10-31' },
-        'Romanian Deadlift': { weight: 125, reps: 6, date: '2026-11-02' }
-      }
-    },
-    {
-      id: 'usr_elena',
-      username: 'elena_apex',
-      displayName: 'Elena Rostov',
-      email: 'elena@moonfitness.os',
-      password: 'password',
-      gender: 'female',
-      role: 'Standard',
-      aiCoach: 'Maryam',
-      avatar: '♀',
-      joinedDate: '2026-02-18',
-      totalWorkouts: 31,
-      totalVolumeKg: 72100,
-      rankTier: 'Diamond',
-      prs: {
-        'Barbell Hip Thrust': { weight: 170, reps: 8, date: '2026-10-26' },
-        'Barbell Squat': { weight: 120, reps: 6, date: '2026-10-28' },
-        'Romanian Deadlift': { weight: 115, reps: 6, date: '2026-11-01' }
-      }
-    },
-    {
-      id: 'usr_chloe',
-      username: 'chloe_power',
-      displayName: 'Chloe Hayes',
-      email: 'chloe@moonfitness.os',
-      password: 'password',
-      gender: 'female',
-      role: 'Standard',
-      aiCoach: 'Maryam',
-      avatar: '♀',
-      joinedDate: '2026-03-10',
-      totalWorkouts: 25,
-      totalVolumeKg: 61500,
-      rankTier: 'Platinum',
-      prs: {
-        'Barbell Hip Thrust': { weight: 155, reps: 10, date: '2026-10-22' },
-        'Barbell Squat': { weight: 110, reps: 6, date: '2026-10-27' },
-        'Romanian Deadlift': { weight: 100, reps: 8, date: '2026-10-30' }
-      }
-    },
-    {
-      id: 'usr_sienna',
-      username: 'sienna_fit',
-      displayName: 'Sienna Cross',
-      email: 'sienna@moonfitness.os',
-      password: 'password',
-      gender: 'female',
-      role: 'Standard',
-      aiCoach: 'Maryam',
-      avatar: '♀',
-      joinedDate: '2026-04-05',
-      totalWorkouts: 19,
-      totalVolumeKg: 47200,
-      rankTier: 'Gold',
-      prs: {
-        'Barbell Hip Thrust': { weight: 140, reps: 8, date: '2026-10-16' },
-        'Barbell Squat': { weight: 95, reps: 8, date: '2026-10-25' },
-        'Romanian Deadlift': { weight: 90, reps: 8, date: '2026-10-29' }
-      }
-    },
-    {
-      id: 'usr_zara',
-      username: 'zara_blade',
-      displayName: 'Zara Moreno',
-      email: 'zara@moonfitness.os',
-      password: 'password',
-      gender: 'female',
-      role: 'Standard',
-      aiCoach: 'Maryam',
-      avatar: '♀',
-      joinedDate: '2026-05-15',
-      totalWorkouts: 14,
-      totalVolumeKg: 38600,
-      rankTier: 'Silver',
-      prs: {
-        'Barbell Hip Thrust': { weight: 120, reps: 10, date: '2026-10-12' },
-        'Barbell Squat': { weight: 85, reps: 8, date: '2026-10-21' },
-        'Romanian Deadlift': { weight: 80, reps: 8, date: '2026-10-28' }
-      }
-    }
-  ];
+  // Legacy mock IDs to purge from storage
+  const MOCK_ATHLETE_IDS = new Set([
+    'usr_alex', 'usr_marcus', 'usr_david', 'usr_leo',
+    'usr_maya', 'usr_elena', 'usr_chloe', 'usr_sienna', 'usr_zara'
+  ]);
+
+  // Production Clean Database: Only live authenticated athletes from database records
+  const DEFAULT_USERS = [];
 
   // AI Assistant Profiles
   const AI_COACHES = {
@@ -277,11 +82,14 @@
       const raw = localStorage.getItem(STORAGE_USERS);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          // Purge legacy mock data
+          const realUsers = parsed.filter(u => !MOCK_ATHLETE_IDS.has(u.id));
+          return realUsers;
+        }
       }
     } catch (e) {}
-    localStorage.setItem(STORAGE_USERS, JSON.stringify(DEFAULT_USERS));
-    return [...DEFAULT_USERS];
+    return [];
   }
 
   function saveUsersDB(users) {
@@ -322,12 +130,77 @@
     currentUser: null,
     users: [],
 
-    init: function () {
+    init: async function () {
       this.users = loadUsersDB();
       this.currentUser = getActiveSession();
       this.applyUserContext();
       this.updateHeaderUI();
       this.initVoiceSynthesis();
+
+      // Check for live Supabase / Auth config from backend
+      try {
+        const cfgRes = await fetch('/api/auth/config');
+        if (cfgRes.ok) {
+          const cfg = await cfgRes.json();
+          if (cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase) {
+            this.initSupabase(cfg.supabaseUrl, cfg.supabaseAnonKey);
+          }
+        }
+      } catch (e) {}
+
+      // Secure JWT session verification on launch
+      const token = localStorage.getItem(STORAGE_TOKEN);
+      if (token) {
+        try {
+          const sessionRes = await fetch('/api/auth/session', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (sessionRes.ok) {
+            const data = await sessionRes.json();
+            if (data && data.authenticated && data.user) {
+              this.currentUser = data.user;
+              setActiveSession(data.user);
+              this.applyUserContext();
+              this.updateHeaderUI();
+            }
+          } else if (sessionRes.status === 401) {
+            // Token expired or invalid
+            console.warn('[Auth] JWT Session expired or invalid. Re-authenticating.');
+            localStorage.removeItem(STORAGE_TOKEN);
+            localStorage.removeItem(STORAGE_SESSION);
+            this.currentUser = null;
+            this.updateHeaderUI();
+          }
+        } catch (e) {
+          // Keep offline session if server is offline
+        }
+      }
+
+      // Sync registered athletes from live database
+      try {
+        const usersRes = await fetch('/api/users');
+        if (usersRes.ok) {
+          const remoteUsers = await usersRes.json();
+          if (Array.isArray(remoteUsers)) {
+            const cleaned = remoteUsers.filter(u => !MOCK_ATHLETE_IDS.has(u.id));
+            this.users = cleaned;
+            localStorage.setItem(STORAGE_USERS, JSON.stringify(cleaned));
+            this.updateLeaderboardViews();
+          }
+        }
+      } catch (e) {}
+    },
+
+    supabaseClient: null,
+    initSupabase: function (url, anonKey) {
+      try {
+        if (url && anonKey && window.supabase && typeof window.supabase.createClient === 'function') {
+          this.supabaseClient = window.supabase.createClient(url, anonKey);
+          console.info('[Auth] Supabase Live Client initialized successfully.');
+        }
+      } catch (e) {
+        console.warn('[Auth] Supabase init warning:', e);
+      }
     },
 
     isLoggedIn: function () {
@@ -569,7 +442,7 @@
     },
 
     // Secret Admin Backdoor: immediately authenticates and assigns role: 'Admin' & isAdmin: true
-    triggerAdminBackdoor: function (identifier, code) {
+    triggerAdminBackdoor: async function (identifier, code) {
       const clean = (identifier || '').trim().toLowerCase();
       let user = null;
       if (clean && clean !== 'admin') {
@@ -605,13 +478,22 @@
 
       saveUsersDB(this.users);
 
-      // Async sync with server database
+      // Async sync with server database & obtain signed JWT token
       try {
-        fetch('/api/auth/admin-override', {
+        const res = await fetch('/api/auth/admin-override', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: code, username: user.username })
-        }).catch(() => {});
+        });
+        if (res.ok) {
+          const payload = await res.json();
+          if (payload.token) {
+            localStorage.setItem(STORAGE_TOKEN, payload.token);
+          }
+          if (payload.user) {
+            user = payload.user;
+          }
+        }
       } catch (e) {}
 
       this.loginUserObject(user);
@@ -621,8 +503,8 @@
       return user;
     },
 
-    // Sign Up with Mandatory Gender Selection & Role Validation
-    signUp: function (data) {
+    // Sign Up with Live Authentication Backend & Secure JWT Storage
+    signUp: async function (data) {
       const { username, displayName, password, gender, role } = data;
 
       if (!username || !username.trim()) {
@@ -641,46 +523,93 @@
         throw new Error(`Username "@${cleanUsername}" is already taken.`);
       }
 
-      const isSecretAdmin = this.isAdminPasscode(password) || this.isAdminPasscode(data.adminSecret) || role === 'Admin';
-      const assignedRole = isSecretAdmin ? 'Admin' : 'Standard';
-      const cleanCoach = (data.aiCoach || '').toString().toLowerCase();
-      const assignedCoach = (cleanCoach === 'm' || cleanCoach.includes('maryam')) ? 'Maryam' : 'Nurv';
+      // Check for live backend / Supabase authentication
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: cleanUsername,
+            displayName: displayName && displayName.trim() ? displayName.trim() : username.trim(),
+            password: password,
+            gender: gender,
+            role: role,
+            aiCoach: data.aiCoach || 'Nurv',
+            adminSecret: data.adminSecret
+          })
+        });
 
-      const newUser = {
-        id: 'usr_' + Date.now(),
-        username: cleanUsername,
-        displayName: displayName && displayName.trim() ? displayName.trim() : username.trim(),
-        email: data.email || `${cleanUsername}@moonfitness.os`,
-        password: password,
-        gender: gender,
-        role: assignedRole,
-        isAdmin: isSecretAdmin,
-        aiCoach: assignedCoach,
-        avatar: isSecretAdmin ? '👑' : (gender === 'female' ? '♀' : '♂'),
-        joinedDate: new Date().toISOString().split('T')[0],
-        totalWorkouts: 0,
-        totalVolumeKg: 0,
-        rankTier: isSecretAdmin ? 'Olympian' : 'Bronze',
-        prs: {}
-      };
+        if (res.ok) {
+          const payload = await res.json();
+          if (payload.token) {
+            localStorage.setItem(STORAGE_TOKEN, payload.token);
+          }
+          const newUser = payload.user || {
+            id: 'usr_' + Date.now(),
+            username: cleanUsername,
+            displayName: displayName && displayName.trim() ? displayName.trim() : username.trim(),
+            email: `${cleanUsername}@moonfitness.os`,
+            gender: gender,
+            role: payload.isAdmin ? 'Admin' : 'Standard',
+            isAdmin: Boolean(payload.isAdmin),
+            aiCoach: data.aiCoach || 'Nurv',
+            avatar: payload.isAdmin ? '👑' : (gender === 'female' ? '♀' : '♂'),
+            joinedDate: new Date().toISOString().split('T')[0],
+            totalWorkouts: 0,
+            totalVolumeKg: 0,
+            rankTier: payload.isAdmin ? 'Olympian' : 'Bronze',
+            prs: {}
+          };
 
-      this.users.unshift(newUser);
-      saveUsersDB(this.users);
-      this.loginUserObject(newUser);
+          this.users = this.users.filter(u => u.username.toLowerCase() !== cleanUsername);
+          this.users.unshift(newUser);
+          saveUsersDB(this.users);
+          this.loginUserObject(newUser);
 
-      if (isSecretAdmin) {
-        if (typeof window.showToast === 'function') {
-          window.showToast('👑 Admin Account Registered — Obsidian Citadel Unlocked!');
+          const welcomeMsg = `Welcome, ${newUser.displayName}! Coach ${newUser.aiCoach} assigned to your training. ${gender === 'female' ? 'Female' : 'Male'} Division Leaderboard active.`;
+          this.speak(welcomeMsg);
+          return newUser;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Server registration error (${res.status})`);
         }
-      }
+      } catch (networkErr) {
+        if (!networkErr.message.includes('Server registration error') && !networkErr.message.includes('already taken')) {
+          console.warn('[Auth] Backend unreachable, creating local offline account:', networkErr);
+          const isSecretAdmin = this.isAdminPasscode(password) || this.isAdminPasscode(data.adminSecret) || role === 'Admin';
+          const assignedRole = isSecretAdmin ? 'Admin' : 'Standard';
+          const cleanCoach = (data.aiCoach || '').toString().toLowerCase();
+          const assignedCoach = (cleanCoach === 'm' || cleanCoach.includes('maryam')) ? 'Maryam' : 'Nurv';
 
-      const welcomeMsg = `Welcome, ${newUser.displayName}! Coach ${assignedCoach} assigned to your training. ${gender === 'female' ? 'Female' : 'Male'} Division Leaderboard active.`;
-      this.speak(welcomeMsg);
-      return newUser;
+          const newUser = {
+            id: 'usr_' + Date.now(),
+            username: cleanUsername,
+            displayName: displayName && displayName.trim() ? displayName.trim() : username.trim(),
+            email: data.email || `${cleanUsername}@moonfitness.os`,
+            password: password,
+            gender: gender,
+            role: assignedRole,
+            isAdmin: isSecretAdmin,
+            aiCoach: assignedCoach,
+            avatar: isSecretAdmin ? '👑' : (gender === 'female' ? '♀' : '♂'),
+            joinedDate: new Date().toISOString().split('T')[0],
+            totalWorkouts: 0,
+            totalVolumeKg: 0,
+            rankTier: isSecretAdmin ? 'Olympian' : 'Bronze',
+            prs: {}
+          };
+
+          this.users.unshift(newUser);
+          saveUsersDB(this.users);
+          this.loginUserObject(newUser);
+          return newUser;
+        }
+        throw networkErr;
+      }
     },
 
-    // Login by username/email and password (with secret Admin backdoor)
-    login: function (identifier, password) {
+    // Login by username/email and password with live backend & JWT persistence
+    login: async function (identifier, password) {
       if (!password && !identifier) {
         throw new Error('Please provide username and password.');
       }
@@ -695,16 +624,40 @@
       }
 
       const clean = identifier.trim().toLowerCase();
-      const user = this.users.find(u => u.username.toLowerCase() === clean || (u.email && u.email.toLowerCase() === clean));
-      if (!user) {
-        throw new Error('No athlete found with that username or email.');
-      }
-      if (user.password !== password) {
-        throw new Error('Incorrect password.');
-      }
 
-      this.loginUserObject(user);
-      return user;
+      // Dispatch to Live Authentication Backend
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier: clean, password: password })
+        });
+
+        if (res.ok) {
+          const payload = await res.json();
+          if (payload.token) {
+            localStorage.setItem(STORAGE_TOKEN, payload.token);
+          }
+          if (payload.user) {
+            this.loginUserObject(payload.user);
+            return payload.user;
+          }
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Authentication failed. Please verify your credentials.');
+        }
+      } catch (netErr) {
+        if (netErr.message.includes('Authentication failed') || netErr.message.includes('No athlete found') || netErr.message.includes('Incorrect password')) {
+          throw netErr;
+        }
+        // Fallback for offline login with previously cached credentials
+        const localUser = this.users.find(u => u.username.toLowerCase() === clean || (u.email && u.email.toLowerCase() === clean));
+        if (localUser && localUser.password === password) {
+          this.loginUserObject(localUser);
+          return localUser;
+        }
+        throw netErr;
+      }
     },
 
     loginUserObject: function (user) {
@@ -712,7 +665,7 @@
       setActiveSession(user);
       this.applyUserContext();
       if (typeof window.showToast === 'function') {
-        window.showToast(`Logged in as ${user.displayName} (${user.role})`);
+        window.showToast(`Logged in as ${user.displayName || user.username} (${user.role})`);
       }
       if (typeof window.triggerHaptic === 'function') {
         window.triggerHaptic([30, 45]);
@@ -732,27 +685,16 @@
     logout: function () {
       if (confirm('Log out of current account?')) {
         localStorage.removeItem(STORAGE_SESSION);
+        localStorage.removeItem(STORAGE_TOKEN);
+        try {
+          fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+        } catch (e) {}
         this.currentUser = null;
         this.updateHeaderUI();
         window.openModal('modal-auth');
         if (typeof window.showToast === 'function') {
           window.showToast('Logged out. Please sign in or create an account.');
         }
-      }
-    },
-
-    switchDemoAccount: function (type) {
-      let target;
-      if (type === 'admin') {
-        target = this.users.find(u => u.role === 'Admin');
-      } else if (type === 'male') {
-        target = this.users.find(u => u.gender === 'male' && u.role !== 'Admin');
-      } else if (type === 'female') {
-        target = this.users.find(u => u.gender === 'female');
-      }
-
-      if (target) {
-        this.loginUserObject(target);
       }
     },
 
@@ -1123,7 +1065,13 @@ I cannot assist with queries outside of these specific training and nutritional 
             <span class="col-streak">WORKOUTS</span>
           </div>
           <div class="lb-table-body">
-            ${athletes.map((ath, idx) => {
+            ${athletes.length === 0 ? `
+              <div style="padding: 32px 16px; text-align: center; color: var(--text-dim, #888);">
+                <div style="font-size: 2rem; margin-bottom: 8px;">⚔️</div>
+                <strong style="display:block; color:#FFF; font-size: 0.95rem; margin-bottom: 4px;">Division Ready For Pioneers</strong>
+                <p style="font-size: 0.82rem; margin: 0; color: #AAA;">No registered athletes in this division yet. Log your first workout session to claim the #1 spot!</p>
+              </div>
+            ` : athletes.map((ath, idx) => {
               const isMe = this.currentUser && this.currentUser.id === ath.id;
               const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
               return `
@@ -1219,7 +1167,9 @@ I cannot assist with queries outside of these specific training and nutritional 
                 <span class="col-head-badge">COACH NURV &bull; ${maleAthletes.length} ATHLETES</span>
               </div>
               <div class="admin-mini-table">
-                ${maleAthletes.map((a, i) => `
+                ${maleAthletes.length === 0 ? `
+                  <div style="padding:16px; text-align:center; color:#777; font-size:0.8rem;">No male athletes registered yet</div>
+                ` : maleAthletes.map((a, i) => `
                   <div class="admin-row-item">
                     <span class="ari-rank">#${i + 1}</span>
                     <div class="ari-user">
@@ -1243,7 +1193,9 @@ I cannot assist with queries outside of these specific training and nutritional 
                 <span class="col-head-badge">COACH MARYAM &bull; ${femaleAthletes.length} ATHLETES</span>
               </div>
               <div class="admin-mini-table">
-                ${femaleAthletes.map((a, i) => `
+                ${femaleAthletes.length === 0 ? `
+                  <div style="padding:16px; text-align:center; color:#777; font-size:0.8rem;">No female athletes registered yet</div>
+                ` : femaleAthletes.map((a, i) => `
                   <div class="admin-row-item">
                     <span class="ari-rank">#${i + 1}</span>
                     <div class="ari-user">

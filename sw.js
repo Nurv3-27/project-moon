@@ -59,7 +59,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET' || event.request.url.includes('/api/') || new URL(event.request.url).origin !== self.location.origin) return;
+  if (event.request.method !== 'GET' || event.request.url.includes('/api/') || event.request.url.includes('/downloads/') || event.request.url.endsWith('.apk') || new URL(event.request.url).origin !== self.location.origin) return;
   // Network-first with offline cache fallback so code updates apply immediately
   event.respondWith(
     fetch(event.request).then((networkResponse) => {

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Moon Fitness OS - Standalone Android APK Generator
 Packages Android manifest, DEX runtime, assets, and signed META-INF into an installable .apk
@@ -99,6 +99,9 @@ def build_apk():
     # Also make a copy with versioned name
     import shutil
     shutil.copyfile(output_apk, output_apk_v1)
+    # Static, deployable copy served at /downloads/moon-fitness.apk (Vercel/static hosts)
+    os.makedirs(os.path.join(base_dir, 'downloads'), exist_ok=True)
+    shutil.copyfile(output_apk, os.path.join(base_dir, 'downloads', 'moon-fitness.apk'))
 
     apk_size_mb = os.path.getsize(output_apk) / (1024 * 1024)
     print(f"[APK Builder] Standalone APK generated: {output_apk} ({apk_size_mb:.2f} MB)")

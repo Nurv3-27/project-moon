@@ -7192,7 +7192,7 @@ window.handleCoachChatSubmit = function(e) {
     } catch (e) {}
     if (!info) {
       const base = window.location.origin;
-      info = { androidUrl: base + '/api/download/android', iosUrl: base + '/' };
+      info = { androidUrl: base + '/downloads/moon-fitness.apk', iosUrl: base + '/' };
     }
     aBox.innerHTML = ''; iBox.innerHTML = '';
     generateQRCode(aBox, info.androidUrl, 150);
